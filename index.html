@@ -64,6 +64,7 @@ body.walk #cutRow{display:none}
 #compass b{position:absolute;top:1px;font-size:10px;color:var(--ink-soft);font-weight:700}
 #joy{position:fixed;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.55);z-index:6;touch-action:none;display:none;box-shadow:0 4px 18px rgba(0,0,0,.18)}
 #knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#ptStatus{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font:500 12.5px var(--font);color:var(--ink);z-index:6;direction:rtl;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--ink);z-index:4;direction:rtl;white-space:nowrap;pointer-events:none;transition:opacity .4s}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--stage);z-index:20;direction:rtl;font-size:15px;color:var(--ink-soft)}
 #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.8);box-shadow:0 0 0 1px rgba(0,0,0,.25);z-index:3;display:none;pointer-events:none}
@@ -101,6 +102,7 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
     <div class="seg" id="qual" style="flex:1" role="group" aria-label="איכות תצוגה">
       <button data-q="hq">גבוהה</button>
       <button data-q="std">רגילה</button>
+      <button data-q="pt" id="q-pt" title="רינדור Path Tracing — אור ושתקפויות אמיתיים. דורש מחשב עם כרטיס מסך; התמונה מתחדדת כשהמצלמה עומדת">ריאליסטית</button>
     </div>
   </div>
   <div class="row">
@@ -131,11 +133,15 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
 <div id="compass" aria-hidden="true"><b>N</b><div id="needle"></div></div>
 <div id="joy" aria-hidden="true"><div id="knob"></div></div>
 <div id="hint"></div>
+<div id="ptStatus" hidden></div>
 
 <script type="importmap">
 {"imports":{
   "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+  "three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.8/build/index.module.js",
+  "three-gpu-pathtracer":"https://cdn.jsdelivr.net/npm/three-gpu-pathtracer@0.0.23/build/index.module.js"
 }}
 </script>
 <script type="module">
@@ -1451,7 +1457,7 @@ if(BLADE.length){ const bg=new THREE.BufferGeometry(), pos=[], seg=4;
     pos.push(-w0,t0,b0, w0,t0,b0, w1,t1,b1, -w0,t0,b0, w1,t1,b1, -w1,t1,b1); }
   bg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); bg.computeVertexNormals();
   const bm=new THREE.MeshStandardMaterial({color:0xffffff, side:THREE.DoubleSide, roughness:.8}); ALL_MATS.push(bm);
-  const im=new THREE.InstancedMesh(bg,bm,BLADE.length), m4=new THREE.Matrix4(), q=new THREE.Quaternion(), eu=new THREE.Euler(), col=new THREE.Color();
+  const im=new THREE.InstancedMesh(bg,bm,BLADE.length); im.userData.ptStride=3; const m4=new THREE.Matrix4(), q=new THREE.Quaternion(), eu=new THREE.Euler(), col=new THREE.Color();
   BLADE.forEach((b,i)=>{ q.setFromEuler(eu.set(0,b[6],0,'YXZ')); m4.compose(_p.set(b[0],b[1],b[2]),q,_s.set(b[4],b[3],b[3]*b[5])); im.setMatrixAt(i,m4); im.setColorAt(i,col.setHSL(b[7][0],b[7][1],b[7][2])); });
   im.instanceMatrix.needsUpdate=true; im.instanceColor.needsUpdate=true; im.computeBoundingSphere(); im.castShadow=false; im.receiveShadow=true; im.userData.orig=bm; im.userData.L='s'; im.userData.foliage=true; scene.add(im); layerObjs.s.push(im); }
 const noAO=[];
@@ -1743,7 +1749,7 @@ addEventListener('resize',()=>{ if(mode==='walk') camera.fov=innerWidth<innerHei
 const needle=document.getElementById('needle'); const fwd=new THREE.Vector3();
 const clock=new THREE.Clock();
 function frame(){ update(Math.min(0.05,clock.getDelta())); requestAnimationFrame(frame); }
-let postFX=null, hq=!IS_TOUCH;
+let postFX=null, quality=IS_TOUCH?'std':'hq';
 (async()=>{ try{
   const [{EffectComposer},{RenderPass},{GTAOPass},{OutputPass}]=await Promise.all([import('three/addons/postprocessing/EffectComposer.js'),import('three/addons/postprocessing/RenderPass.js'),import('three/addons/postprocessing/GTAOPass.js'),import('three/addons/postprocessing/OutputPass.js')]);
   const comp=new EffectComposer(renderer); comp.addPass(new RenderPass(scene,camera));
@@ -1754,7 +1760,77 @@ let postFX=null, hq=!IS_TOUCH;
   comp.addPass(ao); comp.addPass(new OutputPass());
   addEventListener('resize',()=>comp.setSize(innerWidth,innerHeight)); postFX=comp;
 }catch(e){ console.warn('ambient occlusion unavailable',e); } })();
-document.querySelectorAll('#qual button').forEach(b=>{ b.classList.toggle('on',(b.dataset.q==='hq')===hq); b.addEventListener('click',()=>{ hq=b.dataset.q==='hq'; document.querySelectorAll('#qual button').forEach(x=>x.classList.toggle('on',x===b)); }); });
+const syncQual=()=>document.querySelectorAll('#qual button').forEach(x=>x.classList.toggle('on',x.dataset.q===quality));
+document.querySelectorAll('#qual button').forEach(b=>b.addEventListener('click',()=>{ quality=b.dataset.q; syncQual(); if(quality==='pt'){ PTR.dirty=true; ptEnsure(); } else document.getElementById('ptStatus').hidden=true; }));
+if(IS_TOUCH&&Math.min(screen.width,screen.height)<700) document.getElementById('q-pt').remove();   /* path tracing is too heavy for phones */
+syncQual();
+/* ---------- photoreal mode: progressive GPU path tracing (three-gpu-pathtracer) ---------- */
+const PTR={ expo:1, tracer:null, mod:null, building:false, dirty:true, lightsDirty:true, lastCam:new THREE.Matrix4(), lastProj:new THREE.Matrix4(), scene:null, sun:null, env:null, lamps:[] };
+const ptStatus=document.getElementById('ptStatus');
+renderer.domElement.addEventListener('webglcontextlost',()=>{ if(quality!=='pt') return; PTR.tracer=null; PTR.dirty=true; quality='hq'; syncQual();
+  ptStatus.hidden=false; ptStatus.textContent='כרטיס המסך לא עמד ברינדור — חזרתי לאיכות גבוהה'; setTimeout(()=>ptStatus.hidden=true,5000); });
+async function ptEnsure(){
+  if(PTR.tracer||PTR.building) return; PTR.building=true; ptStatus.hidden=false; ptStatus.textContent='טוען מנוע רינדור…';
+  try{ if(!('backgroundRotation' in new THREE.Scene())){ THREE.Scene.prototype.backgroundRotation=new THREE.Euler(); THREE.Scene.prototype.environmentRotation=new THREE.Euler(); }   /* r160 shim for the path tracer */
+    const mod=await import('three-gpu-pathtracer'); PTR.mod=mod; const t=new mod.WebGLPathTracer(renderer);
+    t.bounces=3; t.transmissiveBounces=2; t.filterGlossyFactor=0.5; t.minSamples=2; t.renderDelay=200; t.fadeDuration=350; t.dynamicLowRes=false; t.rasterizeScene=true;
+    t.renderScale=Math.min(1,0.75/renderer.getPixelRatio()); t.tiles.set(8,8);   /* small tiles keep each GPU draw short (avoids the driver watchdog) */ t.textureSize.set(1024,1024);
+    /* output: photographic exposure (interiors are exposed brighter, like architectural photos) + edge-aware denoiser */
+    const { FullScreenQuad } = await import('three/addons/postprocessing/Pass.js');
+    const dq=new FullScreenQuad(new mod.DenoiseMaterial({map:null, blending:THREE.NormalBlending, transparent:true, premultipliedAlpha:renderer.getContextAttributes().premultipliedAlpha}));
+    t.renderToCanvasCallback=(target,r,quad)=>{ const e=r.toneMappingExposure, ac=r.autoClear; r.autoClear=false; r.toneMappingExposure=e*PTR.expo;
+      const dm=dq.material; dm.map=target.texture; dm.opacity=quad.material.opacity; dm.blending=quad.material.blending===THREE.NoBlending?THREE.NoBlending:THREE.NormalBlending;
+      const k=Math.max(0,1-t.samples/400); dm.uniforms.sigma.value=1.5+3.5*k; dm.uniforms.threshold.value=0.02+0.06*k; dq.render(r);
+      r.toneMappingExposure=e; r.autoClear=ac; };
+    t.rasterizeSceneCallback=()=>{ if(postFX&&mode!=='plan') postFX.render(0.016); else renderer.render(scene,activeCam); };
+    PTR.tracer=t; PTR.dirty=true; }
+  catch(e){ console.warn('path tracer unavailable',e); ptStatus.textContent='הרינדור הריאליסטי לא נתמך בדפדפן הזה'; quality='hq'; syncQual(); setTimeout(()=>ptStatus.hidden=true,4000); }
+  PTR.building=false; }
+/* proxy scene: everything visible, with instanced foliage/slats baked to real geometry, sky as an equirect environment */
+function ptBuildScene(){
+  const ps=new THREE.Scene(), m4=new THREE.Matrix4(), nm=new THREE.Matrix3(), v=new THREE.Vector3(), col=new THREE.Color(), cache=new Map();
+  const ptMat=(m,vc)=>{ const k=m.uuid+(vc?':vc':''); if(cache.has(k)) return cache.get(k); let mm=m;
+    if(vc||m===M.ceiling){ mm=m.clone(); if(vc) mm.vertexColors=true; if(m===M.ceiling){ mm.emissiveIntensity=0; } }
+    cache.set(k,mm); return mm; };
+  scene.updateMatrixWorld(true);
+  /* keep the traced scene light: only the plot and its near surroundings (distant field/hills stay in the sky backdrop) */
+  const C=new THREE.Vector3(7,0,6), R=30, sph=new THREE.Sphere();
+  scene.traverseVisible(o=>{
+    if(!o.isMesh||o.isSprite) return; const m=o.material; if(!m||Array.isArray(m)||m===ghost||!m.isMeshStandardMaterial) return;
+    if(!o.isInstancedMesh){ if(!o.geometry.boundingSphere) o.geometry.computeBoundingSphere(); sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld); if(sph.center.distanceTo(C)-sph.radius>R) return; }
+    if(o.isInstancedMesh){ const g0=o.geometry.index? o.geometry.toNonIndexed(): o.geometry, P=g0.attributes.position, N=g0.attributes.normal, U=g0.attributes.uv, vc=P.count, st=o.userData.ptStride||1;
+      const keep=[]; for(let i=0;i<o.count;i+=st){ o.getMatrixAt(i,m4); v.setFromMatrixPosition(m4).applyMatrix4(o.matrixWorld); if(v.distanceTo(C)<R) keep.push(i); } const n=keep.length; if(!n) return;
+      const pos=new Float32Array(vc*n*3), nor=new Float32Array(vc*n*3), uv=new Float32Array(vc*n*2), cc=o.instanceColor? new Float32Array(vc*n*3):null;
+      for(let ii=0;ii<n;ii++){ const i=keep[ii]; o.getMatrixAt(i,m4); m4.premultiply(o.matrixWorld); nm.getNormalMatrix(m4); if(cc) o.getColorAt(i,col);
+        for(let j=0;j<vc;j++){ const k=ii*vc+j; v.fromBufferAttribute(P,j).applyMatrix4(m4); pos[k*3]=v.x; pos[k*3+1]=v.y; pos[k*3+2]=v.z;
+          if(N){ v.fromBufferAttribute(N,j).applyMatrix3(nm).normalize(); nor[k*3]=v.x; nor[k*3+1]=v.y; nor[k*3+2]=v.z; }
+          if(U){ uv[k*2]=U.getX(j); uv[k*2+1]=U.getY(j); } if(cc){ cc[k*3]=col.r; cc[k*3+1]=col.g; cc[k*3+2]=col.b; } } }
+      const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.BufferAttribute(pos,3)); g.setAttribute('normal',new THREE.BufferAttribute(nor,3)); g.setAttribute('uv',new THREE.BufferAttribute(uv,2));
+      if(cc) g.setAttribute('color',new THREE.BufferAttribute(cc,3)); if(!N) g.computeVertexNormals();
+      ps.add(new THREE.Mesh(g,ptMat(m,!!cc))); }
+    else { const mm=new THREE.Mesh(o.geometry,ptMat(m,false)); mm.matrixAutoUpdate=false; mm.matrix.copy(o.matrixWorld); mm.matrixWorld.copy(o.matrixWorld); ps.add(mm); } });
+  PTR.sun=new THREE.DirectionalLight(); ps.add(PTR.sun,PTR.sun.target);
+  PTR.lamps=nightLights.map(l=>{ const p=new THREE.PointLight(l.color,0,l.distance,l.decay); p.position.copy(l.position); ps.add(p); return p; });
+  PTR.env=new PTR.mod.ProceduralEquirectTexture(256,128); PTR.env.generationCallback=(polar,uv,coord,c)=>{ const y=Math.cos(polar.phi);
+    const u=skyDome.material.uniforms; if(y>=0){ c.copy(u.hor.value).lerp(u.mid.value,Math.min(1,y/0.25)); if(y>0.25) c.lerp(u.top.value,Math.min(1,(y-0.25)/0.65)); } else c.set(0x8c8a74).multiplyScalar(0.7); };
+  ps.background=PTR.env; ps.environment=PTR.env;
+  PTR.scene=ps; PTR.lightsDirty=true; }
+function ptSyncLights(){ const s=PTR.sun; s.position.copy(sun.position); s.target.position.copy(sun.target.position); s.color.copy(sun.color); s.intensity=sun.intensity; s.updateMatrixWorld(); s.target.updateMatrixWorld();
+  PTR.lamps.forEach((p,i)=>p.intensity=nightLights[i].intensity); PTR.env.update(); PTR.scene.environmentIntensity=0.9; PTR.scene.backgroundIntensity=1; }
+let ptMsgT=0;
+function ptRender(){ const t=PTR.tracer; if(!t){ renderer.render(scene,activeCam); return; }
+  if(PTR.cutKey!==cut){ PTR.cutKey=cut; if(!PTR.dirty) PTR.dirty=true; }
+  const sk=sunState.doy+':'+Math.round(sunState.min); if(PTR.sunKey!==sk){ PTR.sunKey=sk; PTR.lightsDirty=true; }
+  if(PTR.dirty){ ptStatus.hidden=false; ptStatus.textContent='מכין את הסצנה לרינדור… (כמה שניות)'; renderer.render(scene,camera);
+    if(PTR.dirty==='go'){ ptBuildScene(); ptSyncLights(); t.setScene(PTR.scene,camera); PTR.dirty=false; PTR.lightsDirty=false; PTR.lastCam.copy(camera.matrixWorld); PTR.lastProj.copy(camera.projectionMatrix); }
+    else PTR.dirty='go';   /* let the message paint before the heavy BVH build */
+    return; }
+  if(PTR.lightsDirty){ ptSyncLights(); t.updateLights(); t.updateEnvironment(); PTR.lightsDirty=false; }
+  camera.updateMatrixWorld(); if(!PTR.lastCam.equals(camera.matrixWorld)||!PTR.lastProj.equals(camera.projectionMatrix)){ PTR.lastCam.copy(camera.matrixWorld); PTR.lastProj.copy(camera.projectionMatrix); t.updateCamera(); }
+  { const inside= mode==='walk' && player.x>0.3&&player.x<14.2&&player.z>0.3&&player.z<11.9; const target= inside? 2.6 : 1.15; if(PTR.expo!==target){ PTR.expo=target; } }
+  t.renderSample();
+  const now=performance.now(); if(now-ptMsgT>250){ ptMsgT=now; ptStatus.hidden=false; ptStatus.textContent= t.samples<1? 'מרנדר…' : `רינדור ריאליסטי · ${Math.floor(t.samples)} דגימות`+(t.samples<64?' · התמונה מתחדדת…':''); } }
+
 function update(dt){
   if(sunState.playing){ sunState.min+=dt*45; if(sunState.min>1260) sunState.min=240; sunDirty=true; }
   if(sunDirty){ applySun(); sunDirty=false; }
@@ -1762,7 +1838,7 @@ function update(dt){
   if(mode==='walk') stepWalk(dt); else if(mode==='plan'){ smoothOrtho(dt); planControls.update(); } else { smoothZoom(dt); controls.update(); }
   for(const f of fans) f.rotation.y+=dt*2.2;
   if(mode==='plan') fwd.set(0,0,-1); else camera.getWorldDirection(fwd); const b=Math.atan2(fwd.x,-fwd.z)/D2R; needle.style.transform=`rotate(${NORTH_DEG-b}deg)`;
-  if(postFX&&hq&&mode!=='plan') postFX.render(dt); else renderer.render(scene,activeCam);
+  if(quality==='pt'&&mode!=='plan') ptRender(); else if(postFX&&quality!=='std'&&mode!=='plan') postFX.render(dt); else renderer.render(scene,activeCam);
 }
 /* image-based lighting from a soft daylight sky + ground (reflections in glass and metal) */
 { const es=new THREE.Scene();
@@ -1774,6 +1850,6 @@ function update(dt){
 setCut('all'); applySun(); showHint();
 document.getElementById('loading').hidden=true;
 requestAnimationFrame(frame);
-window.__house={M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
+window.__house={PTR,get quality(){return quality},M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
 </script>
 </body></html>
