@@ -1,0 +1,1749 @@
+<!doctype html><html lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>בית עמר באלומה</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap">
+<style>
+/* Layout: full-bleed 3D stage, floating instrument cards in the corners (RTL). */
+:root{
+  --paper: rgba(250,248,244,.92);
+  --paper-solid:#faf8f4;
+  --ink:#2b2722;
+  --ink-soft:#6d655b;
+  --oak:#a9875d;
+  --oak-deep:#7f6240;
+  --line:rgba(60,50,40,.14);
+  --chip:#efe9df;
+  --sun:#d98b2b;
+  --stage:#e9e6e0;
+  --font:"Heebo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper: rgba(30,28,25,.9); --paper-solid:#1e1c19; --ink:#f1ece4; --ink-soft:#b3a999; --oak:#c9a374; --oak-deep:#e0bf92;
+  --line:rgba(255,240,220,.14); --chip:#2c2925; --sun:#f0a948; --stage:#1a1917; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper: rgba(30,28,25,.9); --paper-solid:#1e1c19; --ink:#f1ece4; --ink-soft:#b3a999; --oak:#c9a374; --oak-deep:#e0bf92;
+  --line:rgba(255,240,220,.14); --chip:#2c2925; --sun:#f0a948; --stage:#1a1917; color-scheme:dark }
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--stage);color:var(--ink);font-family:var(--font)}
+#stage{position:fixed;inset:0;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%;outline:none}
+.card{position:fixed;background:var(--paper);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.12);direction:rtl;z-index:5}
+#top{top:calc(env(safe-area-inset-top,0px) + 12px);right:max(12px,env(safe-area-inset-right,0px));padding:10px 12px;display:flex;flex-direction:column;gap:8px;width:min(300px,calc(100vw - 24px - 64px));box-sizing:border-box}
+.brand{display:flex;align-items:baseline;gap:8px;justify-content:space-between}
+.brand b{font-size:17px;font-weight:700;letter-spacing:.2px}
+.brand span{font-size:12px;color:var(--ink-soft)}
+.seg{display:flex;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;color:var(--ink);font:500 13px var(--font);padding:7px 4px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--paper-solid);box-shadow:0 1px 3px rgba(0,0,0,.15);color:var(--oak-deep)}
+.seg button:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--oak);outline-offset:2px}
+.row{display:flex;gap:8px;align-items:center}
+.lbl{font-size:12px;color:var(--ink-soft);min-width:52px}
+select{flex:1;min-width:0;font:500 13px var(--font);color:var(--ink);background:var(--chip);border:0;border-radius:9px;padding:7px 8px}
+#sun{left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);padding:12px 14px;width:min(360px,calc(100vw - 24px));box-sizing:border-box;display:flex;flex-direction:column;gap:8px}
+.sunhead{display:flex;align-items:center;gap:10px}
+.sunhead .t{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;flex:1;display:flex;gap:8px;align-items:baseline}
+.sunhead .t small{font-weight:400;color:var(--ink-soft);font-size:12px}
+.btn{border:0;background:var(--chip);color:var(--ink);font:500 12.5px var(--font);border-radius:9px;padding:6px 10px;cursor:pointer}
+.btn.round{width:34px;height:34px;padding:0;font-size:14px;display:grid;place-items:center}
+.btn.on{background:var(--sun);color:#fff}
+.slide{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:8px}
+.slide span{font-size:12px;color:var(--ink-soft)}
+input[type=range]{width:100%;accent-color:var(--sun);direction:ltr;margin:0}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.meta{font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;line-height:1.5}
+#sunChip{display:none}
+#sun .body{display:flex;flex-direction:column;gap:8px}
+#sun.min .body{display:none}
+body.walk #cutRow{display:none}
+#sun.min{width:auto;padding:8px 10px}
+#compass{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:max(12px,env(safe-area-inset-left,0px));width:52px;height:52px;border-radius:50%;background:var(--paper);border:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.12);z-index:5;display:grid;place-items:center}
+#needle{width:4px;height:36px;position:relative;transform-origin:50% 50%}
+#needle:before{content:"";position:absolute;left:-5px;top:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:18px solid #c4472d}
+#needle:after{content:"";position:absolute;left:-5px;bottom:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:18px solid var(--ink-soft)}
+#compass b{position:absolute;top:1px;font-size:10px;color:var(--ink-soft);font-weight:700}
+#joy{position:fixed;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.55);z-index:6;touch-action:none;display:none;box-shadow:0 4px 18px rgba(0,0,0,.18)}
+#knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--ink);z-index:4;direction:rtl;white-space:nowrap;pointer-events:none;transition:opacity .4s}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--stage);z-index:20;direction:rtl;font-size:15px;color:var(--ink-soft)}
+#cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:rgba(255,255,255,.8);box-shadow:0 0 0 1px rgba(0,0,0,.25);z-index:3;display:none;pointer-events:none}
+body.walk #cross{display:block}
+body.walk.touch #joy{display:block}
+body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
+@media (max-width:700px){
+  #hint{display:none}
+  #top{width:calc(100vw - 24px - 70px)}
+}
+@media (prefers-reduced-motion: reduce){#hint{transition:none}}
+</style>
+
+<div id="stage"></div>
+<div id="loading">בונה את הבית…</div>
+<div id="cross"></div>
+
+<header class="card" id="top">
+  <div class="brand"><b>בית עמר · אלומה</b><span>מודל 1:1 מתוכניות 1:50</span></div>
+  <div class="seg" id="mode" role="group" aria-label="מצב צפייה">
+    <button id="m-orbit" data-m="orbit" class="on">מבט מבחוץ</button>
+    <button id="m-walk" data-m="walk">סיור בבית</button>
+    <button id="m-plan" data-m="plan">תוכנית 2D</button>
+  </div>
+  <div class="row" id="cutRow">
+    <span class="lbl">תצוגה</span>
+    <div class="seg" id="cut" style="flex:1" role="group" aria-label="חיתוך">
+      <button id="c-all" data-c="all" class="on">הכול</button>
+      <button id="c-noroof" data-c="noroof">בלי גג</button>
+      <button id="c-ground" data-c="ground">קרקע</button>
+    </div>
+  </div>
+  <div class="row">
+    <span class="lbl">איכות</span>
+    <div class="seg" id="qual" style="flex:1" role="group" aria-label="איכות תצוגה">
+      <button data-q="hq">גבוהה</button>
+      <button data-q="std">רגילה</button>
+    </div>
+  </div>
+  <div class="row">
+    <label class="lbl" for="room">קפיצה ל</label>
+    <select id="room"></select>
+  </div>
+</header>
+
+<section class="card" id="sun" aria-label="שמש">
+  <div class="sunhead">
+    <button class="btn round" id="sunToggle" aria-label="הצג או הסתר את בקרת השמש">☀</button>
+    <div class="t" id="sunTitle">—</div>
+    <button class="btn round" id="play" aria-label="הפעל תנועת שמש">▶</button>
+  </div>
+  <div class="body">
+    <div class="slide"><span>שעה</span><input id="time" type="range" min="240" max="1260" step="5" aria-label="שעה ביום"></div>
+    <div class="slide"><span>תאריך</span><input id="day" type="range" min="1" max="365" step="1" aria-label="יום בשנה"></div>
+    <div class="quick">
+      <button class="btn" data-d="172">21 ביוני</button>
+      <button class="btn" data-d="80">21 במרץ</button>
+      <button class="btn" data-d="355">21 בדצמבר</button>
+      <button class="btn" id="now">עכשיו</button>
+    </div>
+    <div class="meta" id="sunMeta">—</div>
+  </div>
+</section>
+
+<div id="compass" aria-hidden="true"><b>N</b><div id="needle"></div></div>
+<div id="joy" aria-hidden="true"><div id="knob"></div></div>
+<div id="hint"></div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/* =====================================================================
+   Coordinates: metres. x = plan left→right (14.50 m), z = plan top→bottom
+   (12.02 m, street side at z=0, garden at z=12). y = up, ground floor ±0.00.
+   North on the plans points 36° clockwise from "plan up".
+   ===================================================================== */
+{ const _tni=THREE.BufferGeometry.prototype.toNonIndexed; THREE.BufferGeometry.prototype.toNonIndexed=function(){ return this.index? _tni.call(this) : this; }; }   /* skip no-op conversions (silences thousands of load warnings) */
+const IS_TOUCH = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+if (IS_TOUCH) document.body.classList.add('touch');
+const D2R = Math.PI/180;
+const NORTH_DEG = 36;               // plan rotation
+const LAT = 31.70, LON = 34.73;     // Aluma
+const G0=0, GC=3.30, U0=3.80, UT=3.72, UC=6.60, RT=6.85, PT=7.25, GRADE=-0.15;
+
+/* ---------------- renderer / scene ---------------- */
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, IS_TOUCH?1.5:2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.8;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false;
+stage.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.12, 420);   /* larger near plane = much finer depth precision */
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+const sky = new Sky(); sky.scale.setScalar(320); scene.add(sky);
+const su = sky.material.uniforms;
+su.turbidity.value = 2.2; su.rayleigh.value = 2.6; su.mieCoefficient.value = 0.003; su.mieDirectionalG.value = 0.82;
+
+const hemi = new THREE.HemisphereLight(0xdde9f5, 0xb9ab92, 0.6); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff2e0, 3);
+sun.castShadow = true;
+sun.shadow.mapSize.set(IS_TOUCH?2048:4096, IS_TOUCH?2048:4096);
+const sc = sun.shadow.camera; sc.left=-19; sc.right=19; sc.top=19; sc.bottom=-19; sc.near=1; sc.far=110;
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.025;
+scene.add(sun); scene.add(sun.target);
+const SHADOW_CENTER = new THREE.Vector3(7.25, 0, 8.5);
+sun.target.position.copy(SHADOW_CENTER);
+
+/* ---------------- procedural textures ---------------- */
+function rng(seed){ return ()=>{ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function makeTex(n, metres, draw, seed=1){
+  const c=document.createElement('canvas'); c.width=c.height=n; const g=c.getContext('2d'); draw(g,n,rng(seed));
+  const t=new THREE.CanvasTexture(c); t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/metres,1/metres);
+  t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
+}
+function noise(g,n,r,count,cols,size=1.5,alpha=.25){ for(let i=0;i<count;i++){ g.globalAlpha=alpha*r(); g.fillStyle=cols[(r()*cols.length)|0]; const s=size*(0.5+r()); g.fillRect(r()*n,r()*n,s,s);} g.globalAlpha=1; }
+const TX = {
+  oakFloor: makeTex(512,1.6,(g,n,r)=>{ const rowH=n/9; for(let row=0;row<9;row++){ let x=-r()*n; while(x<n){ const w=n*(0.45+r()*0.5); const tone=200+r()*22|0; g.fillStyle=`rgb(${tone+18},${tone},${tone-28})`; g.fillRect(x,row*rowH,w,rowH); g.strokeStyle='rgba(120,90,55,.18)'; for(let k=0;k<7;k++){ g.beginPath(); const y=row*rowH+r()*rowH; g.moveTo(x,y); g.bezierCurveTo(x+w*.3,y+r()*4-2,x+w*.6,y+r()*4-2,x+w,y+r()*3-1.5); g.stroke(); } g.fillStyle='rgba(110,80,50,.35)'; g.fillRect(x,row*rowH,1.5,rowH); x+=w; } g.fillStyle='rgba(110,80,50,.3)'; g.fillRect(0,row*rowH,n,1.5);} noise(g,n,r,4000,['#8a6a45','#fff'],1.2,.12); },3),
+  oak: makeTex(512,1.2,(g,n,r)=>{ g.fillStyle='#d5bf9c'; g.fillRect(0,0,n,n); for(let i=0;i<70;i++){ g.strokeStyle=`rgba(${120+r()*40|0},${90+r()*30|0},60,${.08+r()*.12})`; g.lineWidth=0.6+r()*1.6; g.beginPath(); let x=r()*n; g.moveTo(x,0); for(let y=0;y<=n;y+=32){ x+= (r()-.5)*5; g.lineTo(x,y);} g.stroke(); } noise(g,n,r,3000,['#9c7a52','#fff3e0'],1,.12); },5),
+  oakPanel: null, stone:null, tile:null, marble:null, bath:null, terrazzo:null, stick:null, limewash:null, grass:null, gravel:null, paving:null, woodClad:null, rug:null, deck:null, wtile:null, field:null, roof:null,
+};
+TX.oakPanel = makeTex(512,1.2,(g,n,r)=>{ g.drawImage(TX.oak.image,0,0); g.fillStyle='rgba(70,50,30,.55)'; for(const p of [0,n/2]){ g.fillRect(p,0,3,n); g.fillRect(0,p,n,3);} g.fillStyle='rgba(255,245,230,.35)'; for(const p of [0,n/2]){ g.fillRect(p+3,0,1,n); g.fillRect(0,p+3,n,1);} },7);
+TX.stone = makeTex(512,1.5,(g,n,r)=>{ g.fillStyle='#cfc8bb'; g.fillRect(0,0,n,n); for(let i=0;i<260;i++){ const cx=r()*n, cy=r()*n, rx=14+r()*30, ry=10+r()*20; const t=208+r()*28|0; for(const ox of [-n,0,n]) for(const oy of [-n,0,n]){ g.beginPath(); g.ellipse(cx+ox,cy+oy,rx,ry,r()*3,0,7); g.fillStyle=`rgb(${t+6},${t+2},${t-8})`; g.fill(); g.strokeStyle='rgba(165,155,140,.35)'; g.lineWidth=1.5; g.stroke(); } } noise(g,n,r,9000,['#8f877a','#ffffff'],1.6,.18); },11);
+TX.tile = makeTex(512,1.2,(g,n,r)=>{ g.fillStyle='#e4e1db'; g.fillRect(0,0,n,n); noise(g,n,r,9000,['#cfcac1','#f6f4f0'],1.4,.35); g.fillStyle='rgba(170,162,150,.6)'; g.fillRect(0,0,n,1.5); g.fillRect(0,0,1.5,n); },13);   /* 120x120 cm porcelain tiles */
+TX.marble = makeTex(512,1.6,(g,n,r)=>{ g.fillStyle='#ece9e4'; g.fillRect(0,0,n,n); for(let i=0;i<14;i++){ g.strokeStyle=`rgba(150,145,140,${.1+r()*.2})`; g.lineWidth=0.6+r()*2; g.beginPath(); let x=r()*n,y=0; g.moveTo(x,y); while(y<n){ x+=(r()-.5)*40; y+=20+r()*30; g.lineTo(x,y);} g.stroke(); } noise(g,n,r,4000,['#bbb','#fff'],1.2,.15); },17);
+TX.bath = makeTex(512,1.6,(g,n,r)=>{ g.fillStyle='#d9d5cd'; g.fillRect(0,0,n,n); for(let i=0;i<26;i++){ g.strokeStyle=`rgba(${170+r()*30|0},${160+r()*25|0},150,${.15+r()*.2})`; g.lineWidth=2+r()*6; g.beginPath(); let x=r()*n; g.moveTo(x,0); for(let y=0;y<=n;y+=40){ x+=(r()-.5)*30; g.lineTo(x,y);} g.stroke(); } noise(g,n,r,8000,['#b8b2a6','#f2efe9'],1.4,.25); g.fillStyle='rgba(150,142,130,.5)'; g.fillRect(0,0,n,1.5); g.fillRect(0,0,1.5,n); g.fillRect(n/2,0,1.5,n); },19);
+TX.terrazzo = makeTex(256,0.6,(g,n,r)=>{ g.fillStyle='#ece6dc'; g.fillRect(0,0,n,n); const cols=['#c9b9a3','#a99f92','#e2cfb5','#d7b9a0','#9eaa95','#ffffff']; for(let i=0;i<520;i++){ g.fillStyle=cols[(r()*cols.length)|0]; g.beginPath(); g.ellipse(r()*n,r()*n,1+r()*3.2,1+r()*2.2,r()*3,0,7); g.fill(); } },23);
+TX.stick = makeTex(256,0.4,(g,n,r)=>{ g.fillStyle='#f3eee6'; g.fillRect(0,0,n,n); const w=n/8, h=n/2; for(let row=0;row<2;row++) for(let i=0;i<8;i++){ const t=205+r()*14|0; g.fillStyle=`rgb(${t+12},${t+3},${t-12})`; g.fillRect(i*w+2,row*h+2,w-4,h-4);} },29);
+TX.limewash = makeTex(256,2.2,(g,n,r)=>{ g.fillStyle='#dedad2'; g.fillRect(0,0,n,n); for(let i=0;i<160;i++){ const x=r()*n,y=r()*n,rad=10+r()*40; const gr=g.createRadialGradient(x,y,0,x,y,rad); const a=r()*.05; gr.addColorStop(0,r()>.5?`rgba(255,255,250,${a})`:`rgba(150,145,135,${a})`); gr.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=gr; g.fillRect(x-rad,y-rad,rad*2,rad*2);} },31);
+TX.grass = makeTex(256,2.5,(g,n,r)=>{ g.fillStyle='#7f9a55'; g.fillRect(0,0,n,n); noise(g,n,r,16000,['#6b8746','#93ad67','#5d773b','#a7b97a'],2,.5); },37);
+TX.field = makeTex(256,24,(g,n,r)=>{ g.fillStyle='#a4a46a'; g.fillRect(0,0,n,n); noise(g,n,r,9000,['#8f9a5a','#b7b07a','#c2b585','#7f8f52'],6,.5); },38);
+TX.gravel = makeTex(256,1,(g,n,r)=>{ g.fillStyle='#d9d2c5'; g.fillRect(0,0,n,n); noise(g,n,r,9000,['#b5ab9b','#efe9de','#9d9384','#ffffff'],3,.7); },41);
+TX.paving = makeTex(512,2.4,(g,n,r)=>{ g.fillStyle='#dcd6cb'; g.fillRect(0,0,n,n); noise(g,n,r,8000,['#c8c1b4','#f0ebe2'],1.6,.35); g.fillStyle='rgba(150,140,125,.55)'; for(let i=0;i<=4;i++){ g.fillRect(0,i*n/4,n,2);} for(let row=0;row<4;row++){ const off=row%2?n/4:0; for(let i=0;i<3;i++) g.fillRect((off+i*n/2)%n,row*n/4,2,n/4);} },43);
+TX.woodClad = makeTex(256,1,(g,n,r)=>{ const w=n/10; for(let i=0;i<10;i++){ const t=140+r()*20|0; g.fillStyle=`rgb(${t+20},${t},${t-30})`; g.fillRect(i*w,0,w,n); g.fillStyle='rgba(40,28,15,.7)'; g.fillRect(i*w,0,3,n);} noise(g,n,r,2000,['#5b4128','#d2b48c'],1,.2); },47);
+TX.rug = makeTex(256,0.8,(g,n,r)=>{ const s=n/8; for(let y=0;y<8;y++) for(let x=0;x<8;x++){ g.fillStyle=(x+y)%2?'#e9e5de':'#d4cfc6'; g.fillRect(x*s,y*s,s,s);} noise(g,n,r,5000,['#bbb','#fff'],1.2,.3); },53);
+TX.deck = makeTex(256,1.2,(g,n,r)=>{ const h=n/8; for(let i=0;i<8;i++){ const t=150+r()*25|0; g.fillStyle=`rgb(${t+25},${t+5},${t-25})`; g.fillRect(0,i*h,n,h); g.fillStyle='rgba(60,40,20,.5)'; g.fillRect(0,i*h,n,2);} },59);
+TX.wtile = makeTex(256,0.6,(g,n,r)=>{ g.fillStyle='#f5f3ef'; g.fillRect(0,0,n,n); g.fillStyle='rgba(190,182,170,.55)'; for(let i=0;i<4;i++){ g.fillRect(0,i*n/4,n,1.5); g.fillRect(i*n/4,0,1.5,n);} },61);
+TX.roof = makeTex(256,2,(g,n,r)=>{ g.fillStyle='#d2cfc9'; g.fillRect(0,0,n,n); noise(g,n,r,7000,['#b4b0a8','#ebe8e2'],2,.4); },67);
+
+/* ---------------- materials ---------------- */
+const M = {};
+const ALL_MATS = [];
+function mat(name, p){ const m=new THREE.MeshStandardMaterial(Object.assign({roughness:.85, metalness:0},p)); m.name=name; M[name]=m; ALL_MATS.push(m); return m; }
+mat('plaster',{color:0xf2f0eb, roughness:.95});
+mat('ceiling',{color:0xf6f5f1, roughness:.95});
+mat('ext',{color:0xf3f2ee, roughness:.9});
+mat('stone',{map:TX.stone, roughness:.95});
+mat('tile',{map:TX.tile, roughness:.55});
+mat('oakFloor',{map:TX.oakFloor, roughness:.6});
+mat('oak',{map:TX.oak, roughness:.55});
+mat('oakPanel',{map:TX.oakPanel, roughness:.55});
+mat('lacquer',{color:0xf1eee8, roughness:.5});
+mat('marble',{map:TX.marble, roughness:.3});
+mat('bath',{map:TX.bath, roughness:.5});
+mat('bathGrey',{map:TX.bath, color:0xd2cdc4, roughness:.8});
+mat('terrazzo',{map:TX.terrazzo, roughness:.45});
+mat('stick',{map:TX.stick, roughness:.35});
+mat('wtile',{map:TX.wtile, roughness:.35});
+mat('limewash',{map:TX.limewash, roughness:.95});
+mat('grass',{map:TX.grass, roughness:1});
+mat('field',{map:TX.field, color:0xc9d3b0, roughness:1});
+mat('gravel',{map:TX.gravel, roughness:1});
+mat('paving',{map:TX.paving, roughness:.9});
+mat('woodClad',{map:TX.woodClad, roughness:.8});
+mat('rugCheck',{map:TX.rug, roughness:1});
+mat('deck',{map:TX.deck, roughness:.8});
+mat('roof',{map:TX.roof, roughness:1});
+mat('white',{color:0xf4f4f1, roughness:.5});
+mat('frame',{color:0xf2f2ef, roughness:.4, metalness:.1});
+mat('slatWood',{color:0x9a7451, roughness:.75});
+mat('slatLight',{color:0xd2c8bb, roughness:.7});
+mat('teak',{color:0x8a6646, roughness:.7});
+mat('concrete',{color:0xe9e7e2, roughness:.9});
+mat('porcelain',{color:0xfafaf8, roughness:.18});
+mat('chrome',{color:0xd0d0d0, roughness:.2, metalness:1});
+mat('bronze',{color:0x9a5e3a, roughness:.35, metalness:.85});
+mat('black',{color:0x262422, roughness:.5});
+mat('screen',{color:0x0e0e0f, roughness:.15, metalness:.2});
+mat('mirror',{color:0xe8e8e8, roughness:.03, metalness:1});
+mat('fabWhite',{color:0xefece6, roughness:1});
+mat('fabCream',{color:0xe4ddd0, roughness:1});
+mat('fabLinen',{color:0xd5cec2, roughness:1});
+mat('fabGrey',{color:0xaeaaa3, roughness:1});
+mat('fabMustard',{color:0xa47c2c, roughness:1});
+mat('fabOlive',{color:0x77725c, roughness:1});
+mat('fabSage',{color:0x9aa08a, roughness:1});
+mat('rugWhite',{color:0xf0ece5, roughness:1});
+mat('plant',{color:0x587a3c, roughness:.9});
+mat('plantDark',{color:0x3f5b2e, roughness:.9});
+mat('olive',{color:0x7d8f63, roughness:.9});
+mat('trunk',{color:0x6d5a47, roughness:.95});
+mat('asphalt',{color:0x6b6b69, roughness:1});
+mat('hedge',{color:0x4f6e38, roughness:1});
+mat('art',{color:0xd9cbb4, roughness:.9});
+mat('artDark',{color:0x9c8064, roughness:.9});
+mat('ceramic',{color:0xc8b79f, roughness:.6});
+mat('book',{color:0x8b7f70, roughness:.8});
+mat('lamp',{color:0xfbf7ef, roughness:.6, emissive:0xffdcaa, emissiveIntensity:0});
+mat('brass',{color:0xb08d57, roughness:.35, metalness:.8});
+mat('glass',{color:0xd8e6ea, roughness:.04, metalness:0, transparent:true, opacity:.16, depthWrite:false});
+mat('glassTint',{color:0x8a8f90, roughness:.05, transparent:true, opacity:.35, depthWrite:false});
+mat('water',{color:0xbfd7dc, roughness:.05, transparent:true, opacity:.6});
+M.glass.side = THREE.DoubleSide; M.glassTint.side = THREE.DoubleSide;
+const NO_SHADOW = new Set(['glass','glassTint','water','lamp']);
+const ghost = new THREE.MeshBasicMaterial({colorWrite:false, depthWrite:false});
+
+/* ---------------- high-detail PBR textures (procedural, tileable, with relief normal maps) ---------------- */
+const TS = IS_TOUCH?512:1024;
+const ANI = Math.min(12, renderer.capabilities.getMaxAnisotropy());
+const hsh=(x,y,s=0)=>{ let h=(x*374761393+y*668265263+s*982451653)|0; h=Math.imul(h^(h>>>13),1274126177); h^=h>>>16; return (h>>>0)/4294967296; };
+function canvasN(n){ const c=document.createElement('canvas'); c.width=c.height=n; return c; }
+function blurH(a,n,r){ if(r<1) return a; const t=new Float32Array(n*n), o=new Float32Array(n*n), w=2*r+1;
+  for(let y=0;y<n;y++){ let s=0; for(let k=-r;k<=r;k++) s+=a[y*n+((k+n)%n)]; for(let x=0;x<n;x++){ t[y*n+x]=s/w; s+=a[y*n+((x+r+1)%n)]-a[y*n+((x-r+n)%n)]; } }
+  for(let x=0;x<n;x++){ let s=0; for(let k=-r;k<=r;k++) s+=t[((k+n)%n)*n+x]; for(let y=0;y<n;y++){ o[y*n+x]=s/w; s+=t[((y+r+1)%n)*n+x]-t[((y-r+n)%n)*n+x]; } }
+  return o; }
+function hFromCanvas(c,n){ const d=c.getContext('2d').getImageData(0,0,n,n).data; const H=new Float32Array(n*n); for(let i=0;i<n*n;i++) H[i]=d[i*4]/255; return H; }
+function texRepeat(t,metres,rep){ t.wrapS=t.wrapT=THREE.RepeatWrapping; if(rep) t.repeat.set(rep,rep); else t.repeat.set(1/metres,1/metres); t.anisotropy=ANI; return t; }
+function colorTex(c,metres,rep){ const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return texRepeat(t,metres,rep); }
+function normalTex(H,n,str,metres,rep){ const c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data; str*=n/1024;
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++){ const dx=(H[y*n+(x+1)%n]-H[y*n+(x-1+n)%n])*str*(1024/n), dy=(H[((y+1)%n)*n+x]-H[((y-1+n)%n)*n+x])*str*(1024/n); const l=Math.hypot(dx,dy,1), i=(y*n+x)*4;
+    d[i]=(-dx/l*0.5+0.5)*255; d[i+1]=(dy/l*0.5+0.5)*255; d[i+2]=(1/l*0.5+0.5)*255; d[i+3]=255; }
+  g.putImageData(im,0,0); return texRepeat(new THREE.CanvasTexture(c),metres,rep); }
+function wrapDraw(n,x,y,fn){ for(const ox of [-n,0,n]) for(const oy of [-n,0,n]) if(x+ox>-60&&x+ox<n+60&&y+oy>-60&&y+oy<n+60) fn(x+ox,y+oy); }
+// random flagstone cladding (as in the renders): off-white irregular stones, thin grey joints
+function texStone(metres){ const n=TS, G=11, r=rng(101), pts=[];
+  for(let j=0;j<G;j++) for(let i=0;i<G;i++) pts.push([(i+0.1+r()*0.8)/G,(j+0.1+r()*0.8)/G,r(),r(),0.75+r()*0.5]);
+  const c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data, H=new Float32Array(n*n), w=0.006/metres;
+  for(let py=0;py<n;py++){ const v=(py+0.5)/n, cj=Math.floor(v*G); for(let px=0;px<n;px++){ const u=(px+0.5)/n, ci=Math.floor(u*G); let d1=9,d2=9,best=pts[0];
+    for(let dj=-1;dj<=1;dj++) for(let di=-1;di<=1;di++){ const a=ci+di, b=cj+dj, ii=((a%G)+G)%G, jj=((b%G)+G)%G, p=pts[jj*G+ii];
+      const ddx=(u-(p[0]+(a-ii)/G))*p[4], ddy=v-(p[1]+(b-jj)/G), dd=Math.sqrt(ddx*ddx+ddy*ddy); if(dd<d1){ d2=d1; d1=dd; best=p; } else if(dd<d2) d2=dd; }
+    const e=(d2-d1)*0.5, i=(py*n+px)*4, f1=hsh(px,py,7), f2=hsh(px>>2,py>>2,3), f3=hsh(px>>4,py>>4,9);
+    if(e<w){ const k=196+f1*14; d[i]=k; d[i+1]=k-2; d[i+2]=k-7; H[py*n+px]=0.12+f1*0.06; }
+    else { const edge=e<w*2.6, base=236+best[2]*17-(edge?6:0)+(f3-0.5)*5, warm=best[3]*9, k=base+(f1-0.5)*12+(f2-0.5)*8;
+      d[i]=k+warm*0.5; d[i+1]=k-1; d[i+2]=k-5-warm*0.6; H[py*n+px]=Math.min(1,0.5+(e-w)*90)+(f2-0.5)*0.18+(f1-0.5)*0.06+(f3-0.5)*0.15; }
+    d[i+3]=255; } }
+  g.putImageData(im,0,0); return {map:colorTex(c,metres), normalMap:normalTex(blurH(H,n,1),n,4.5,metres)}; }
+// fine sand-float plaster for the white walls
+function texPlaster(metres){ const n=TS/2|0, r=rng(17), c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data;
+  let H=new Float32Array(n*n); for(let i=0;i<n*n;i++) H[i]=r(); H=blurH(H,n,2); const Hf=new Float32Array(n*n); for(let i=0;i<n*n;i++) Hf[i]=r();
+  for(let i=0;i<n*n;i++){ const k=246+(H[i]-0.5)*14+(Hf[i]-0.5)*4; d[i*4]=k; d[i*4+1]=k-1; d[i*4+2]=k-4; d[i*4+3]=255; H[i]=H[i]*0.8+Hf[i]*0.2; }
+  g.putImageData(im,0,0); return {map:colorTex(c,metres), normalMap:normalTex(H,n,1.6,metres)}; }
+// lawn: dense short blades with colour variation
+function texGrass(metres){ const n=TS, r=rng(37), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d');
+  g.fillStyle='#5f7d3a'; g.fillRect(0,0,n,n); hg.fillStyle='#000'; hg.fillRect(0,0,n,n);
+  const cols=['#6f8f44','#7d9c4e','#58763a','#8aa65a','#a3b56c','#4d6b33','#93ad5f'];
+  for(let i=0;i<n*n/18;i++){ const x=r()*n, y=r()*n, a=r()*Math.PI*2, L=(4+r()*9)*n/1024*1.6, col=cols[(r()*cols.length)|0], hv=(80+r()*175)|0;
+    wrapDraw(n,x,y,(X,Y)=>{ g.strokeStyle=col; g.lineWidth=1.3*n/1024+0.4; g.beginPath(); g.moveTo(X,Y); g.lineTo(X+Math.cos(a)*L,Y+Math.sin(a)*L); g.stroke();
+      hg.strokeStyle=`rgb(${hv},${hv},${hv})`; hg.lineWidth=g.lineWidth; hg.beginPath(); hg.moveTo(X,Y); hg.lineTo(X+Math.cos(a)*L,Y+Math.sin(a)*L); hg.stroke(); }); }
+  return {map:colorTex(c,metres), normalMap:normalTex(hFromCanvas(h,n),n,2.2,metres)}; }
+// cobbled sidewalk laid in fans (as in the render)
+function texCobble(metres){ const n=TS, r=rng(53), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d'), k=n/metres;
+  g.fillStyle='#b9ad9b'; g.fillRect(0,0,n,n); hg.fillStyle='#000'; hg.fillRect(0,0,n,n);
+  const cols=['#d9cfc0','#cfc3b1','#e2d9cb','#c8bba7','#d6c7b0','#beb3a3','#e8e0d4'], S=1.0, R=0.6, st=0.085;
+  for(let kk=-1;kk<=Math.ceil(metres/0.5)+1;kk++){ const cy=kk*0.5; for(let m=-1;m<=Math.ceil(metres/S)+1;m++){ const cx=m*S+(kk%2?S/2:0);
+    for(let rr=R; rr>0.03; rr-=st){ const cnt=Math.max(2,Math.round(Math.PI*rr/st)); for(let t=0;t<cnt;t++){ const a=Math.PI+(t+0.5)/cnt*Math.PI, X=(((cx+Math.cos(a)*rr)%metres)+metres)%metres*k, Y=(((cy+Math.sin(a)*rr)%metres)+metres)%metres*k;
+      const col=cols[(r()*cols.length)|0], hv=(170+r()*85)|0, w=st*0.86*k, hh=st*0.8*k, rot=a+Math.PI/2+(r()-0.5)*0.15;
+      wrapDraw(n,X,Y,(XX,YY)=>{ for(const [ctx,fill] of [[g,col],[hg,`rgb(${hv},${hv},${hv})`]]){ ctx.save(); ctx.translate(XX,YY); ctx.rotate(rot); ctx.fillStyle=fill; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(-w/2,-hh/2,w,hh,w*0.18); else ctx.rect(-w/2,-hh/2,w,hh); ctx.fill(); ctx.restore(); } }); } } } }
+  const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const f=(hsh(i%n,(i/n)|0,5)-0.5)*14; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f; } g.putImageData(id,0,0);
+  return {map:colorTex(c,metres), normalMap:normalTex(blurH(hFromCanvas(h,n),n,2),n,5,metres)}; }
+// large concrete/limestone pavers for the path and the parking
+function texPavers(metres){ const n=TS, r=rng(61), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d'), k=n/metres;
+  g.fillStyle='#bfb7aa'; g.fillRect(0,0,n,n); hg.fillStyle='#000'; hg.fillRect(0,0,n,n);
+  const PW=0.6, PH=0.4, j=0.005*k;
+  for(let row=0; row<Math.round(metres/PH); row++){ const off=row%2?PW/2:0; for(let i=-1;i<=Math.round(metres/PW);i++){ const x=(i*PW+off)*k, y=row*PH*k, t=(225+r()*16)|0, hv=(200+r()*55)|0;
+    for(const ox of [0,n]){ g.fillStyle=`rgb(${t+4},${t},${t-8})`; g.fillRect(x+j-ox,y+j,PW*k-2*j,PH*k-2*j); hg.fillStyle=`rgb(${hv},${hv},${hv})`; hg.fillRect(x+j-ox,y+j,PW*k-2*j,PH*k-2*j); } } }
+  const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const x=i%n,y=(i/n)|0, f=(hsh(x,y,11)-0.5)*16+(hsh(x>>3,y>>3,12)-0.5)*8; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f; } g.putImageData(id,0,0);
+  const H=hFromCanvas(h,n); for(let i=0;i<n*n;i++) H[i]+= (hsh(i%n,(i/n)|0,13)-0.5)*0.08;
+  return {map:colorTex(c,metres), normalMap:normalTex(blurH(H,n,1),n,4,metres)}; }
+// light timber for the fins and pergola slats (box UVs: whole face 0..1, grain along the length)
+function texFin(){ const n=512, r=rng(71), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d');
+  g.fillStyle='#ae9b86'; g.fillRect(0,0,n,n); hg.fillStyle='#808080'; hg.fillRect(0,0,n,n);
+  for(let i=0;i<220;i++){ let x=r()*n; const w=0.4+r()*1.6, a=0.05+r()*0.14, dark=r()>.5; g.strokeStyle=dark?`rgba(120,92,60,${a})`:`rgba(255,248,235,${a})`; hg.strokeStyle=`rgba(${dark?40:220},${dark?40:220},${dark?40:220},${a*2})`; g.lineWidth=hg.lineWidth=w;
+    g.beginPath(); hg.beginPath(); g.moveTo(x,0); hg.moveTo(x,0); for(let y=0;y<=n;y+=16){ x+=(r()-0.5)*1.2; g.lineTo(x,y); hg.lineTo(x,y); } g.stroke(); hg.stroke(); }
+  return {map:colorTex(c,0,1), normalMap:normalTex(hFromCanvas(h,n),n,1.2,0,1)}; }
+// clipped hedge: small leaves
+function texHedge(metres){ const n=TS/2|0, r=rng(83), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d');
+  g.fillStyle='#2f4a22'; g.fillRect(0,0,n,n); hg.fillStyle='#000'; hg.fillRect(0,0,n,n); const cols=['#3f6a2a','#4f7a33','#365c25','#5d8a3c','#2c4c1e'];
+  for(let i=0;i<n*n/14;i++){ const x=r()*n,y=r()*n, rx=1.5+r()*3, ry=1+r()*2, a=r()*3.14, col=cols[(r()*cols.length)|0], hv=(90+r()*165)|0;
+    wrapDraw(n,x,y,(X,Y)=>{ g.fillStyle=col; g.beginPath(); g.ellipse(X,Y,rx,ry,a,0,7); g.fill(); hg.fillStyle=`rgb(${hv},${hv},${hv})`; hg.beginPath(); hg.ellipse(X,Y,rx,ry,a,0,7); hg.fill(); }); }
+  return {map:colorTex(c,metres), normalMap:normalTex(blurH(hFromCanvas(h,n),n,1),n,3,metres)}; }
+{ const T0=performance.now();
+  const ST=texStone(2.0), PL=texPlaster(2.5), GR=texGrass(2.4), CB=texCobble(2.0), PV=texPavers(2.4), FN=texFin(), HG=texHedge(1.4);
+  const up=(m,t,o={})=>{ Object.assign(m,{map:t.map,normalMap:t.normalMap},o); m.color.set(0xffffff); m.needsUpdate=true; };
+  up(M.stone,ST,{roughness:.86}); up(M.ext,PL,{roughness:.92}); up(M.grass,GR,{roughness:1}); up(M.paving,PV,{roughness:.88});
+  up(M.slatLight,FN,{roughness:.75}); up(M.hedge,HG,{roughness:1});
+  M.stone.normalScale.set(1.1,1.1); M.grass.normalScale.set(0.8,0.8);
+  mat('cobble',{map:CB.map, normalMap:CB.normalMap, roughness:.92});
+  mat('cactus',{color:0x7d8a4e, roughness:.6});
+  mat('rock',{color:0xe4ddd0, roughness:.9, normalMap:PL.normalMap});
+  { const n=512, rr=rng(57), c=canvasN(n), g=c.getContext('2d'); g.fillStyle='#7b6e60'; g.fillRect(0,0,n,n); const H=new Float32Array(n*n).fill(0.6);
+    for(let i=0;i<260;i++){ let x=rr()*n; const w=1+rr()*3, y0=rr()*n, len=40+rr()*160; g.strokeStyle=`rgba(${40+rr()*30|0},${35+rr()*25|0},${28+rr()*20|0},${0.5+rr()*0.4})`; g.lineWidth=w; g.beginPath(); g.moveTo(x,y0);
+      for(let y=0;y<len;y+=8){ x+=(rr()-0.5)*4; g.lineTo(x,y0+y); for(let d=-w;d<=w;d++){ const px=((Math.round(x+d)%n)+n)%n, py=((Math.round(y0+y)%n)+n)%n; H[py*n+px]=0.1; } } g.stroke(); }
+    const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const f=(hsh(i%n>>2,(i/n|0)>>3,33)-0.5)*40+(hsh(i%n,(i/n)|0,34)-0.5)*14; d[i*4]+=f; d[i*4+1]+=f*0.95; d[i*4+2]+=f*0.85; } g.putImageData(id,0,0);
+    Object.assign(M.trunk,{map:colorTex(c,0.6), normalMap:normalTex(blurH(H,n,1),n,6,0.6), roughness:.95}); M.trunk.color.set(0xffffff); M.trunk.needsUpdate=true; }
+  /* ---------- interior finishes ---------- */
+  const setM=(m,map,nm,o={})=>{ Object.assign(m,{map,normalMap:nm},o); m.color.set(0xffffff); m.needsUpdate=true; };
+  // wide smoked-oak planks (20 cm x 1.6-2.4 m): greige, cathedral grain, micro-bevel (per the sample photo)
+  { const n=TS, rr=rng(301), c=canvasN(n), g=c.getContext('2d'), H=new Float32Array(n*n).fill(0.6), metres=2.4, k=n/metres, PW=0.2;
+    for(let row=0;row<Math.round(metres/PW);row++){ let x=-rr()*2.4; const y0=row*PW*k, y1=(row+1)*PW*k, ph=y1-y0;
+      while(x<metres){ const L=1.6+rr()*0.8, t=rr(), base=[176+t*16,156+t*14,134+t*12];
+        for(const ox of [0,metres]){ const X0=(x-ox)*k, X1=(x+L-ox)*k; if(X1<0||X0>n) continue;
+          g.save(); g.beginPath(); g.rect(X0,y0,X1-X0,ph); g.clip();
+          g.fillStyle=`rgb(${base[0]|0},${base[1]|0},${base[2]|0})`; g.fillRect(X0,y0,X1-X0,ph);
+          // straight grain along the plank
+          for(let j=0;j<22;j++){ const yy=y0+rr()*ph; g.strokeStyle=`rgba(${120+rr()*25|0},${105+rr()*20|0},${88+rr()*18|0},${0.1+rr()*0.14})`; g.lineWidth=0.5+rr()*1.1;
+            g.beginPath(); g.moveTo(X0,yy); let yv=yy; for(let xx=X0;xx<=X1;xx+=10){ yv+=(rr()-0.5)*0.8; g.lineTo(xx,yv); } g.stroke(); }
+          // cathedral figure: nested arches pointing along the plank
+          // cathedral figure: nested rounded arches (half-ellipse tips trailing into straight grain)
+          const nCath=1+((rr()*2)|0);
+          for(let q=0;q<nCath;q++){ const cx=X0+(0.25+rr()*0.5)*(X1-X0), cy=y0+(0.35+rr()*0.3)*ph, dir=rr()>.5?1:-1, rx0=ph*(0.5+rr()*0.6), tail=(0.25+rr()*0.3)*(X1-X0);
+            for(let m=0;m<9;m++){ const ry=ph*0.025+m*ph*0.042, rx=rx0+m*ph*0.12; g.strokeStyle=`rgba(${100+rr()*18|0},${86+rr()*15|0},${70+rr()*12|0},${0.16+rr()*0.16})`; g.lineWidth=0.7+rr()*1.1;
+              g.beginPath(); g.moveTo(cx-dir*tail,cy-ry); g.lineTo(cx,cy-ry); g.ellipse(cx,cy,rx,ry,0,-Math.PI/2,Math.PI/2,dir<0); g.lineTo(cx-dir*tail,cy+ry); g.stroke(); } }
+          // a few small pin knots
+          if(rr()<0.3){ const kx=X0+rr()*(X1-X0), ky=y0+ph*(0.25+rr()*0.5); g.fillStyle='rgba(105,88,72,.45)'; g.beginPath(); g.ellipse(kx,ky,2+rr()*2,1.2+rr(),0,0,7); g.fill(); }
+          g.restore();
+          g.fillStyle='rgba(95,82,70,.5)'; g.fillRect(X0,y0,1.2,ph);
+          for(let yy=Math.max(0,y0|0); yy<Math.min(n,y1|0); yy++) for(let xx=Math.max(0,X0|0); xx<Math.min(n,X1|0); xx++){ const e=Math.min(yy-y0,y1-yy,xx-X0,X1-xx); if(e<2) H[yy*n+xx]=0.2+e*0.2; } }
+        x+=L; }
+      g.fillStyle='rgba(95,82,70,.5)'; g.fillRect(0,y0,n,1.2); }
+    const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const f=(hsh(i%n,(i/n)|0,41)-0.5)*8; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f; H[i]+=(hsh(i%n>>1,(i/n|0)>>1,42)-0.5)*0.05; } g.putImageData(id,0,0);
+    setM(M.oakFloor,colorTex(c,metres),normalTex(H,n,3,metres),{roughness:.62}); M.oakFloor.normalScale.set(0.8,0.8); }
+  // fine oak for furniture and cladding (+ panel grooves every 60 cm)
+  const oakFine=(grooves)=>{ const n=TS, rr=rng(grooves?311:313), c=canvasN(n), g=c.getContext('2d'), H=new Float32Array(n*n).fill(0.6), metres=1.2;
+    g.fillStyle='#ae9b86'; g.fillRect(0,0,n,n);
+    for(let i=0;i<180;i++){ let x=rr()*n; const w=0.5+rr()*2, a=0.06+rr()*0.18, dark=rr()>.35; g.strokeStyle=dark?`rgba(${105+rr()*22|0},${90+rr()*18|0},${74+rr()*14|0},${a})`:`rgba(240,232,222,${a*0.8})`; g.lineWidth=w; const x0=x, A1=1+rr()*3, A2=rr()*1.5, p1=rr()*6.28, p2=rr()*6.28; /* periodic drift: the texture tiles seamlessly top-to-bottom */
+      for(const ox of [-n,0,n]){ g.beginPath(); for(let y=0;y<=n;y+=8){ const xx=x0+ox+A1*Math.sin(y/n*6.2832+p1)+A2*Math.sin(y/n*12.566+p2); if(y===0) g.moveTo(xx,y); else g.lineTo(xx,y); } g.stroke(); } }
+    for(let q=0;q<2;q++){ const cx=n*(0.25+rr()*0.5), cy=n*(0.32+q*0.36), dir=rr()>.5?1:-1, ry0=n*(0.05+rr()*0.03), tail=n*0.16;
+      for(let m=0;m<10;m++){ const rx=n*0.01+m*n*0.012, ry=ry0+m*n*0.018; g.strokeStyle=`rgba(${100+rr()*18|0},${86+rr()*15|0},${70+rr()*12|0},${0.14+rr()*0.14})`; g.lineWidth=0.7+rr()*1.1;
+        g.beginPath(); g.moveTo(cx-rx,cy-dir*tail); g.lineTo(cx-rx,cy); g.ellipse(cx,cy,rx,ry,0,Math.PI,0,dir<0); g.lineTo(cx+rx,cy-dir*tail); g.stroke(); } }
+    if(grooves) for(const p of [0,n/2]){ g.fillStyle='rgba(60,42,25,.55)'; g.fillRect(p,0,3,n); g.fillRect(0,p,n,3); for(let t=0;t<n;t++) for(let d=0;d<3;d++){ H[t*n+((p+d)|0)%n]=0.1; H[(((p+d)|0)%n)*n+t]=0.1; } }
+    const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const f=(hsh(i%n,(i/n)|0,43)-0.5)*8; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f; H[i]+=(hsh(i%n>>2,(i/n)|0,44)-0.5)*0.05; } g.putImageData(id,0,0);
+    return [colorTex(c,metres),normalTex(H,n,2,metres)]; };
+  { const [m1,n1]=oakFine(false); setM(M.oak,m1,n1,{roughness:.5}); const [m2,n2]=oakFine(true); setM(M.oakPanel,m2,n2,{roughness:.5});
+    /* front door: same greige oak with 10 cm grooves */
+    /* outdoor timber (posts, gate, garden furniture) in a deeper tone of the same greige */
+    M.teak.color.set(0x9b8774); M.slatWood.color.set(0x9b8774); }
+  // large-format porcelain 120x120, soft cloudy stone look, 2 mm joints
+  { const n=TS, rr=rng(321), metres=2.4, c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data; let N=new Float32Array(n*n); for(let i=0;i<n*n;i++) N[i]=rr(); N=blurH(N,n,12); let N2=new Float32Array(n*n); for(let i=0;i<n*n;i++) N2[i]=rr(); N2=blurH(N2,n,3);
+    const H=new Float32Array(n*n).fill(0.6), jw=Math.max(1,Math.round(0.003*n/metres));
+    for(let y=0;y<n;y++) for(let x=0;x<n;x++){ const i=y*n+x, tile=((x/(n/2))|0)+((y/(n/2))|0)*2, sh=[0,4,-3,2][tile]; let v=229+sh+(N[i]-0.5)*40+(N2[i]-0.5)*8;
+      const jx=x%(n/2), jy=y%(n/2); const joint=jx<jw||jy<jw; if(joint){ v=196; H[i]=0.2; }
+      d[i*4]=v+2; d[i*4+1]=v; d[i*4+2]=v-5; d[i*4+3]=255; }
+    g.putImageData(im,0,0);
+    // a few faint veins
+    for(let i=0;i<6;i++){ let x=rr()*n, y=rr()*n; g.strokeStyle=`rgba(170,160,148,${0.12+rr()*0.12})`; g.lineWidth=0.8+rr()*1.5; g.beginPath(); g.moveTo(x,y); for(let k=0;k<40;k++){ x+=(rr()-0.3)*14; y+=(rr()-0.5)*14; g.lineTo(x,y); } g.stroke(); }
+    setM(M.tile,colorTex(c,metres),normalTex(H,n,2,metres),{roughness:.28}); }
+  // calacatta marble (kitchen, laundry): white with grey-gold veins
+  { const n=TS, rr=rng(331), metres=1.6, c=canvasN(n), g=c.getContext('2d'); g.fillStyle='#f3f1ec'; g.fillRect(0,0,n,n);
+    let N=new Float32Array(n*n); for(let i=0;i<n*n;i++) N[i]=rr(); N=blurH(N,n,20); const id0=g.getImageData(0,0,n,n), d0=id0.data; for(let i=0;i<n*n;i++){ const f=(N[i]-0.5)*26; d0[i*4]+=f; d0[i*4+1]+=f; d0[i*4+2]+=f; } g.putImageData(id0,0,0);
+    for(let i=0;i<9;i++){ let x=rr()*n, y=0; const main=i<3; g.lineCap='round';
+      const pts=[[x,y]]; let dx=0; while(y<n){ dx=dx*0.8+(rr()-0.5)*(main?6:4); x+=dx; y+=5+rr()*4; pts.push([x,y]); }
+      for(const [w,col] of main?[[9,'rgba(160,150,140,.10)'],[4,'rgba(140,125,105,.30)'],[1.6,'rgba(110,98,85,.55)']]:[[3,'rgba(150,140,130,.14)'],[1,'rgba(120,110,100,.35)']]){ g.strokeStyle=col; g.lineWidth=w; g.beginPath(); pts.forEach((p,k)=>k?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])); g.stroke(); }
+      if(main) for(let b=0;b<4;b++){ const p=pts[(rr()*pts.length)|0]; let bx=p[0], by=p[1], bd=0; g.strokeStyle='rgba(130,118,100,.25)'; g.lineWidth=0.8; g.beginPath(); g.moveTo(bx,by); for(let q=0;q<30;q++){ bd=bd*0.8+(rr()-0.3)*3; bx+=2+bd; by+=(rr()-0.5)*3; g.lineTo(bx,by); } g.stroke(); } }
+    { let H=hFromCanvas(c,n); H=blurH(H,n,1); const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const v=H[i]*255; d[i*4]=d[i*4]*0.5+v*0.5+1; d[i*4+1]=d[i*4+1]*0.5+v*0.5; d[i*4+2]=d[i*4+2]*0.5+v*0.5-2; } g.putImageData(id,0,0); }
+    setM(M.marble,colorTex(c,metres),null,{roughness:.16}); }
+  // bathroom limestone (60x120 slabs): warm cloudy beige with soft horizontal banding
+  for(const [key,tone,seed] of [['bath',[226,219,206],341],['bathGrey',[205,200,191],343]]){ const n=TS, rr=rng(seed), metres=2.4, c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data;
+    let N=new Float32Array(n*n); for(let i=0;i<n*n;i++) N[i]=rr(); N=blurH(N,n,10); let F=new Float32Array(n*n); for(let i=0;i<n*n;i++) F[i]=rr(); F=blurH(F,n,1);
+    const H=new Float32Array(n*n).fill(0.6), jw=Math.max(1,Math.round(0.002*n/metres)), TW=n/4, TH=n/2;
+    for(let y=0;y<n;y++){ const band=Math.sin(y*0.045+Math.sin(y*0.011)*3)*6; for(let x=0;x<n;x++){ const i=y*n+x, t=((x/TW)|0)+((y/TH)|0)*4, sh=((hsh(t,1,seed)-0.5)*10);
+      let v=(N[i]-0.5)*80+band*1.4+(F[i]-0.5)*14+sh; const joint=(x%TW)<jw||(y%TH)<jw; if(joint){ v=-28; H[i]=0.25; } else if(F[i]>0.82){ v-=10; H[i]=0.5; }
+      d[i*4]=tone[0]+v; d[i*4+1]=tone[1]+v; d[i*4+2]=tone[2]+v*0.9; d[i*4+3]=255; } }
+    g.putImageData(im,0,0); setM(M[key],colorTex(c,metres),normalTex(H,n,2,metres),{roughness:key==='bath'?.4:.6}); }
+  // interior plaster + ceilings: fine sand texture
+  setM(M.plaster,PL.map,PL.normalMap,{roughness:.92}); M.plaster.normalScale.set(0.5,0.5); M.plaster.color.set(0xf7f5f0);
+  setM(M.ceiling,PL.map,PL.normalMap,{roughness:.95}); M.ceiling.normalScale.set(0.3,0.3);
+  setM(M.lacquer,PL.map,null,{roughness:.38}); M.lacquer.color.set(0xf4f1eb);
+  // abstract canvas for the living-room wall (mapped once over 1.1 x 1.3 m)
+  { const W=440, Hh=520, c=document.createElement('canvas'); c.width=W; c.height=Hh; const g=c.getContext('2d'), rr=rng(515);
+    g.fillStyle='#ece5d8'; g.fillRect(0,0,W,Hh); for(let i=0;i<900;i++){ g.fillStyle=`rgba(${190+rr()*50|0},${175+rr()*45|0},${150+rr()*40|0},${rr()*0.08})`; g.fillRect(rr()*W,rr()*Hh,6+rr()*30,2+rr()*6); }
+    const gr=g.createRadialGradient(W*0.62,Hh*0.62,10,W*0.62,Hh*0.62,W*0.5); gr.addColorStop(0,'rgba(196,160,110,.55)'); gr.addColorStop(1,'rgba(196,160,110,0)'); g.fillStyle=gr; g.fillRect(0,0,W,Hh);
+    g.strokeStyle='rgba(55,48,42,.85)'; g.lineCap='round'; for(let k=0;k<5;k++){ g.lineWidth=16-k*2.5; g.beginPath(); g.arc(W*0.45+k*1.5,Hh*0.95,W*0.38+k*3,Math.PI*1.08,Math.PI*1.62); g.stroke(); }
+    g.fillStyle='rgba(120,92,62,.6)'; g.fillRect(W*0.7,Hh*0.18,W*0.08,Hh*0.5);
+    const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=ANI; t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.repeat.set(1/1.1,1/1.3); t.offset.set(-8.8/1.1,-1.15/1.3);
+    mat('canvasArt',{map:t, normalMap:PL.normalMap, roughness:.9}); }
+  // wool loop-pile rug
+  { const n=512, c=canvasN(n), g=c.getContext('2d'), H=new Float32Array(n*n); g.fillStyle='#e2d6c3'; g.fillRect(0,0,n,n);
+    for(let y=0;y<n;y++) for(let x=0;x<n;x++){ const u=x/n*96, v=y/n*96; H[y*n+x]=0.5+0.35*Math.sin(u*Math.PI*2)*Math.sin(v*Math.PI*2)+(hsh(x,y,61)-0.5)*0.3; }
+    const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const y=(i/n)|0, band=Math.sin(y/n*Math.PI*12)*4, f=(H[i]-0.5)*18+band; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f*0.9; } g.putImageData(id,0,0);
+    setM(M.rugWhite,colorTex(c,0.8),normalTex(H,n,3,0.8),{roughness:1}); }
+  // woven fabric normal for upholstery, bedding, rugs
+  { const n=256, H=new Float32Array(n*n); for(let y=0;y<n;y++) for(let x=0;x<n;x++){ const u=x/n*48, v=y/n*48; const wx=Math.sin(u*Math.PI*2)*(((v|0)%2)?1:-1), wy=Math.sin(v*Math.PI*2)*(((u|0)%2)?1:-1); H[y*n+x]=0.5+0.25*wx+0.25*wy+(hsh(x,y,51)-0.5)*0.25; }
+    const fn=normalTex(H,n,1.4,0.25);
+    for(const k of ['fabWhite','fabCream','fabLinen','fabGrey','fabMustard','fabOlive','fabSage']){ M[k].normalMap=fn; M[k].normalScale=new THREE.Vector2(0.7,0.7); M[k].roughness=0.95; M[k].needsUpdate=true; } }
+  { // river pebbles for the courtyard bed
+    const n=TS, rr=rng(31), c=canvasN(n), g=c.getContext('2d'), h=canvasN(n), hg=h.getContext('2d'), k=n/1.0;
+    g.fillStyle='#b9b0a1'; g.fillRect(0,0,n,n); hg.fillStyle='#000'; hg.fillRect(0,0,n,n);
+    const cols=['#e7e1d6','#d8cfc1','#cfc6b8','#efebe4','#c4baa9','#ddd3c3','#b8ad9c'];
+    for(let i=0;i<n*n/260;i++){ const x=rr()*n, y=rr()*n, rx=(0.008+rr()*0.016)*k, ry=rx*(0.6+rr()*0.35), a=rr()*3.14, col=cols[(rr()*cols.length)|0];
+      wrapDraw(n,x,y,(X,Y)=>{ g.fillStyle=col; g.beginPath(); g.ellipse(X,Y,rx,ry,a,0,7); g.fill(); g.fillStyle='rgba(255,255,255,.18)'; g.beginPath(); g.ellipse(X-rx*0.25,Y-ry*0.3,rx*0.5,ry*0.4,a,0,7); g.fill();
+        const gr=hg.createRadialGradient(X,Y,0,X,Y,rx); gr.addColorStop(0,'#fff'); gr.addColorStop(1,'#222'); hg.fillStyle=gr; hg.beginPath(); hg.ellipse(X,Y,rx,ry,a,0,7); hg.fill(); }); }
+    Object.assign(M.gravel,{map:colorTex(c,1), normalMap:normalTex(blurH(hFromCanvas(h,n),n,1),n,4,1), roughness:.85}); M.gravel.color.set(0xffffff); M.gravel.needsUpdate=true; }
+  const cp=new THREE.MeshPhysicalMaterial({color:0x3b3e44, metalness:0.55, roughness:0.32, clearcoat:1, clearcoatRoughness:0.06}); cp.name='carPaint'; M.carPaint=cp; ALL_MATS.push(cp);
+  if(!IS_TOUCH){ const gl=new THREE.MeshPhysicalMaterial({color:0xf2f7f8, metalness:0, roughness:0.03, transparent:true, opacity:0.06, depthWrite:false, specularIntensity:1, side:THREE.DoubleSide});   /* crisp clear glass (no blurred transmission buffer) */
+    gl.name='glass'; ALL_MATS.splice(ALL_MATS.indexOf(M.glass),1,gl); M.glass=gl; }
+  else { Object.assign(M.glass,{opacity:.22, roughness:.02}); M.glass.color.set(0xcfdde3); }
+  // oak front door: flush planks with vertical grooves every 10 cm (as in the render)
+  { const n=512, c=canvasN(n), g=c.getContext('2d'); g.drawImage((M.oak.map&&M.oak.map.image)||TX.oak.image,0,0,n,n);   /* greige oak, same as the joinery */ const H=new Float32Array(n*n).fill(1);
+    for(let k=0;k<10;k++){ const x=Math.round(k*n/10); g.fillStyle='rgba(70,48,28,.55)'; g.fillRect(x,0,3,n); for(let y=0;y<n;y++) for(let d=0;d<4;d++) H[y*n+((x+d)%n)]=0.2; }
+    mat('oakDoor',{map:colorTex(c,1), normalMap:normalTex(H,n,4,1), roughness:.5}); }
+  // asphalt with aggregate
+  { const n=TS/2|0, r=rng(91), c=canvasN(n), g=c.getContext('2d'), im=g.createImageData(n,n), d=im.data, H=new Float32Array(n*n);
+    for(let i=0;i<n*n;i++){ const a=r(), k=92+a*38+(hsh(i%n>>3,(i/n|0)>>3,4)-0.5)*14; d[i*4]=k; d[i*4+1]=k; d[i*4+2]=k+2; d[i*4+3]=255; H[i]=a; }
+    g.putImageData(im,0,0); Object.assign(M.asphalt,{map:colorTex(c,2), normalMap:normalTex(H,n,1.5,2), roughness:.95}); M.asphalt.color.set(0xffffff); M.asphalt.needsUpdate=true; }
+  // open field around the plot: dry grass at a larger scale
+  { const GR2=texGrass(6); Object.assign(M.field,{map:GR2.map, normalMap:GR2.normalMap}); M.field.color.set(0xd9d2a6); M.field.needsUpdate=true; }
+  console.log('textures', Math.round(performance.now()-T0)+'ms'); }
+
+/* ---------------- geometry collection ---------------- */
+const buckets = new Map();             // "layer|mat" -> [geometries]
+const inst = new Map();                // instanced slats/rods
+const solids = [];                     // collision boxes
+const floors = [];                     // walkable tops
+const stack = [new THREE.Matrix4()];
+const cur = ()=>stack[stack.length-1];
+const FACE = {S:0, E:Math.PI/2, N:Math.PI, W:-Math.PI/2};
+function place(x,y,z,face,fn){ const m=new THREE.Matrix4().makeRotationY(typeof face==='string'?FACE[face]:face); m.setPosition(x,y,z); stack.push(cur().clone().multiply(m)); fn(); stack.pop(); }
+
+function worldUV(geo){
+  const p=geo.attributes.position, nrm=geo.attributes.normal, uv=geo.attributes.uv; if(!uv) return;
+  for(let i=0;i<p.count;i++){ const nx=Math.abs(nrm.getX(i)), ny=Math.abs(nrm.getY(i)), nz=Math.abs(nrm.getZ(i));
+    if(nx>=ny&&nx>=nz) uv.setXY(i,p.getZ(i),p.getY(i)); else if(ny>=nx&&ny>=nz) uv.setXY(i,p.getX(i),p.getZ(i)); else uv.setXY(i,p.getX(i),p.getY(i)); }
+  uv.needsUpdate=true;
+}
+const BX=[];   // debug: world AABBs of axis-aligned boxes, for the coplanar-face check
+function addGeo(geo, m, L, o={}){
+  geo.applyMatrix4(cur());
+  if(o._box){ geo.computeBoundingBox(); const bb=geo.boundingBox; BX.push([m,L,bb.min.x,bb.max.x,bb.min.y,bb.max.y,bb.min.z,bb.max.z]); }
+  if(geo.index) geo = geo.toNonIndexed();
+  if(!o.keepUV) worldUV(geo);
+  const k=L+'|'+m; if(!buckets.has(k)) buckets.set(k,[]); buckets.get(k).push(geo);
+  if(o.solid||o.walk){ geo.computeBoundingBox(); const b=geo.boundingBox;
+    if(o.solid) solids.push({x0:b.min.x,x1:b.max.x,y0:b.min.y,y1:b.max.y,z0:b.min.z,z1:b.max.z});
+    if(o.walk) floors.push({x0:b.min.x,x1:b.max.x,z0:b.min.z,z1:b.max.z,y0:b.min.y,top:b.max.y}); }
+}
+function box(m,L,x0,x1,y0,y1,z0,z1,o={}){
+  if(x1<x0)[x0,x1]=[x1,x0]; if(y1<y0)[y0,y1]=[y1,y0]; if(z1<z0)[z0,z1]=[z1,z0];
+  const w=x1-x0,h=y1-y0,d=z1-z0; if(w<1e-4||h<1e-4||d<1e-4) return;
+  let g;
+  if(o.r){ const r=Math.min(o.r, w/2-1e-3, h/2-1e-3, d/2-1e-3); g = r>0.003? new RoundedBoxGeometry(w,h,d,o.seg||2,r) : new THREE.BoxGeometry(w,h,d); }
+  else g=new THREE.BoxGeometry(w,h,d);
+  g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); addGeo(g,m,L,o.r?o:{...o,_box:true});
+}
+function cyl(m,L,x,z,y0,y1,r,o={}){ const g=new THREE.CylinderGeometry(o.r2??r, r, y1-y0, o.seg||18, 1, !!o.open); g.translate(x,(y0+y1)/2,z); addGeo(g,m,L,o); }
+function sph(m,L,x,y,z,r,sx=1,sy=1,sz=1,o={}){ const g=new THREE.SphereGeometry(r,o.seg||16,o.seg?Math.max(6,o.seg/2|0):12); g.scale(sx,sy,sz); g.translate(x,y,z); addGeo(g,m,L,o); }
+function solid(x0,x1,y0,y1,z0,z1){ solids.push({x0:Math.min(x0,x1),x1:Math.max(x0,x1),y0,y1,z0:Math.min(z0,z1),z1:Math.max(z0,z1)}); }
+function walkable(x0,x1,z0,z1,top,y0=top-0.2){ floors.push({x0,x1,z0,z1,top,y0}); }
+const _m4=new THREE.Matrix4(), _p=new THREE.Vector3(), _q=new THREE.Quaternion(), _s=new THREE.Vector3();
+function instPush(key, m, L, shape, mtx){ if(!inst.has(key)) inst.set(key,{m,L,shape,list:[]}); inst.get(key).list.push(mtx); }
+function slat(m,L,x0,x1,y0,y1,z0,z1){ const mt=new THREE.Matrix4().compose(_p.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2),_q.identity(),_s.set(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0))); instPush(L+'|'+m+'|b',m,L,'box',cur().clone().multiply(mt)); }
+const _Y=new THREE.Vector3(0,1,0);
+function fin(m,L,cx,cz,y0,y1,sx,sz,ang){ const mt=new THREE.Matrix4().compose(_p.set(cx,(y0+y1)/2,cz),new THREE.Quaternion().setFromAxisAngle(_Y,ang),_s.set(sx,y1-y0,sz)); instPush(L+'|'+m+'|b',m,L,'box',cur().clone().multiply(mt)); }
+function rod(m,L,x,z,y0,y1,r=0.007){ if(y1-y0<0.01) return; const mt=new THREE.Matrix4().compose(_p.set(x,(y0+y1)/2,z),_q.identity(),_s.set(r*2,y1-y0,r*2)); instPush(L+'|'+m+'|c',m,L,'cyl',cur().clone().multiply(mt)); }
+
+/* walls: axis 'x' runs along x with thickness in z (t0..t1); axis 'z' runs along z */
+function wall(m,L,axis,t0,t1,a0,a1,y0,y1,ops=[],o={}){
+  const B=(a,b,ya,yb)=> axis==='x'? box(m,L,a,b,ya,yb,t0,t1,{solid:o.solid!==false}) : box(m,L,t0,t1,ya,yb,a,b,{solid:o.solid!==false});
+  ops=[...ops].filter(p=>p.b>a0&&p.a<a1).sort((p,q)=>p.a-q.a);
+  let c=a0;
+  for(const op of ops){
+    const a=Math.max(op.a,a0), b=Math.min(op.b,a1);
+    if(a>c+1e-4) B(c,a,y0,y1);
+    const s=Math.max(op.s??y0,y0), h=Math.min(op.h??y1,y1);
+    if(s>y0+1e-4) B(a,b,y0,s);
+    if(h<y1-1e-4) B(a,b,h,y1);
+    if(!o.noFill) fillOpening(axis,t0,t1,{...op,a,b},s,h,L,o);
+    c=b;
+  }
+  if(a1>c+1e-4) B(c,a1,y0,y1);
+}
+function along(axis,a,b,t0,t1,y0,y1,m,L,o){ if(axis==='x') box(m,L,a,b,y0,y1,t0,t1,o); else box(m,L,t0,t1,y0,y1,a,b,o); }
+function fillOpening(axis,t0,t1,op,s,h,L,o){
+  const type=op.type||'win'; const tm=(t0+t1)/2; const fm=op.frame||'frame';
+  const ext=o.ext||0;  // +1 exterior on t1 side, -1 on t0 side
+  if(type==='win'||type==='fix'||type==='slide'){
+    const gm=op.glass||'glass';
+    const fw=0.045;
+    along(axis,op.a,op.a+fw,tm-0.04,tm+0.04,s,h,fm,L); along(axis,op.b-fw,op.b,tm-0.04,tm+0.04,s,h,fm,L);
+    along(axis,op.a,op.b,tm-0.04,tm+0.04,s,s+fw,fm,L); along(axis,op.a,op.b,tm-0.04,tm+0.04,h-fw,h,fm,L);
+    if(type==='slide'){
+      const mid=(op.a+op.b)/2;
+      along(axis,op.a+fw,mid+0.03,tm-0.03,tm-0.01,s+fw,h-fw,gm,L,{solid:true});
+      along(axis,op.a+fw,mid+0.03,tm+0.01,tm+0.03,s+fw,h-fw,gm,L);
+      along(axis,mid,mid+0.05,tm-0.035,tm+0.035,s,h,fm,L); along(axis,op.a+0.02,op.a+0.07,tm+0.0,tm+0.04,s,h,fm,L);
+    } else {
+      along(axis,op.a+fw,op.b-fw,tm-0.01,tm+0.01,s+fw,h-fw,gm,L,{solid:true});
+      const n=Math.max(0,Math.round((op.b-op.a)/(op.mull||1.05))-1);
+      for(let i=1;i<=n;i++){ const x=op.a+(op.b-op.a)*i/(n+1); along(axis,x-0.022,x+0.022,tm-0.035,tm+0.035,s,h,fm,L); }
+    }
+  }
+  if(type==='door'&&op.leaf){
+    const len=Math.min(op.b-op.a-0.04,1.0), side=op.leaf.side||1, hinge=op.leaf.hinge||'a';
+    const ha= hinge==='a'? op.a+0.05 : op.b-0.05; const face= side>0? t1 : t0;
+    // leaf rotated about its hinge; open: 0 = closed, 1 = wide open (90 degrees)
+    const ang=(op.leaf.open??1)*Math.PI/2, dirA= hinge==='a'?1:-1, lw=Math.min(op.b-op.a-0.08,1.0);
+    let dx,dz,px,pz;
+    if(axis==='x'){ dx=dirA*Math.cos(ang); dz=side*Math.sin(ang); px=ha; pz=face; }
+    else { dx=side*Math.sin(ang); dz=dirA*Math.cos(ang); px=face; pz=ha; }
+    const lg=new THREE.BoxGeometry(lw,h-0.01-s,0.04); lg.translate(lw/2,(h-0.01+s)/2,0); lg.rotateY(Math.atan2(-dz,dx)); lg.translate(px,0,pz);
+    addGeo(lg,op.leaf.m||'lacquer',L);
+  }
+  if(op.casing){ const cm=op.casing, e=0;   /* door/window lining flush with the wall faces */
+    along(axis,op.a,op.a+0.035,t0-e,t1+e,s,h,cm,L); along(axis,op.b-0.035,op.b,t0-e,t1+e,s,h,cm,L); along(axis,op.a,op.b,t0-e,t1+e,h-0.035,h,cm,L); }
+  if(op.lv&&ext){ // exterior horizontal louvres (white blinds)
+    const tt= ext>0? [t1-0.07,t1-0.015] : [t0+0.015,t0+0.07]; const bottom=h-(h-s)*op.lv;
+    for(let y=h-0.06;y>bottom;y-=0.105){ if(axis==='x') slat('white',L,op.a+0.02,op.b-0.02,y-0.012,y+0.012,tt[0],tt[1]); else slat('white',L,tt[0],tt[1],y-0.012,y+0.012,op.a+0.02,op.b-0.02); }
+  }
+}
+/* thin finish layers on the inside faces of a room; gaps: {n,s,w,e:[[a,b,sill,head]]} */
+function finish(m,L,x0,x1,z0,z1,y0,y1,gaps={},t=0.012){
+  const G=k=>(gaps[k]||[]).map(g=>({a:g[0],b:g[1],s:g[2]??y0,h:g[3]??y1}));
+  const O={solid:false,noFill:true};
+  wall(m,L,'x',z0,z0+t,x0,x1,y0,y1,G('n'),O); wall(m,L,'x',z1-t,z1,x0,x1,y0,y1,G('s'),O);
+  wall(m,L,'z',x0,x0+t,z0,z1,y0,y1,G('w'),O); wall(m,L,'z',x1-t,x1,z0,z1,y0,y1,G('e'),O);
+}
+
+/* ===================================================================
+   FURNITURE LIBRARY  (local: front faces +z, floor y=0, centred on x)
+   =================================================================== */
+const F = {
+  sofa(L,w,d,m,o={}){ const bh=o.back??0.78;
+    box(m,L,-w/2,w/2,0.05,0.42,-d/2,d/2,{r:.06,solid:true}); box('black',L,-w/2+.05,w/2-.05,0,0.05,-d/2+.05,d/2-.05);
+    box(m,L,-w/2,w/2,0.42,bh,-d/2,-d/2+0.24,{r:.08});
+    if(o.arms!==false){ box(m,L,-w/2,-w/2+0.2,0.42,0.62,-d/2,d/2,{r:.08}); box(m,L,w/2-0.2,w/2,0.42,0.62,-d/2,d/2,{r:.08}); }
+    const n=Math.max(1,Math.round(w/0.85)); const cw=(w-(o.arms===false?0.04:0.42))/n;
+    for(let i=0;i<n;i++){ const x=-w/2+(o.arms===false?0.02:0.21)+cw*i; box(m,L,x+0.01,x+cw-0.01,0.42,0.52,-d/2+0.24,d/2-0.02,{r:.05}); }
+    for(let i=0;i<(o.pillows??2);i++){ const x=-w/2+0.45+i*(w-0.9)/Math.max(1,(o.pillows??2)-1); box(o.pm||'fabWhite',L,x-0.22,x+0.22,0.5,0.92,-d/2+0.2,-d/2+0.34,{r:.07}); }
+  },
+  modular(L,n,m){ // mustard tufted modules (family room)
+    for(let i=0;i<n;i++){ const x=-n*0.37+i*0.74; box(m,L,x+0.01,x+0.73,0,0.4,-0.45,0.45,{r:.1,solid:true}); box(m,L,x+0.03,x+0.71,0.4,0.78,-0.45,-0.22,{r:.1});
+      for(let k=0;k<3;k++) box(m,L,x+0.05+k*0.22,x+0.05+k*0.22+0.2,0.38,0.44,-0.2,0.42,{r:.05}); }
+  },
+  lounge(L,seat,frame){ // oak framed armchair with cushions
+    box(frame,L,-0.38,-0.33,0,0.62,-0.38,0.38,{solid:true}); box(frame,L,0.33,0.38,0,0.62,-0.38,0.38);
+    box(frame,L,-0.33,0.33,0.22,0.27,-0.36,0.36);
+    box(seat,L,-0.33,0.33,0.27,0.45,-0.33,0.36,{r:.06}); box(seat,L,-0.33,0.33,0.4,0.85,-0.38,-0.16,{r:.08});
+    box(seat,L,-0.2,0.2,0.45,0.75,-0.2,-0.05,{r:.08});
+  },
+  tubChair(L,m){ cyl(m,L,0,0,0,0.42,0.42,{seg:24,solid:true}); const g=new THREE.TorusGeometry(0.36,0.1,10,24,Math.PI*1.25); g.rotateX(Math.PI/2); g.rotateY(Math.PI*0.125+Math.PI); g.translate(0,0.55,0); addGeo(g,m,L); },
+  chair(L,seat,leg){ for(const [x,z] of [[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]]) cyl(leg,L,x,z,0,0.45,0.017,{seg:8}); box(seat,L,-0.23,0.23,0.43,0.47,-0.22,0.23,{r:.015}); box(seat,L,-0.23,0.23,0.47,0.88,-0.25,-0.21,{r:.015}); },
+  elbow(L,seat,leg){ for(const [x,z] of [[-.2,-.18],[.2,-.18],[-.2,.2],[.2,.2]]) cyl(leg,L,x,z,0,0.44,0.018,{seg:8}); cyl(seat,L,0,0.02,0.42,0.47,0.24,{seg:20}); const g=new THREE.TorusGeometry(0.25,0.035,8,20,Math.PI); g.rotateX(-Math.PI/2); g.rotateY(Math.PI); g.translate(0,0.68,0.0); addGeo(g,leg,L); box(leg,L,-0.24,-0.21,0.45,0.68,-0.02,0.02); box(leg,L,0.21,0.24,0.45,0.68,-0.02,0.02); box(leg,L,-0.02,0.02,0.45,0.9,-0.27,-0.23); },
+  stool(L,m){ for(const [x,z] of [[-.15,-.15],[.15,-.15],[-.15,.15],[.15,.15]]) cyl(m,L,x*1,z*1,0,0.66,0.017,{seg:8,r2:0.014}); box(m,L,-0.2,0.2,0.66,0.7,-0.17,0.17,{r:.02}); box(m,L,-0.17,0.17,0.3,0.32,-0.14,0.14); },
+  wishbone(L){ for(const [x,z] of [[-.22,.2],[.22,.2]]) cyl('oak',L,x,z,0,0.45,0.02,{seg:8}); box('oak',L,-0.24,0.24,0.43,0.46,-0.2,0.22); box('fabCream',L,-0.22,0.22,0.44,0.47,-0.18,0.2); const g=new THREE.TorusGeometry(0.26,0.022,8,20,Math.PI); g.rotateX(-Math.PI/2); g.rotateY(Math.PI); g.translate(0,0.72,0.02); addGeo(g,'oak',L); box('oak',L,-0.27,-0.24,0,0.72,-0.2,-0.17); box('oak',L,0.24,0.27,0,0.72,-0.2,-0.17); },
+  table(L,w,d,h,top,leg,o={}){ box(top,L,-w/2,w/2,h-0.05,h,-d/2,d/2,{solid:true,r:.01});
+    if(o.trestle){ for(const x of [-w/2+0.3,w/2-0.3]) box(leg,L,x-0.05,x+0.05,0,h-0.05,-d/2+0.12,d/2-0.12); box(leg,L,-w/2+0.3,w/2-0.3,0.25,0.33,-0.04,0.04); }
+    else if(o.block){ box(leg,L,-w/2+o.block,w/2-o.block,0,h-0.05,-d/2+o.block,d/2-o.block); }
+    else for(const [x,z] of [[-w/2+.06,-d/2+.06],[w/2-.06,-d/2+.06],[-w/2+.06,d/2-.06],[w/2-.06,d/2-.06]]) box(leg,L,x-0.03,x+0.03,0,h-0.05,z-0.03,z+0.03); },
+  bed(L,w,l,base,o={}){ box(base,L,-w/2,w/2,0.0,0.32,-l/2,l/2,{r:.05,solid:true}); box('fabWhite',L,-w/2+0.04,w/2-0.04,0.32,0.55,-l/2+0.03,l/2-0.03,{r:.06});
+    box(o.duvet||'fabWhite',L,-w/2+0.01,w/2-0.01,0.5,0.6,-l/2+0.55,l/2+0.01,{r:.05});
+    if(o.throw) box(o.throw,L,-w/2-0.01,w/2+0.01,0.59,0.63,l/2-0.6,l/2-0.15,{r:.02});
+    const np=w>1.2?2:1; for(let i=0;i<np;i++){ const x= np===1?0:(i?w/4:-w/4); box('fabWhite',L,x-w/(np*2)+0.06,x+w/(np*2)-0.06,0.55,0.75,-l/2+0.08,-l/2+0.42,{r:.07}); }
+    if(w>1.2) box(o.cushion||'fabLinen',L,-0.22,0.22,0.6,0.82,-l/2+0.36,-l/2+0.48,{r:.05}); },
+  toilet(L){ box('porcelain',L,-0.18,0.18,0.28,0.44,-0.02,0.5,{r:.12,solid:true}); box('porcelain',L,-0.19,0.19,0.43,0.46,0.02,0.52,{r:.06}); box('black',L,-0.12,0.12,1.0,1.15,-0.02,-0.005); },
+  basin(L,w,d,m){ box(m,L,-w/2,w/2,0,0.14,-d/2,d/2,{r:.02}); box('porcelain',L,-w/2+0.05,w/2-0.05,0.13,0.141,-d/2+0.05,d/2-0.06); },
+  tap(L,m,o={}){ box(m,L,-0.025,0.025,0,0.05,0,0.03); box(m,L,-0.012,0.012,0.012,0.032,0,0.2); if(o.handle!==false){ cyl(m,L,0.11,0.01,0.0,0.05,0.022,{seg:12}); } },
+  pendantOval(L,y,top=GC,sx=0.36,sy=0.14){ rod('black',L,0,0,y,top,0.003); sph('lamp',L,0,y,0,1,sx,sy,sx*0.6); },
+  cone(L,y,top=UC){ rod('black',L,0,0,y+0.25,top,0.003); cyl('lamp',L,0,0,y,y+0.25,0.16,{r2:0.02,seg:20}); },
+  sconce(L,m){ const g=new THREE.CylinderGeometry(0.12,0.12,0.03,24); g.rotateX(Math.PI/2); g.translate(0,0,0.015); addGeo(g,m,L); },
+  plant(L,h=0.6,pot='ceramic'){ cyl(pot,L,0,0,0,0.3,0.16,{r2:0.18,seg:16}); sph('plant',L,0,0.3+h*0.45,0,0.28,1,h*1.6,1); sph('plantDark',L,0.1,0.3+h*0.3,0.05,0.2,1,h*1.2,1); },
+  rug(L,w,d,m){ box(m,L,-w/2,w/2,0.0,0.012,-d/2,d/2); },
+  wardrobe(L,w,h,d,m,doorW=0.6){ box(m,L,-w/2,w/2,0,h,-d/2,d/2-0.012,{solid:true}); const n=Math.max(1,Math.round(w/doorW));
+    for(let i=0;i<n;i++){ const x0=-w/2+w*i/n, x1=-w/2+w*(i+1)/n; box(m,L,x0+0.003,x1-0.003,0.003,h-0.003,d/2-0.012,d/2); } },
+  fan(L){ /* added as separate animated object */ },
+};
+const fans=[]; const fanGroup = new THREE.Group(); scene.add(fanGroup);
+function addFan(L,x,z,yCeil){
+  box('white',L,x-0.05,x+0.05,yCeil-0.25,yCeil,z-0.05,z+0.05); cyl('white',L,x,z,yCeil-0.38,yCeil-0.25,0.09);
+  const g=[]; for(let i=0;i<4;i++){ const b=new THREE.BoxGeometry(0.62,0.012,0.11); b.translate(0.42,0,0); b.rotateY(i*Math.PI/2); g.push(b.toNonIndexed()); }
+  const mesh=new THREE.Mesh(mergeGeometries(g), M.white); mesh.position.set(x,yCeil-0.33,z); mesh.castShadow=false; mesh.receiveShadow=true;
+  mesh.userData.L=L; fans.push(mesh); fanGroup.add(mesh);
+}
+
+/* ---------------- vegetation: instanced leaf clusters with per-leaf colour ---------------- */
+const FOL=[], LEAF=[];   // [x,y,z,scale,[h,s,l],rotX,rotY,stretchY]
+function branch(x0,y0,z0,x1,y1,z1,r0,r1,m='trunk'){ const v=new THREE.Vector3(x1-x0,y1-y0,z1-z0), len=v.length(); const g=new THREE.CylinderGeometry(r1,r0,len,r0>0.05?16:9); g.translate(0,len/2,0);
+  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize())); g.translate(x0,y0,z0); addGeo(g,m,'s'); }
+function lavender(x,z,r){ r=r||rng((x*31+z*17)|0); FOL.push([x,0.02,z,0.2,[0.26,0.22,0.33],0,0,0.65]);
+  for(let i=0;i<12;i++){ const a=r()*6.28, d=r()*0.17; FOL.push([x+Math.cos(a)*d,0.18+r()*0.16,z+Math.sin(a)*d,0.04,[0.73+r()*0.04,0.32+r()*0.2,0.48+r()*0.14],0,0,2.4]); } }
+const BLADE=[];   // [x,y,z,height,width,lean,rotY,[h,s,l]]
+function grassTuft(x,z,r,y0=-0.02,hgt=0.3,col=null){ for(let i=0;i<18;i++){ const a=r()*6.28, d=r()*0.07; BLADE.push([x+Math.cos(a)*d,y0,z+Math.sin(a)*d,hgt*(0.6+r()*0.6),0.012+r()*0.008,0.25+r()*0.6,a,col||[0.17+r()*0.07,0.32+r()*0.25,0.34+r()*0.18]]); } }
+function shrub(x,z,s,r){ for(let i=0;i<9;i++){ const a=r()*6.28, d=r()*0.18*s; FOL.push([x+Math.cos(a)*d,(0.12+r()*0.22)*s,z+Math.sin(a)*d,(0.12+r()*0.08)*s,[0.25+r()*0.05,0.35+r()*0.2,0.26+r()*0.14],r()*3,r()*3,0.85]); } }
+function cactus(x,z,h){ const mk=(rad,len)=>{ const g=new THREE.CylinderGeometry(rad,rad*1.06,len,24,6); const p=g.attributes.position;
+    for(let i=0;i<p.count;i++){ const px=p.getX(i), pz=p.getZ(i), rr=Math.hypot(px,pz); if(rr>1e-4){ const k=1+0.13*Math.cos(Math.atan2(pz,px)*9); p.setX(i,px*k); p.setZ(i,pz*k); } }
+    g.computeVertexNormals(); return g; };
+  const b=mk(0.1,h); b.translate(x,-0.15+h/2,z); addGeo(b,'cactus','s',{keepUV:true}); sph('cactus','s',x,-0.15+h,z,0.1,1,0.75,1);
+  const arm=mk(0.065,h*0.32); arm.translate(x+0.2,-0.15+h*0.62,z); addGeo(arm,'cactus','s',{keepUV:true}); sph('cactus','s',x+0.2,-0.15+h*0.78,z,0.065,1,0.8,1);
+  branch(x+0.05,-0.15+h*0.45,z,x+0.2,-0.15+h*0.47,z,0.06,0.06,'cactus'); }
+/* ===================================================================
+   SITE
+   =================================================================== */
+const PX0=-3.0, PX1=17.5, PZ0=-5.0, PZ1=19.1;   // plot: 4 m of lawn beyond the pergola line (z 15.10)   // plot
+box('field','s',-150,150,-0.5,-0.37,-150,150);
+/* recessed downlights (ground floor living, dining, kitchen, hall; upper bedrooms) */
+for(const [x0,x1,z0,z1,y,st] of [[1.0,4.4,8.0,11.2,GC,1.1],[1.2,3.8,4.6,6.9,GC,1.2],[10.4,13.2,7.2,11.0,GC,1.25],[5.8,8.8,1.0,4.2,UC,1.4],[0.9,4.4,9.2,11.2,UC,1.6],[5.9,7.9,0.9,3.2,UC,1.3],[8.9,10.8,0.9,3.2,UC,1.3],[11.8,13.7,0.9,3.2,UC,1.3]])
+  for(let x=x0;x<=x1+1e-6;x+=st) for(let z=z0;z<=z1+1e-6;z+=st){ const LL=y===GC?'u':'r'; cyl('lamp',LL,x,z,y-0.012,y-0.002,0.045,{seg:16}); cyl('frame',LL,x,z,y-0.008,y-0.001,0.06,{seg:16}); }
+/* bollard lights along the entrance path and in the garden */
+for(const [x,z] of [[5.75,-3.6],[7.43,-2.0],[5.75,-0.6],[0.5,13.6],[9.0,13.6],[14.0,13.6]]){ cyl('black','s',x,z,GRADE,GRADE+0.55,0.05,{seg:12}); cyl('lamp','s',x,z,GRADE+0.42,GRADE+0.52,0.051,{seg:12}); }
+/* in-ground uplights under the fins */
+for(let x=8.3;x<14;x+=0.9) cyl('lamp','s',x,-0.1,-0.141,-0.13,0.05,{seg:12});
+box('grass','s',PX0,PX1,-0.45,GRADE,PZ0,PZ1,{walk:true});
+box('asphalt','s',-60,80,-0.45,-0.34,PZ0-10,PZ0-1.6);
+box('cobble','s',-60,80,-0.45,-0.2,PZ0-1.6,PZ0); box('concrete','s',-60,80,-0.45,-0.18,PZ0-1.75,PZ0-1.6);   // cobbled sidewalk + curb
+// boundary walls (white, as in the renders) + front gate gap
+const BW=1.35;
+box('ext','s',PX0-0.2,PX0,GRADE,BW,PZ0,PZ1+0.2,{solid:true});
+box('ext','s',PX1,PX1+0.2,GRADE,GRADE+1.70,PZ0,PZ1+0.2,{solid:true});   // shared wall H=1.70
+// south (garden) boundary: low wall with a white railing on top
+box('ext','s',PX0-0.2,PX1+0.2,GRADE,GRADE+0.60,PZ1,PZ1+0.2,{solid:true});
+box('white','s',PX0-0.2,PX1+0.2,GRADE+1.31,GRADE+1.35,PZ1+0.07,PZ1+0.13);
+for(let x=PX0-0.12;x<PX1+0.15;x+=0.11) slat('white','s',x,x+0.025,GRADE+0.60,GRADE+1.31,PZ1+0.085,PZ1+0.115);
+for(let x=PX0-0.2;x<PX1+0.2;x+=2.5) box('white','s',x,x+0.05,GRADE+0.60,GRADE+1.35,PZ1+0.075,PZ1+0.125);
+solid(PX0-0.2,PX1+0.2,GRADE,GRADE+1.35,PZ1,PZ1+0.2);
+// ---- front development (per site plan): entrance path, garden with stepping stones, 2 open parking spaces
+// front wall H=1.36: stone cladding outside, plaster inside; white metal gates; stone pillars
+const FW1=GRADE+1.36, PIL=GRADE+1.50;
+function frontWall(x0,x1){ box('ext','s',x0,x1,GRADE,FW1,PZ0-0.17,PZ0,{solid:true}); box('stone','s',x0,x1,GRADE,FW1,PZ0-0.22,PZ0-0.17); box('stone','s',x0,x1,FW1,FW1+0.04,PZ0-0.22,PZ0); }
+function pillar(x0,x1){ box('stone','s',x0,x1,GRADE,PIL,PZ0-0.26,PZ0+0.04,{solid:true}); }
+function gate(x0,x1,h){ const y1=GRADE+h; box('white','s',x0,x1,GRADE+0.08,GRADE+0.12,PZ0-0.13,PZ0-0.09); box('white','s',x0,x1,y1-0.05,y1,PZ0-0.13,PZ0-0.09);
+  for(let x=x0+0.06;x<x1-0.03;x+=0.11) slat('white','s',x,x+0.025,GRADE+0.12,y1-0.05,PZ0-0.125,PZ0-0.095); solid(x0,x1,GRADE,y1,PZ0-0.15,PZ0-0.07); }
+frontWall(PX0-0.2,6.10);                 // west part, in front of the family room garden
+gate(6.10,7.42,1.30);                    // pedestrian gate (≈1.35) on the entrance path
+pillar(7.42,7.82);
+frontWall(7.82,12.20);                   // in front of the garden
+pillar(12.20,12.55);
+gate(12.55,17.30,1.30);                  // sliding car gate, 2 parking spaces
+pillar(17.30,PX1+0.2);
+// entrance path (2.07 wide) from the gate to the front door
+box('paving','s',5.56,7.62,GRADE,-0.13,PZ0,0.1,{walk:true});
+box('paving','s',-2.8,0.1,GRADE,-0.13,PZ0+0.2,0.0,{walk:true}); // side path
+// parking: stone paving 2 x 2.50, open (no roof), markers between the spaces
+box('paving','s',12.36,PX1,GRADE,-0.13,PZ0,0.08,{walk:true});
+box('white','s',14.86,14.92,-0.13,-0.125,PZ0+0.3,-0.4);
+// a parked car on the east space
+place(16.15,-0.13,-2.55,'S',()=>{ box('carPaint','s',-0.88,0.88,0.28,0.82,-2.25,2.25,{r:.18,solid:true});
+  box('glassTint','s',-0.78,0.78,0.82,1.28,-1.05,0.95,{r:.12}); box('carPaint','s',-0.76,0.76,1.26,1.32,-0.9,0.8,{r:.05});
+  for(const [x,z] of [[-0.82,-1.45],[0.82,-1.45],[-0.82,1.45],[0.82,1.45]]) box('black','s',x-0.1,x+0.1,0,0.62,z-0.31,z+0.31,{r:.12});
+  box('lamp','s',-0.75,-0.45,0.62,0.72,2.24,2.26); box('lamp','s',0.45,0.75,0.62,0.72,2.24,2.26); });
+// garden between the path and the parking: stepping stones, cacti and low planting
+for(let i=0;i<6;i++){ const x=7.95+i*0.72, z=-0.85-Math.sin(i*0.9)*0.25; sph('paving','s',x,-0.13,z,0.32,1,0.06,0.72); }
+for(const [x,z,h] of [[8.4,-0.35,1.7],[9.6,-0.4,1.4],[10.8,-0.35,1.8]]) cactus(x,z,h);
+{ const rr=rng(77); for(let i=0;i<46;i++){ const x=7.75+rr()*4.45, z=PZ0+0.35+rr()*4.2; if(z>-1.3&&z<-0.45) continue; const k=rr(); if(k<0.45) grassTuft(x,z,rr,GRADE,0.38); else if(k<0.75) shrub(x,z,0.9+rr()*0.5,rr); else lavender(x,z,rr); } }
+{ const rr=rng(79); for(let i=0;i<10;i++) grassTuft(7.7+rr()*4.5,-0.2-rr()*0.25,rr,GRADE,0.38); }
+for(let x=-2.4;x<5.3;x+=0.45) lavender(x,PZ0+0.45);   // lavender along the inside of the west wall
+// hedges along the back and sides
+box('hedge','s',PX0,PX0+0.7,GRADE,1.1,PZ0+0.5,PZ1,{r:.25,solid:true});
+box('hedge','s',PX1-0.7,PX1,GRADE,1.1,0.3,PZ1,{r:.25,solid:true});
+// lavender strip in front of kitchen terrace
+for(let x=10;x<14.2;x+=0.32) lavender(x,15.6);
+
+function tree(x,z,s=1,kind='round'){ const r=rng((x*100+z*7)|0), olive=kind==='olive';
+  const th=(olive?1.3:1.9)*s, lean=(r()-0.5)*0.35*s, tx=x+lean, tz=z+lean*0.4, top=GRADE+th;
+  branch(x,GRADE-0.05,z,tx,top,tz,(olive?0.2:0.15)*s,(olive?0.14:0.1)*s);
+  const cy=top+(olive?0.85:1.35)*s, rx=(olive?1.75:1.6)*s, ry=(olive?0.95:1.35)*s;
+  for(let b=0;b<6;b++){ const a=b/6*Math.PI*2+r()*0.6, ex=tx+Math.cos(a)*rx*0.62, ez=tz+Math.sin(a)*rx*0.62, ey=cy+(r()-0.25)*ry*0.7; branch(tx,top-0.15,tz,ex,ey,ez,0.085*s,0.03*s);
+    branch(ex,ey,ez,ex+Math.cos(a+0.8)*0.5*s,ey+0.35*s,ez+Math.sin(a+0.8)*0.5*s,0.03*s,0.012*s); }
+  const N=olive?560:660;
+  for(let i=0;i<N;i++){ const u=r()*2-1, t=r()*Math.PI*2, rad=Math.pow(r(),0.3), sx=Math.sqrt(1-u*u);
+    const px=tx+Math.cos(t)*sx*rx*rad*(0.85+r()*0.3), py=cy+u*ry*rad, pz=tz+Math.sin(t)*sx*rx*rad*(0.85+r()*0.3), lit=u>0.2?0.05:(u<-0.4?-0.05:0);
+    const c= olive? [0.2+r()*0.05, 0.2+r()*0.14, 0.34+r()*0.14+lit] : [0.24+r()*0.06, 0.45+r()*0.25, 0.27+r()*0.15+lit];
+    LEAF.push([px,py,pz,(0.6+r()*0.35)*s,c,r()*6.28,r()*6.28,1]); } }
+{ const rr=rng(123); for(let i=0;i<22;i++){ const side=i%4, t=rr(); let x,z;
+    if(side===2) continue;   /* keep the southern view open */
+    if(side===0){ x=-8-rr()*10; z=-6+t*28; } else if(side===1){ x=23+rr()*10; z=-6+t*28; } else if(side===2){ x=-6+t*26; z=24+rr()*10; } else { x=-10+t*32; z=-20-rr()*8; }
+    tree(x,z,0.9+rr()*0.6, rr()>.5?'olive':'round'); } }
+tree(-1.6,17.0,1.25,'olive'); tree(16.1,17.3,1.1); tree(1.6,-3.2,0.9,'olive'); tree(-1.8,-3.3,1.0); tree(16.3,6.0,1.1,'olive'); tree(-1.9,8.2,0.9,'olive');
+
+/* ===================================================================
+   GROUND FLOOR  (layer g)
+   =================================================================== */
+const L1='g';
+// slabs
+box('concrete',L1,0.08,14.42,-0.32,-0.02,0.08,11.95);
+box('tile',L1,0.08,14.42,-0.02,0,0.08,7.58,{walk:true});
+box('tile',L1,0.08,5.27,-0.02,0,7.58,11.95,{walk:true});
+box('tile',L1,9.27,14.42,-0.02,0,7.58,11.95,{walk:true});
+box('gravel',L1,5.27,9.27,-0.04,-0.012,7.58,11.95,{walk:true});
+// raised oak platform of the family corner (+0.18)
+const PL=0.18;
+box('oakFloor',L1,0.38,3.62,0,PL,0.38,4.10,{walk:true});
+box('oakFloor',L1,3.62,4.52,0,PL,2.92,4.10,{walk:true});
+
+// ---- exterior walls: stone skin + plaster core, height 0..3.30
+const EXT_STONE='stone';
+// top (street) wall, west part with family-room window
+const topOps=[{a:0.95,b:3.25,s:0.95,h:2.40,lv:.45}];
+wall('plaster',L1,'x',0.13,0.38,0.08,5.60,0,GC,topOps,{ext:-1});
+wall(EXT_STONE,L1,'x',0.08,0.13,0.08,5.60,0,GC,topOps,{noFill:true,solid:false});
+// porch recess walls
+wall('plaster',L1,'z',5.42,5.55,0.38,1.95,0,GC); wall('ext',L1,'z',5.55,5.60,0.08,1.95,0,GC,[],{solid:false});   // entrance porch: white
+box('plaster',L1,5.42,5.60,0,GC,0.08,0.38,{solid:true});
+const doorOps=[{a:5.95,b:7.15,s:0,h:2.70,type:'door',leaf:{m:'oakDoor',side:1,hinge:'a',open:0},casing:'oak'}];
+/* long black pull on the front door, outside and inside */
+box('black',L1,7.00,7.03,0.85,1.95,2.04,2.10); box('black',L1,7.00,7.03,0.85,0.88,2.04,2.10); box('black',L1,7.00,7.03,1.92,1.95,2.04,2.10);
+box('black',L1,7.00,7.03,0.85,1.95,2.14,2.20);
+wall('plaster',L1,'x',2.00,2.12,5.60,7.69,0,GC,doorOps);
+wall('ext',L1,'x',1.95,2.00,5.60,7.69,0,GC,doorOps,{noFill:true,solid:false});
+wall('plaster',L1,'z',7.74,7.99,0.38,1.86,0,GC); wall('ext',L1,'z',7.69,7.74,0.08,2.12,0,GC,[],{solid:false}); wall('plaster',L1,'z',7.74,7.99,1.86,2.12,0,GC);
+box('plaster',L1,7.69,7.99,0,GC,0.08,0.38,{solid:true});
+box('lamp',L1,6.4,6.7,3.2,3.28,0.6,0.9);
+// top wall, east part (wood-clad facade)
+const topE=[{a:8.14,b:8.71,s:1.45,h:2.45},{a:9.81,b:10.49,s:1.45,h:2.45}];
+wall('plaster',L1,'x',0.13,0.38,7.99,14.42,0,GC,topE,{ext:-1});
+wall('ext',L1,'x',0.08,0.13,7.69,14.42,0,GC,topE,{noFill:true,solid:false});
+// same deep light-timber fins as the upper east facade
+for(let x=8.12; x<14.05; x+=0.2) fin('slatLight',L1,x,0.0,0,GC,0.09,0.16,0.7);
+box('stone',L1,7.69,7.99,0,GC,-0.12,0.38,{solid:true});   /* stone column on the entrance side of the fin niche */      // fins turned ~40°, in a niche under the overhang
+box('stone',L1,14.12,14.42,0,GC,-0.12,0.38,{solid:true});   /* stone return closing the fin niche at the corner */
+solid(7.69,14.42,0,GC,-0.08,0.08);
+// west wall with dining window
+const westOps=[{a:4.60,b:6.75,s:0,h:GC,type:'fix',mull:99}];   /* dining: fixed glass, floor to ceiling */
+wall('plaster',L1,'z',0.13,0.38,0.08,11.95,0,GC,westOps,{ext:-1});
+wall(EXT_STONE,L1,'z',0.08,0.13,0.08,11.95,0,GC,westOps,{noFill:true,solid:false});
+// east wall: safe-room window + kitchen window
+const eastOps=[{a:1.25,b:2.75,s:1.10,h:2.20},{a:4.14,b:5.08,s:0,h:2.30,type:'door',leaf:{m:'frame',side:-1,hinge:'a'}},{a:6.90,b:10.00,s:1.05,h:2.40,lv:.4,mull:1.55}];
+wall('plaster',L1,'z',14.12,14.37,0.08,11.95,0,GC,eastOps,{ext:1});
+wall(EXT_STONE,L1,'z',14.37,14.42,0.08,11.95,0,GC,eastOps,{noFill:true,solid:false});
+// south (garden) wall: living slider | courtyard open | kitchen slider
+const southW=[{a:0.66,b:4.69,s:0,h:2.80,type:'slide',lv:.25}];
+wall('plaster',L1,'x',11.65,11.90,0.08,4.95,0,GC,southW,{ext:1});
+wall(EXT_STONE,L1,'x',11.90,11.95,0.08,4.95,0,GC,southW,{noFill:true,solid:false});
+const southE=[{a:10.20,b:13.55,s:0,h:2.80,type:'slide',lv:.25}];
+wall('plaster',L1,'x',11.65,11.90,9.56,14.42,0,GC,southE,{ext:1});
+wall(EXT_STONE,L1,'x',11.90,11.95,9.56,14.42,0,GC,southE,{noFill:true,solid:false});
+
+// ---- courtyard: stone columns, glass on three sides, open to the garden
+/* courtyard columns: white inside the house, stone only on the garden facade */
+for(const [x0,x1,z0,z1] of [[4.95,5.27,7.30,7.60],[9.27,9.56,7.30,7.60]]) box('ext',L1,x0,x1,0,GC,z0,z1,{solid:true});
+for(const [x0,x1,z0,z1] of [[4.95,5.27,11.65,11.95],[9.27,9.56,11.65,11.95]]) box('stone',L1,x0,x1,0,GC,z0,z1,{solid:true});
+// courtyard vitrine: one undivided pane per floor, white beam at slab level between them
+wall('ext',L1,'x',7.42,7.58,5.27,9.27,0,GC,[{a:5.27,b:9.27,s:0,h:GC,type:'fix',mull:99}],{solid:false});
+wall('ext',L1,'x',7.42,7.58,5.27,9.27,GC,UC,[{a:5.27,b:9.27,s:U0,h:UC,type:'fix',mull:99}],{solid:false});
+// living-room side: glass | piano wall | glass
+// living/courtyard wall per plan detail: inverted-U glazing (two full-height sides + clerestory)
+// and a shallow piano niche between two full-thickness stubs
+wall('plaster',L1,'z',4.95,5.20,7.60,8.31,0,GC,[{a:7.60,b:8.31,s:0,h:GC,type:'fix',lv:.18}],{ext:1});
+wall('plaster',L1,'z',4.95,5.20,10.92,11.65,0,GC,[{a:10.92,b:11.65,s:0,h:GC,type:'fix',lv:.18}],{ext:1});
+wall('plaster',L1,'z',4.95,5.20,8.31,10.92,2.55,GC,[{a:8.31,b:10.92,s:2.55,h:GC,type:'fix',mull:99}],{ext:1});
+box('plaster',L1,4.95,5.20,0,2.55,8.31,8.54,{solid:true}); box('plaster',L1,4.95,5.20,0,2.55,10.70,10.92,{solid:true});
+box('plaster',L1,5.16,5.20,0,2.55,8.54,10.70,{solid:true});   /* niche back, ~21 cm deep */
+box('ext',L1,5.20,5.27,0,2.55,8.31,10.92);
+// kitchen side: window seat
+const ckOps=[{a:8.62,b:10.60,s:0.45,h:2.60,type:'fix',mull:99,casing:'oak'}];   /* single fixed pane over the window seat */
+wall('plaster',L1,'z',9.32,9.56,7.60,11.65,0,GC,ckOps,{ext:-1});
+wall('ext',L1,'z',9.27,9.32,7.60,11.65,0,GC,ckOps,{noFill:true,solid:false});
+// courtyard: sculpted olive tree, pebble bed, ornamental grasses, lavender, rosemary and boulders
+(function(){ const L='g', r=rng(4242), TX0=7.2, TZ0=9.9;
+  // gnarled twin-stem trunk
+  const stems=[[[7.12,-0.02,9.96],[6.98,0.55,9.82],[7.22,1.15,9.74],[7.08,1.75,9.88]],[[7.3,-0.02,9.84],[7.46,0.65,10.02],[7.26,1.25,10.12],[7.45,1.8,9.96]]];
+  for(const st of stems) for(let k=0;k<st.length-1;k++){ const a=st[k], b=st[k+1], r0=0.16-k*0.03, r1=0.13-k*0.03; branch(a[0],a[1],a[2],b[0],b[1],b[2],r0,r1); sph('trunk','s',b[0],b[1],b[2],r1*1.05,1,1,1,{seg:10}); }
+  sph('trunk','s',7.21,0.05,9.9,0.24,1.2,0.35,1.1,{seg:12});   // root flare
+  // main limbs and canopy clusters of silver-green leaves
+  const tips=[];
+  for(let b=0;b<6;b++){ const a=b/6*Math.PI*2+r()*0.5, st=stems[b%2][3], len=0.9+r()*0.5;
+    const mx=st[0]+Math.cos(a)*len*0.55, my=st[1]+0.55+r()*0.3, mz=st[2]+Math.sin(a)*len*0.55;
+    const ex=st[0]+Math.cos(a)*len, ey=my+0.45+r()*0.4, ez=st[2]+Math.sin(a)*len;
+    branch(st[0],st[1],st[2],mx,my,mz,0.085,0.06); sph('trunk','s',mx,my,mz,0.062,1,1,1,{seg:8}); branch(mx,my,mz,ex,ey,ez,0.06,0.03);
+    for(let t=0;t<3;t++){ const ta=a+(r()-0.5)*1.4, tx=ex+Math.cos(ta)*0.45, tz=ez+Math.sin(ta)*0.45, ty=ey+0.1+r()*0.35; branch(ex,ey,ez,tx,ty,tz,0.028,0.012); tips.push([tx,ty,tz]); }
+    tips.push([ex,ey+0.15,ez]); }
+  for(const [x,y,z] of tips) for(let k=0;k<150;k++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.4)*0.62, sx=Math.sqrt(1-u*u);
+    LEAF.push([x+Math.cos(th)*sx*rad*1.15, y+u*rad*0.6, z+Math.sin(th)*sx*rad*1.15, 0.3+r()*0.2, [0.2+r()*0.05, 0.14+r()*0.12, 0.34+r()*0.14+(u>0?0.04:-0.04)], r()*6.28, r()*6.28, 1]); }
+  // boulders (soft-edged limestone)
+  for(const [x,z,s,sy] of [[5.95,8.25,0.42,0.55],[8.55,11.05,0.36,0.6],[8.7,8.2,0.26,0.7]]){ const g=new THREE.IcosahedronGeometry(s,3), pp=g.attributes.position;
+    for(let i=0;i<pp.count;i++){ const v=new THREE.Vector3().fromBufferAttribute(pp,i), n=1+0.12*Math.sin(v.x*9+v.z*4)+0.08*Math.sin(v.y*13+v.x*5); v.multiplyScalar(n); pp.setXYZ(i,v.x,v.y,v.z); }
+    g.scale(1.25,sy,1); g.computeVertexNormals(); g.translate(x,s*sy*0.55-0.03,z); addGeo(g,'rock',L,{keepUV:true}); }
+  // ornamental grasses (fountain grass), lavender and rosemary, kept clear of the trunk
+  const free=(x,z)=>Math.hypot(x-TX0,z-TZ0)>0.55 && Math.hypot(x-5.95,z-8.25)>0.55 && Math.hypot(x-8.55,z-11.05)>0.5 && Math.hypot(x-8.7,z-8.2)>0.38;
+  for(let i=0;i<34;i++){ const x=5.45+r()*3.65, z=7.8+r()*3.7; if(!free(x,z)) continue;
+    for(let k=0;k<2;k++) grassTuft(x+(r()-0.5)*0.1,z+(r()-0.5)*0.1,r,-0.02,0.65,[0.16+r()*0.04,0.3+r()*0.2,0.42+r()*0.12]);
+    if(r()>0.4) for(let k=0;k<6;k++){ const a=r()*6.28, d=0.18+r()*0.1; FOL.push([x+Math.cos(a)*d,0.55+r()*0.15,z+Math.sin(a)*d,0.013,[0.11,0.28,0.66],0.9*Math.cos(a),a,4]); } }
+  for(let i=0;i<10;i++){ const x=5.5+r()*3.5, z=7.85+r()*3.6; if(free(x,z)) lavender(x,z,r); }
+  for(let i=0;i<7;i++){ const x=5.5+r()*3.5, z=7.85+r()*3.6; if(free(x,z)) shrub(x,z,0.9,r); }
+  // night uplight under the canopy
+  cyl('lamp',L,7.55,10.35,-0.025,-0.015,0.06,{seg:16}); cyl('black',L,7.55,10.35,-0.03,-0.02,0.08,{seg:16});
+})();
+
+// ---- interior partitions (ground)
+const P='plaster';
+// guest WC
+wall(P,L1,'x',1.86,1.99,7.99,8.95,0,GC,[{a:8.16,b:8.92,s:0,h:2.30,type:'door',leaf:{side:1,hinge:'b',open:0.25},casing:'oak'}]);
+// sink niche (open to the hall): plain white wall on its west side, the trough sink hangs on it; oak trim on the pier end
+wall(P,L1,'z',7.535,7.70,1.99,3.65,0,GC); wall(P,L1,'x',3.54,3.65,7.535,8.16,0,GC);   /* return wall closing the sink into a niche, flush with the WC door jamb line */ box('bath',L1,7.70,7.99,0,0.006,1.99,3.65);
+wall(P,L1,'z',8.95,9.14,0.38,3.65,0,GC);
+// shower room
+wall(P,L1,'x',3.54,3.65,9.14,10.51,0,GC,[{a:9.66,b:10.42,s:0,h:2.30,type:'door',leaf:{side:-1,hinge:'a',open:0.25},casing:'oak'}]);
+// safe room (thick concrete)
+wall(P,L1,'z',10.51,10.73,0.38,3.65,0,GC);
+wall(P,L1,'x',3.21,3.44,10.73,14.12,0,GC,[{a:10.89,b:11.66,s:0,h:2.10,type:'door',leaf:{m:'frame',side:-1,hinge:'a',open:0.25}}]);
+// ---- pantry block (measured from the plan): one inner space linking the hall (flush door 19),
+// the guest unit (safe-room door) and the pantry room. Every outside face is oak-clad for one unified volume.
+// flush door 19 from the hall, oak-clad on the hall side
+wall(P,L1,'z',9.38,9.45,3.65,4.77,0,GC,[{a:3.86,b:4.70,s:0,h:2.60,type:'door',leaf:{m:'oak',side:1,hinge:'a',open:0.25}}]);
+box('oak',L1,9.34,9.38,0,GC,3.65,3.86); box('oak',L1,9.34,9.38,2.60,GC,3.86,4.70); box('oak',L1,9.34,9.38,0,GC,4.70,4.77);
+// coat closet facing the hall, rounded corner toward the kitchen
+// one continuous oak skin: square boxes sharing planes, only the hall/kitchen corner is rounded
+box('oak',L1,9.48,10.04,0,GC,4.77,6.10,{solid:true}); box('oak',L1,9.34,9.48,0,GC,4.77,5.96,{solid:true});
+cyl('oak',L1,9.48,5.96,0,GC,0.14,{seg:24});
+// straight 3 cm gypsum wall between the passage and the kitchen-side tall units (fridge etc.)
+box(P,L1,10.04,12.45,0,GC,5.22,5.25,{solid:true});
+// tall units opening to the kitchen: oak fronts flush along one line
+box('oak',L1,10.04,12.39,0,GC,5.25,6.10,{solid:true});
+// concrete pier under the safe-room wall + tall closet (pantry / vacuum)
+box(P,L1,11.83,12.05,0,GC,3.44,4.05,{solid:true});   /* pier shortened to half its length for a wider passage */
+box('lacquer',L1,12.05,12.46,0,2.60,3.44,4.05,{solid:true});   /* tall closet ends with the shortened pier */
+// pantry room: door from the passage, door to the kitchen (oak-clad, flush)
+/* pantry west wall + door removed for now: the pantry is open to the passage */
+wall('oak',L1,'x',5.98,6.10,12.39,14.12,0,GC,[{a:12.48,b:13.38,s:0,h:2.40,type:'door',leaf:{m:'oak',side:-1,hinge:'b',open:0.25}}]);
+/* face-frame grid on the oak block (Scandinavian frame-and-panel: slim proud stiles and rails, recessed panels with fine shadow gaps) */
+function frameGrid(axis,plane,dir,segs,doors,ys){
+  const S=(a0,a1,y0,y1,d0,d1,m)=>{ const p0=plane+dir*d0, p1=plane+dir*d1; if(axis==='z') box(m,L1,a0,a1,y0,y1,Math.min(p0,p1),Math.max(p0,p1)); else box(m,L1,Math.min(p0,p1),Math.max(p0,p1),y0,y1,a0,a1); };
+  const W=0.026, D=0.016, g=0.004;
+  for(const [a0,a1] of segs){ const n=Math.max(1,Math.round((a1-a0)/0.6)), cw=(a1-a0)/n;
+    for(let i=0;i<=n;i++){ const a=a0+i*cw; S(Math.max(a0,a-W/2),Math.min(a1,a+W/2),ys[0]-W/2,ys[ys.length-1]+W/2,0,D,'oak'); }
+    for(const y of ys) S(a0,a1,y-W/2,y+W/2,0,D,'oak');
+    for(let i=0;i<n;i++) for(let k=0;k<ys.length-1;k++){ const c0=a0+i*cw+W/2+0.005, c1=a0+(i+1)*cw-W/2-0.005, y0=ys[k]+W/2+0.005, y1=ys[k+1]-W/2-0.005;
+      for(const [b0,b1,z0,z1] of [[c0,c1,y0,y0+g],[c0,c1,y1-g,y1],[c0,c0+g,y0,y1],[c1-g,c1,y0,y1]]) S(b0,b1,z0,z1,0,0.0015,'artDark'); } }
+  for(const [a0,a1,h] of doors){ S(a0-W,a0,0,h+W,0,D,'oak'); S(a1,a1+W,0,h+W,0,D,'oak'); S(a0-W,a1+W,h,h+W,0,D,'oak');
+    for(const y of ys) if(y>h+W) S(a0,a1,y-W/2,y+W/2,0,D,'oak'); S(a0,a1,ys[ys.length-1]-W/2,ys[ys.length-1]+W/2,0,D,'oak'); }
+}
+/* kitchen face (z = 6.10) and hall face (x = 9.34) of the block */
+frameGrid('z',6.10,1,[[9.48,12.48],[13.38,14.12]],[[12.48,13.38,2.40]],[0.10,0.92,2.12,GC-0.03]);
+frameGrid('x',9.34,-1,[[3.65,3.86],[4.70,5.96]],[[3.86,4.70,2.60]],[0.10,0.92,2.12,GC-0.03]);
+
+// ---- staircase: oak blocks (flight 1) + winders + white folded plates (flight 2)
+const RS=U0/21;
+const d1=(4.10-1.30)/11;
+for(let k=1;k<=11;k++){ const z0=4.10-k*d1, z1=4.10-(k-1)*d1; box('oak',L1,4.52,5.42,0,k*RS,z0,z1,{walk:true}); }
+box('oak',L1,4.52,5.42,0,12*RS,0.84,1.30,{walk:true});
+box('oak',L1,4.52,5.42,0,13*RS,0.38,0.84,{walk:true});
+box('white',L1,3.62,4.52,14*RS-0.06,14*RS,0.38,0.84,{walk:true});
+box('white',L1,3.62,4.52,15*RS-0.06,15*RS,0.84,1.30,{walk:true});
+const d2=(2.92-1.30)/6;
+for(let k=16;k<=21;k++){ const z0=1.30+(k-16)*d2, z1=z0+d2; box('white',L1,3.62,4.52,k*RS-0.06,k*RS,z0,z1,{walk:true}); box('white',L1,3.62,4.52,(k-1)*RS-0.06,k*RS,z0-0.03,z0); }
+box('white',L1,3.62,4.52,14*RS-0.06,15*RS,0.81,0.84);
+// stair rods: hall side, between flights, from floor/step to slab
+for(let z=1.98; z<4.10; z+=0.09){ const k=Math.min(11,Math.max(0,Math.ceil((4.10-z)/d1))); rod('white',L1,5.40,z,k*RS,GC); }
+solid(5.38,5.43,0,GC,1.95,4.10);
+for(let z=1.33; z<3.92; z+=0.09){ const k=Math.min(11,Math.max(0,Math.ceil((4.10-z)/d1))); rod('white',L1,4.52,z,k*RS,z<2.92?UC:U0+1.0); }
+solid(4.50,4.54,0,U0+1.0,1.30,3.92);
+box('white',L1,4.47,4.57,U0+0.98,U0+1.02,2.92,3.92);
+
+/* ===================================================================
+   UPPER FLOOR  (layer u)
+   =================================================================== */
+const L2='u';
+// structural slab (ceiling of ground floor) + oak finish
+// keep slab edges 2 cm inside the facade planes so they never z-fight with the outer wall face
+const inX=(a,b)=>[Math.max(a,0.24),Math.min(b,14.25)], inZ=(a,b)=>[Math.max(a,0.22),Math.min(b,12.00)];
+function upSlab(x0,x1,z0,z1,top=U0,fin='oakFloor'){ [x0,x1]=inX(x0,x1); [z0,z1]=inZ(z0,z1); box('ceiling',L2,x0,x1,GC,top-0.02,z0,z1); box(fin,L2,x0,x1,top-0.02,top,z0,z1,{walk:true}); }
+upSlab(0.0,3.62,4.05,12.02);
+upSlab(3.62,5.27,3.92,12.02);
+upSlab(3.62,4.52,2.92,3.92);
+upSlab(5.42,14.50,0.00,5.11);
+upSlab(4.52,5.42,3.92,5.11);
+upSlab(9.27,14.50,5.11,7.50);
+upSlab(0.0,3.62,0.0,4.05,U0,'oakFloor');          // single bedroom (former service balcony)
+upSlab(9.27,14.50,7.50,12.02,U0,'oakFloor');     // office + laundry above the kitchen (former roof terrace)
+box('ceiling',L2,3.62,5.42,GC,U0,0.22,0.38); 
+// pergola-side cornice where upper box meets slab
+// upper floor bathrooms: stone floors
+// ---- upper outer box (white), height 3.30..7.25
+const upTop=[
+  {a:0.87,b:3.06,s:U0+1.2,h:U0+2.45,lv:.6},
+  {a:3.63,b:5.43,s:U0+1.2,h:U0+2.40,lv:.4},
+  {a:5.85,b:8.04,s:U0+1.2,h:U0+2.40,lv:.4},
+  {a:8.76,b:10.95,s:U0+1.2,h:U0+2.40,lv:.4},
+  {a:11.67,b:13.86,s:U0+1.2,h:U0+2.40,lv:.4}];
+wall('ext',L2,'x',-0.20,0.45,-0.20,14.70,GC,PT,upTop,{ext:-1});   // upper box overhangs the ground floor by 40 cm; facade 20 cm behind the frame
+const upWest=[
+  {a:1.25,b:2.75,s:U0+1.2,h:U0+2.45,lv:.6},
+  {a:4.26,b:6.56,s:U0+1.2,h:U0+2.40,lv:.35},
+  {a:6.66,b:7.81,s:U0+1.2,h:U0+2.40,lv:.35}];
+wall('ext',L2,'z',-0.20,0.35,0.45,12.02,GC,PT,upWest,{ext:-1});   // overhang west
+const upEast=[{a:4.45,b:5.25,s:U0+1.2,h:U0+2.40},{a:6.20,b:7.00,s:U0+1.2,h:U0+2.40}];
+// east face: plain white panel at the north end, deep light-timber fins over the southern two thirds
+wall('ext',L2,'z',14.15,14.70,0.45,4.10,GC,PT);   // overhang east
+wall('ext',L2,'z',14.15,14.28,4.10,7.50,GC,PT,upEast,{ext:1});
+box('ext',L2,14.15,14.28,GC,UT,7.50,12.02,{solid:true}); box('ext',L2,14.15,14.28,UC,PT,7.50,12.02);
+wall('ext',L2,'z',14.15,14.28,7.50,11.68,UT,UC); // closed wall behind the east fins
+for(let z=4.22; z<12.10; z+=0.2) fin('slatLight',L2,14.79,z,GC+0.25,PT-0.2,0.16,0.09,0.7);
+   // fins turned ~40°, frame band to frame band
+solid(14.15,14.90,UT,UC,7.50,12.12);
+// south face: master window with french balcony | timber screen over courtyard + terrace
+wall('ext',L2,'x',11.68,12.22,-0.20,5.27,GC,PT,[{a:0.70,b:4.70,s:U0,h:UC,type:'slide'}],{ext:1});   // south overhang
+// south face over courtyard + roof terrace: white wall with framed openings (no timber slats)
+const upSouth=[
+  {a:5.27,b:9.30,s:UT,h:UC,type:'open'},                     // no wall over the courtyard: open between slab edge and roof frame
+  {a:10.65,b:13.30,s:U0+1.0,h:U0+2.45,lv:.5}];  // louvred window of the enclosed room
+wall('ext',L2,'x',11.68,12.22,5.27,14.70,GC,PT,upSouth,{ext:1});
+for(let x=0.74; x<4.68; x+=0.09) rod('white',L2,x,12.27,U0,U0+1.0,0.008);
+box('white',L2,0.70,4.70,U0+0.98,U0+1.02,12.24,12.30);
+// fascia band under the box, between stone ground floor and white upper volume
+box('ext',L2,0.0,14.50,GC-0.02,GC,0.0,0.08);
+// white frame around the upper box on the front, east and west faces — flush with the house outline;
+// the facade surfaces sit 20 cm behind it, so nothing protrudes past the sides
+{ const R=0.2, FW=0.2, B0=GC, B1=GC+0.25, T1=PT+0.05, T0=T1-0.25, X0=-0.40, Z0=-0.40, X1=14.90, Z1=12.42;
+  // the whole upper box projects 40 cm beyond the ground floor on the front, east and west
+  // front (street)
+  box('ext',L2,X0,X1,B0,B1,Z0,Z0+R); box('ext',L2,X0,X1,T0,T1,Z0,0.45);
+  box('ext',L2,X0,X0+FW,B0,T1,Z0,Z0+R); box('ext',L2,X1-FW,X1,B0,T1,Z0,Z0+R);
+  // east: bands run back over the fin zone, posts at both ends
+  box('ext',L2,14.15,X1,B0,B1,Z0,Z1); box('ext',L2,14.15,X1,T0,T1,Z0,Z1);
+  box('ext',L2,X1-R,X1,B0,T1,Z0,Z0+FW); box('ext',L2,14.15,X1,B0,T1,Z1-0.30,Z1);
+  // south (garden)
+  box('ext',L2,X0,X1,B0,B1,Z1-R,Z1); box('ext',L2,X0,X1,T0,T1,11.68,Z1);
+  // west
+  box('ext',L2,X0,X0+R,B0,B1,Z0,Z1); box('ext',L2,X0,0.35,T0,T1,Z0,Z1);
+  box('ext',L2,X0,X0+R,B0,T1,Z0,Z0+FW); box('ext',L2,X0,0.35,B0,T1,Z1-0.30,Z1);
+}
+
+// ---- interior partitions (upper), 3.80..6.60
+// service balcony walls (also rise to parapet)
+wall('ext',L2,'z',3.42,3.62,0.38,4.05,UT,UC,[{a:3.05,b:3.85,s:U0,h:U0+2.25,type:'door',leaf:{side:-1,hinge:'b'}}]);
+wall('ext',L2,'x',4.05,4.25,0.35,3.62,UT,UC);
+// bedroom 3 (former laundry): same size and front line as bedroom 2, door at the same spot
+wall(P,L2,'x',3.92,4.02,5.42,8.32,U0,UC,[{a:7.30,b:8.10,s:U0,h:U0+2.2,type:'door',leaf:{side:-1,hinge:'b'}}]);
+wall(P,L2,'z',5.42,5.52,0.45,3.92,U0,UC);
+// bedrooms
+wall(P,L2,'z',8.32,8.42,0.45,3.92,U0,UC);
+wall(P,L2,'z',11.22,11.32,0.45,3.92,U0,UC);
+wall(P,L2,'x',3.92,4.02,8.32,14.15,U0,UC,[
+  {a:10.20,b:11.00,s:U0,h:U0+2.2,type:'door',leaf:{side:-1,hinge:'b'}},
+  {a:11.45,b:12.25,s:U0,h:U0+2.2,type:'door',leaf:{side:-1,hinge:'a'}},
+  {a:12.45,b:13.15,s:U0,h:U0+2.2,type:'door',leaf:{side:1,hinge:'a'}}]);   /* kids bath A: entered from inside bedroom 1 */
+// stair-side rods on the upper landing / hallway edge
+for(let x=4.55;x<5.42;x+=0.09) rod('white',L2,x,3.92,U0,U0+1.0);
+box('white',L2,4.52,5.42,U0+0.98,U0+1.02,3.90,3.94); solid(4.52,5.42,U0,U0+1.0,3.90,3.94);
+// void railing (double-height entrance hall)
+for(let x=5.30;x<9.27;x+=0.09) rod('white',L2,x,5.11,U0,U0+1.0);
+for(let z=5.14;z<7.44;z+=0.09) rod('white',L2,5.27,z,U0,U0+1.0);
+box('white',L2,5.27,9.27,U0+0.98,U0+1.02,5.09,5.13); box('white',L2,5.25,5.29,U0+0.98,U0+1.02,5.11,7.44);
+solid(5.27,9.27,U0,U0+1.0,5.09,5.13); solid(5.25,5.29,U0,U0+1.0,5.11,7.44);
+// master bath / closet / suite
+// (measured from plan 101) bath east wall, suite entry from the hall, linen closet, bath/closet wall with pocket door,
+// closet-room entry on its east side (door swings in), 7 cm block wall between closet room and bedroom
+wall(P,L2,'z',3.54,3.64,4.25,6.05,U0,UC);   /* bath east wall on the closet-room line */
+wall(P,L2,'x',6.05,6.15,2.24,4.88,U0,UC,[{a:3.79,b:4.63,s:U0,h:U0+2.25,type:'door',leaf:{m:'oak',side:1,hinge:'b',open:0.25},casing:'oak'}]);
+box(P,L2,2.26,2.37,U0,UC,6.15,6.58,{solid:true}); box(P,L2,3.54,3.64,U0,UC,6.15,6.79,{solid:true});
+wall(P,L2,'x',6.48,6.58,0.35,2.26,U0,UC,[{a:1.45,b:2.26,s:U0,h:U0+2.25,type:'door'}]);   /* bath pocket door right next to the linen closet */
+wall(P,L2,'z',3.54,3.64,6.79,8.39,U0,UC,[{a:6.81,b:7.66,s:U0,h:U0+2.3,type:'door',leaf:{m:'oak',side:-1,hinge:'b',open:0.25},casing:'oak'}]);
+wall(P,L2,'x',8.32,8.39,0.35,3.64,U0,UC);
+wall(P,L2,'z',4.88,5.27,6.05,11.68,U0,UC);
+// closet room (roof hatch) and kids bathrooms
+wall(P,L2,'z',9.27,9.40,5.11,7.55,U0,UC);
+/* former closet room is now an open corridor from the hall to the room above the kitchen */
+wall(P,L2,'z',10.80,10.90,5.11,7.55,U0,UC);   /* big kids bath wall moved 40 cm toward the passage door */
+/* passage: full-length oak wardrobe in a niche along the bath wall, return wall on the hallway line */
+box(P,L2,10.30,10.80,U0,UC,5.11,5.20,{solid:true});
+box(P,L2,10.30,10.80,UC-0.10,UC,5.20,7.45);
+box('oakPanel',L2,10.30,10.80,U0,UC-0.10,5.20,7.45,{solid:true});
+wall(P,L2,'z',12.25,12.35,4.02,5.65,U0,UC);
+/* bath door wall on the hallway/passage line (z 5.11); east part stays behind the small bath */
+wall(P,L2,'x',5.11,5.20,10.90,12.25,U0,UC,[{a:11.48,b:12.23,s:U0,h:U0+2.2,type:'door',leaf:{side:1,hinge:'b'}}]);
+wall(P,L2,'x',5.65,5.75,12.25,14.15,U0,UC);
+wall('ext',L2,'x',7.45,7.55,9.27,14.15,U0,UC,[{a:9.45,b:10.25,s:U0,h:U0+2.3,type:'door'}]);
+// terrace edge to the courtyard
+// wall replaces the railing to the courtyard; 80 cm floor-to-ceiling window right next to the door
+box('ext',L2,9.27,9.40,GC,UT,7.55,11.68);
+wall('ext',L2,'z',9.27,9.45,7.55,11.68,UT,UC,[{a:7.60,b:8.40,s:U0,h:UC,type:'fix'}],{ext:-1});
+/* laundry room in the NE corner (per plan): west wall with door swinging in, south wall */
+wall(P,L2,'z',10.78,10.87,7.55,9.14,U0,UC,[{a:8.22,b:9.02,s:U0,h:U0+2.2,type:'door',leaf:{side:1,hinge:'b'}}]);
+wall(P,L2,'x',9.07,9.14,10.87,14.15,U0,UC);
+/* office entry: wall on the laundry's south line, against the bookcase, with the office door */
+wall(P,L2,'x',9.07,9.14,9.45,10.78,U0,UC,[{a:9.92,b:10.72,s:U0,h:U0+2.2,type:'door',leaf:{side:1,hinge:'b',open:0.25}}]);
+// parapets around open-to-sky courtyard edge (above master east wall handled), north glass head
+
+
+/* ===================================================================
+   ROOF  (layer r)
+   =================================================================== */
+const L3='r';
+function roofSlab(x0,x1,z0,z1){ [x0,x1]=inX(x0,x1); [z0,z1]=inZ(z0,z1); box('ceiling',L3,x0,x1,UC,RT-0.02,z0,z1); box('roof',L3,x0,x1,RT-0.02,RT,z0,z1); }
+roofSlab(3.42,14.50,0.0,7.50); roofSlab(0.0,3.42,4.05,7.50); roofSlab(0.0,3.42,0.0,4.05); roofSlab(0.0,5.27,7.50,12.02); roofSlab(9.27,14.50,7.50,12.02); // incl. roofed service balcony + room above kitchen
+// water-heater screen on the roof
+box('concrete',L3,6.4,8.2,RT,RT+1.4,2.2,3.3);
+for(let x=6.3;x<8.3;x+=0.09){ slat('white',L3,x,x+0.04,RT,RT+1.8,2.08,2.12); slat('white',L3,x,x+0.04,RT,RT+1.8,3.38,3.42); }
+for(let z=2.1;z<3.4;z+=0.09){ slat('white',L3,6.28,6.32,RT,RT+1.8,z,z+0.04); slat('white',L3,8.28,8.32,RT,RT+1.8,z,z+0.04); }
+
+
+/* ===================================================================
+   PERGOLA + GARDEN (layer s)
+   =================================================================== */
+box('paving','s',0.0,14.5,GRADE,-0.02,11.95,15.10,{walk:true});
+// pergola: thin white frame on round timber posts, light slats
+// outer edges flush with the upper-floor frame (x -0.20 … 14.70), same band height
+for(const [x0,x1] of [[-0.40,-0.20],[4.95,5.15],[9.15,9.35],[14.70,14.90]]) box('white','s',x0,x1,3.30,3.55,12.42,15.10);
+box('white','s',-0.40,14.90,3.30,3.55,14.86,15.10);
+for(const x of [-0.30,5.05,9.25,14.80]) cyl('teak','s',x,14.98,-0.02,3.30,0.11,{seg:14,solid:true});
+for(const [x0,x1] of [[-0.20,4.95],[5.15,9.15],[9.35,14.70]]) for(let z=12.48; z<14.84; z+=0.16) slat('slatLight','s',x0,x1,3.42,3.52,z,z+0.05);
+// outdoor lounge (teak + grey cushions) and dining table
+place(2.6,-0.02,13.6,'N',()=>F.sofa('s',2.1,0.85,'fabGrey',{pillows:2}));
+place(1.0,-0.02,12.7,'E',()=>F.lounge('s','fabGrey','teak'));
+place(4.1,-0.02,12.7,'W',()=>F.lounge('s','fabGrey','teak'));
+place(2.6,-0.02,12.6,'S',()=>F.table('s',1.1,0.6,0.38,'teak','teak',{block:0.08}));
+place(11.6,-0.02,13.5,'S',()=>{ F.table('s',2.0,0.85,0.75,'teak','black',{trestle:true}); box('teak','s',-1.0,1.0,0.42,0.46,-0.75,-0.5); box('teak','s',-1.0,1.0,0.42,0.46,0.5,0.75); box('black','s',-0.9,-0.86,0,0.42,-0.7,-0.55); box('black','s',0.86,0.9,0,0.42,-0.7,-0.55); box('black','s',-0.9,-0.86,0,0.42,0.55,0.7); box('black','s',0.86,0.9,0,0.42,0.55,0.7); });
+place(7.2,-0.02,13.9,'S',()=>F.plant('s',0.9));
+
+/* ===================================================================
+   FURNITURE — GROUND FLOOR (per the renders)
+   =================================================================== */
+// family corner on the raised oak platform
+box('oakPanel',L1,0.38,0.93,PL,GC,0.40,1.55,{solid:true});
+box('oakPanel',L1,0.38,0.93,PL,GC,2.45,3.70,{solid:true});
+box('oakPanel',L1,0.38,0.50,PL,GC,1.55,2.45);
+box('oakPanel',L1,0.38,0.93,2.30,GC,1.55,2.45);
+box('oak',L1,0.50,0.93,PL+0.73,PL+0.77,1.55,2.45,{solid:true});
+box('oak',L1,0.50,0.80,1.78,1.80,1.55,2.45);
+box('screen',L1,0.55,0.58,PL+0.95,PL+1.30,1.78,2.22); box('black',L1,0.56,0.62,PL+0.77,PL+0.95,1.98,2.02);
+for(let i=0;i<9;i++) box('book',L1,0.52,0.72,1.80,1.80+0.18+((i*37)%7)/100,2.0+i*0.04,2.03+i*0.04);
+place(1.20,PL,2.0,'W',()=>F.wishbone(L1));
+place(2.10,PL,0.88,'S',()=>F.modular(L1,3,'fabMustard'));
+place(2.10,PL,2.45,'S',()=>F.rug(L1,2.3,1.9,'rugCheck'));
+place(2.65,PL,2.8,'S',()=>{ cyl('fabGrey',L1,0,0,0.01,0.36,0.46,{seg:24,solid:true}); cyl('fabGrey',L1,0,0,0.36,0.4,0.42,{seg:24}); });
+// TV / shelving divider between family corner and dining
+box('oak',L1,0.93,2.95,PL,PL+0.45,3.70,4.10,{solid:true});
+for(const x of [0.93,1.94,2.92]) box('white',L1,x,x+0.03,PL+0.45,2.95,3.74,4.06);
+for(const y of [PL+0.45,1.0,2.15,2.92]) box('white',L1,0.93,2.95,y,y+0.03,3.74,4.06);
+box('oak',L1,1.05,2.80,0.98,2.05,3.74,3.79); box('screen',L1,1.15,2.70,1.05,1.92,3.70,3.74);
+box('oak',L1,2.95,3.30,0,GC,3.68,4.12,{solid:true});
+place(1.4,2.18,3.9,'S',()=>{ cyl('ceramic',L1,-0.1,0,0,0.22,0.07); cyl('ceramic',L1,0.1,0,0,0.18,0.06); });
+place(2.5,2.18,3.9,'S',()=>F.plant(L1,0.3,'white'));
+// dining
+/* ---------- detailed furniture helpers (local coords, front = +z) ---------- */
+function rb(m,L,x0,x1,y0,y1,z0,z1,r,rotX=0,rotY=0,o={}){ const w=x1-x0,h=y1-y0,d=z1-z0, rr=Math.min(r,w/2-1e-3,h/2-1e-3,d/2-1e-3);
+  const g=new RoundedBoxGeometry(w,h,d,4,Math.max(0.002,rr)); if(rotX) g.rotateX(rotX); if(rotY) g.rotateY(rotY); g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); addGeo(g,m,L,o); }
+function lathe(m,L,x,y,z,pts,seg=28){ const g=new THREE.LatheGeometry(pts.map(([r,h])=>new THREE.Vector2(r,h)),seg); g.translate(x,y,z); addGeo(g,m,L); }
+F.sofa2=(L,w,d,m)=>{ const n=Math.max(1,Math.round(w/0.95)), cw=w/n;
+  box('teak',L,-w/2+0.06,w/2-0.06,0,0.08,-d/2+0.06,d/2-0.06,{solid:true});
+  rb(m,L,-w/2,w/2,0.08,0.4,-d/2,d/2,0.05,0,0,{solid:true});
+  rb(m,L,-w/2,w/2,0.08,0.74,-d/2,-d/2+0.14,0.05);
+  for(let i=0;i<n;i++){ const x0=-w/2+i*cw+0.006, x1=x0+cw-0.012;
+    rb(m,L,x0,x1,0.39,0.57,-d/2+0.2,d/2-0.01,0.075);
+    rb(m,L,x0+0.01,x1-0.01,0.5,0.98,-d/2+0.08,-d/2+0.32,0.1,-0.2); } };
+F.chair2=(L,seat,leg)=>{ for(const [x,z] of [[-.2,-.19],[.2,-.19],[-.2,.19],[.2,.19]]) cyl(leg,L,x,z,0,0.44,0.016,{seg:10,r2:0.021});
+  box(leg,L,-0.23,0.23,0.4,0.44,-0.22,0.22); rb(seat,L,-0.23,0.23,0.43,0.5,-0.21,0.23,0.03);
+  for(const x of [-0.2,0.2]) box(leg,L,x-0.017,x+0.017,0.44,0.86,-0.22,-0.19);
+  rb(seat,L,-0.22,0.22,0.58,0.86,-0.25,-0.19,0.03,-0.12); };
+// dining table perpendicular to the west window: solid oak top on two slab legs, linen runner, upholstered chairs
+place(2.65,0,5.68,'S',()=>{ rb('oak',L1,-1.35,1.35,0.7,0.76,-0.5,0.5,0.012,0,0,{solid:true});
+  for(const x of [-0.95,0.95]){ box('oak',L1,x-0.045,x+0.045,0,0.7,-0.36,0.36,{solid:true}); box('oak',L1,x-0.09,x+0.09,0,0.03,-0.38,0.38); }
+  box('fabLinen',L1,-1.15,1.15,0.76,0.764,-0.17,0.17); });
+for(const x of [1.67,2.32,2.97,3.62]){ place(x,0,4.88,'S',()=>F.chair2(L1,'fabCream','oak')); place(x,0,6.48,'N',()=>F.chair2(L1,'fabCream','oak')); }
+place(2.0,0,5.68,'E',()=>F.pendantOval(L1,2.25)); place(3.3,0,5.68,'E',()=>F.pendantOval(L1,2.25));
+// table styling: stoneware vases with dried pampas, a low bowl
+{ const T=0.764; lathe('ceramic',L1,2.45,T,5.66,[[0,0],[0.07,0],[0.09,0.08],[0.07,0.22],[0.035,0.3],[0.04,0.33],[0,0.33]]); lathe('limewash',L1,2.7,T,5.72,[[0,0],[0.06,0],[0.08,0.12],[0.05,0.2],[0.025,0.24],[0,0.24]]);
+  lathe('artDark',L1,2.9,T,5.62,[[0,0],[0.05,0],[0.06,0.06],[0.02,0.15],[0.022,0.17],[0,0.17]]);
+  lathe('ceramic',L1,3.35,T,5.7,[[0,0],[0.06,0],[0.12,0.05],[0.13,0.07],[0.115,0.06],[0,0.02]]);
+  const rr=rng(808); for(const [vx,vz,vy] of [[2.45,5.66,T+0.3],[2.7,5.72,T+0.22]]) for(let k=0;k<7;k++){ const a=rr()*6.28, h=0.35+rr()*0.35, tx=vx+Math.cos(a)*0.12, tz=vz+Math.sin(a)*0.12;
+    branch(vx,vy,vz,tx,vy+h,tz,0.004,0.003,'trunk'); for(let q=0;q<14;q++) FOL.push([tx+(rr()-0.5)*0.04,vy+h+0.01+q*0.016,tz+(rr()-0.5)*0.04,0.011,[0.1,0.3,0.8],(rr()-0.5)*0.6,rr()*6.28,1.8]); } }
+// living: sofa on a teak plinth with plump cushions, throw cushions and a mustard throw
+place(0.92,0,9.45,'E',()=>{ F.sofa2(L1,3.0,0.98,'fabWhite');
+  rb('fabLinen',L1,-1.2,-0.72,0.55,1.0,-0.24,-0.08,0.06,-0.32,0.15); rb('fabCream',L1,-0.62,-0.16,0.55,0.98,-0.24,-0.09,0.06,-0.3,-0.1);
+  rb('fabSage',L1,0.25,0.75,0.56,0.8,-0.2,-0.08,0.05,-0.25); rb('fabLinen',L1,0.72,1.18,0.55,0.98,-0.24,-0.09,0.06,-0.3,0.12);
+  box('fabMustard',L1,0.95,1.45,0.57,0.6,-0.3,0.42,{r:.012}); box('fabMustard',L1,0.95,1.45,0.2,0.6,0.42,0.47,{r:.012}); });
+place(1.88,0,10.55,'E',()=>{ box('teak',L1,-0.44,0.44,0,0.08,-0.4,0.4); rb('fabWhite',L1,-0.5,0.5,0.08,0.4,-0.45,0.45,0.05,0,0,{solid:true}); rb('fabWhite',L1,-0.49,0.49,0.39,0.56,-0.44,0.44,0.075); });
+place(2.55,0,9.15,'S',()=>{ rb('rugWhite',L1,-1.25,1.25,0,0.014,-1.4,1.4,0.006); });
+place(2.55,0,9.10,'S',()=>{ rb('oak',L1,-0.62,0.62,0.33,0.38,-0.42,0.42,0.012,0,0,{solid:true}); rb('oak',L1,-0.44,0.44,0.014,0.33,-0.24,0.24,0.01); });
+// coffee table styling: book stack, stoneware bowl, candle holders, vase with olive branches
+{ const T=0.38, X=2.55, Z=9.1;
+  box('artDark',L1,X+0.12,X+0.42,T,T+0.035,Z-0.3,Z-0.08); box('fabLinen',L1,X+0.14,X+0.4,T+0.035,T+0.06,Z-0.28,Z-0.1); box('book',L1,X+0.15,X+0.37,T+0.06,T+0.085,Z-0.27,Z-0.12);
+  lathe('ceramic',L1,X-0.25,T,Z+0.15,[[0,0],[0.05,0],[0.13,0.04],[0.15,0.07],[0.14,0.075],[0.12,0.04],[0,0.02]]);
+  for(const [dx,h] of [[-0.05,0.24],[0.02,0.3]]){ lathe('black',L1,X+dx,T,Z-0.2,[[0,0],[0.03,0],[0.012,0.02],[0.008,h],[0.016,h+0.01],[0,h+0.01]],12); cyl('lamp',L1,X+dx,Z-0.2,T+h+0.01,T+h+0.09,0.01,{seg:10}); }
+  lathe('limewash',L1,X+0.3,T,Z+0.22,[[0,0],[0.05,0],[0.075,0.08],[0.06,0.17],[0.03,0.22],[0.034,0.25],[0,0.25]]);
+  const rr=rng(909); for(let k=0;k<5;k++){ const a=rr()*6.28, h=0.25+rr()*0.25, tx=X+0.3+Math.cos(a)*0.18, tz=Z+0.22+Math.sin(a)*0.18;
+    branch(X+0.3,T+0.24,Z+0.22,tx,T+0.24+h,tz,0.005,0.003,'trunk'); for(let q=0;q<6;q++) LEAF.push([X+0.3+(tx-X-0.3)*(0.4+q*0.12),T+0.24+h*(0.4+q*0.12),Z+0.22+(tz-Z-0.22)*(0.4+q*0.12),0.12+rr()*0.06,[0.2,0.14,0.42],rr()*6.28,rr()*6.28,1]); } }
+// potted olive tree in the corner by the garden door
+{ const X=0.82, Z=11.22; lathe('limewash',L1,X,0,Z,[[0,0],[0.2,0],[0.27,0.1],[0.28,0.5],[0.26,0.52],[0,0.5]]); cyl('gravel',L1,X,Z,0.46,0.49,0.25,{seg:24});
+  const rr=rng(707); branch(X,0.48,Z,X+0.05,1.25,Z-0.03,0.04,0.03); branch(X+0.05,1.25,Z-0.03,X+0.25,1.7,Z-0.1,0.025,0.012); branch(X+0.05,1.25,Z-0.03,X-0.15,1.75,Z+0.05,0.022,0.01);
+  for(let k=0;k<210;k++){ const u=rr()*2-1, th=rr()*6.28, rad=Math.pow(rr(),0.4)*0.42, sx=Math.sqrt(1-u*u); LEAF.push([X+0.05+Math.cos(th)*sx*rad, 1.75+u*rad*0.75, Z-0.03+Math.sin(th)*sx*rad,0.16+rr()*0.1,[0.2+rr()*0.04,0.14+rr()*0.1,0.38+rr()*0.12],rr()*6.28,rr()*6.28,1]); } }
+place(3.70,0,8.40,Math.atan2(2.55-3.70,9.10-8.40),()=>F.lounge(L1,'fabOlive','oak'));   /* armchair faces the sofa and coffee table */
+place(0.75,0,7.72,'S',()=>{ cyl('brass',L1,0,0,0,0.03,0.16); cyl('brass',L1,0,0,0,1.65,0.012); sph('brass',L1,0.12,1.55,0,0.14,1,1,0.7); sph('brass',L1,0.12,1.15,0,0.12,1,1,0.7); });
+box('canvasArt',L1,0.38,0.425,1.15,2.45,8.80,9.90);   /* abstract canvas over the sofa */
+place(4.94,0,9.62,'W',()=>{ // digital piano set into the wall niche
+  box('oak',L1,-0.7,0.7,0.62,0.78,-0.2,0.22,{solid:true}); box('oak',L1,-0.7,-0.66,0,0.62,-0.2,0.2); box('oak',L1,0.66,0.7,0,0.62,-0.2,0.2);
+  box('white',L1,-0.64,0.64,0.75,0.79,-0.02,0.2); box('black',L1,-0.64,0.64,0.785,0.8,0.0,0.06); box('oak',L1,-0.7,0.7,0.78,0.98,-0.2,-0.08);
+  box('oak',L1,-0.3,0.3,0.98,1.2,-0.16,-0.12); box('oak',L1,-0.35,0.35,0.0,0.5,0.45,0.75,{solid:true}); });
+box('white',L1,4.95,5.16,1.95,1.98,8.54,10.70); for(let i=0;i<10;i++) box('book',L1,4.98,5.14,1.98,2.18+(i%3)*0.03,9.9+i*0.045,9.935+i*0.045);
+place(5.06,1.98,9.0,'S',()=>{ cyl('ceramic',L1,0,0,0,0.24,0.07); cyl('ceramic',L1,0,0.16,0,0.2,0.065); });
+place(3.85,0,11.05,'S',()=>{ cyl('oak',L1,0,0,0,0.46,0.12,{r2:0.18,seg:20,solid:true}); cyl('oak',L1,0.38,0.28,0,0.36,0.1,{r2:0.15,seg:20}); });
+/* living-room curtains removed */
+// entrance hall: pendant cones from the double-height ceiling, coat closet
+place(6.5,0,6.0,'S',()=>F.cone(L1,3.2)); place(8.0,0,6.5,'S',()=>F.cone(L1,3.6));
+// guest WC
+finish('bath',L1,7.99,8.95,0.38,1.86,0,1.25,{s:[[8.16,8.92]]});
+place(8.47,0,0.40,'S',()=>F.toilet(L1));
+box('bath',L1,7.99,8.95,0,0.006,0.38,3.65);
+// stone trough sink in the niche, bronze wall tap (as in the render)
+box('bath',L1,7.70,8.14,0.78,0.92,2.10,3.10,{solid:true}); box('bronze',L1,7.70,7.76,1.02,1.06,2.58,2.62); box('bronze',L1,7.74,7.88,1.02,1.035,2.59,2.61);
+box('bath',L1,7.70,7.72,0.92,1.25,2.10,3.10);
+box('mirror',L1,7.72,7.73,1.25,2.20,2.15,3.05); place(8.02,0,2.40,'S',()=>{ rod('black',L1,0,0,1.75,GC,0.003); cyl('lamp',L1,0,0,1.6,1.78,0.05); });
+// shower room
+finish('bathGrey',L1,9.14,10.51,0.38,3.54,0,GC,{s:[[9.66,10.42,0,2.3]],n:[[9.81,10.49,1.45,2.45]]});
+box('bathGrey',L1,9.14,10.51,0,0.006,0.38,3.54);
+box('glassTint',L1,9.14,10.05,0,2.1,1.20,1.22);
+place(10.07,2.1,0.39,'S',()=>{ box('black',L1,-0.01,0.01,0,0.25,0,0.3); cyl('black',L1,0,0.32,-0.01,0.0,0.12,{seg:20}); });
+place(9.15,0,1.48,'E',()=>F.toilet(L1));
+place(9.15,0.55,2.45,'E',()=>{ box('oak',L1,-0.45,0.45,0,0.3,0,0.5,{solid:true}); box('bathGrey',L1,-0.47,0.47,0.3,0.42,0,0.52); place(0,0.42,0.02,'S',()=>F.tap(L1,'black')); });
+box('mirror',L1,9.15,9.16,1.25,1.95,2.0,2.9);
+// safe room — lounge / guest room
+place(12.0,0,1.25,'S',()=>F.tubChair(L1,'fabCream')); place(13.25,0,1.25,'S',()=>F.tubChair(L1,'fabCream'));
+place(12.6,0,1.8,'S',()=>F.rug(L1,2.4,1.6,'rugWhite'));
+place(12.62,0,1.05,'S',()=>{ cyl('oak',L1,0,0,0,0.5,0.2,{seg:24,solid:true}); });
+box('oak',L1,10.73,11.08,0,2.0,0.6,2.4,{solid:true}); for(let i=0;i<12;i++) box('book',L1,10.78,11.03,1.0+((i/6)|0)*0.5,1.22+((i/6)|0)*0.5,0.7+(i%6)*0.08,0.76+(i%6)*0.08);
+place(13.8,0,2.9,'S',()=>F.plant(L1,0.7));
+// pantry fittings: marble counter with upper cabinets, freezer, robot-vacuum closet
+box('lacquer',L1,12.46,13.47,0,0.88,3.44,4.03,{solid:true}); box('marble',L1,12.46,13.47,0.88,0.92,3.44,4.05);
+box('lacquer',L1,12.46,13.47,1.55,2.60,3.44,3.80);
+box('white',L1,13.47,14.12,0,1.90,3.44,4.05,{solid:true}); box('chrome',L1,13.55,13.57,0.9,1.6,4.05,4.07);
+box('lacquer',L1,13.51,14.12,0,2.40,5.42,5.98,{solid:true});
+
+// ---------- kitchen (east run along the window, island with waterfall marble, oak dining extension) ----------
+mat('lemon',{color:0xe8c34a, roughness:.55}); mat('brushedSteel',{color:0xbfc1c3, roughness:.32, metalness:1}); mat('hobGlass',{color:0x101112, roughness:.08, metalness:.2});
+mat('oil',{color:0x9a8a2a, roughness:.05, transparent:true, opacity:.75}); mat('bread',{color:0xc08a4e, roughness:.85});
+// base run: carcass, recessed plinth, handleless fronts with 3 mm shadow gaps and a grip channel
+box('lacquer',L1,13.56,14.12,0.10,0.86,6.40,11.30,{solid:true});
+box('black',L1,13.60,14.12,0,0.10,6.40,11.30);
+{ const cols=[[6.40,7.00],[7.00,7.65],[7.65,8.25],[8.25,9.05],[9.05,9.70],[9.70,10.15],[10.15,10.90],[10.90,11.30]];
+  for(const [z0,z1] of cols){ const wide=z1-z0>0.62;
+    if(z0>=10.15&&z1<=10.90){ for(const [y0,y1] of [[0.11,0.36],[0.375,0.60],[0.615,0.80]]) rb('lacquer',L1,13.50,13.53,y0,y1,z0+0.0015,z1-0.0015,0.003); }
+    else rb('lacquer',L1,13.50,13.53,0.11,0.80,z0+0.0015,z1-0.0015,0.003);
+    if(wide) box('black',L1,13.505,13.51,0.12,0.79,(z0+z1)/2-0.0015,(z0+z1)/2+0.0015); }
+  box('black',L1,13.52,13.56,0.80,0.855,6.40,11.30); }
+// worktop: 4 cm calacatta with 2 cm overhang, full-height marble splash around the window
+/* worktop with two undermount sink cut-outs */
+rb('marble',L1,13.48,14.12,0.86,0.90,6.40,7.68,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,8.22,8.48,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,9.02,11.30,0.004);
+for(const [z0,z1] of [[7.68,8.22],[8.48,9.02]]){ box('marble',L1,13.48,13.62,0.86,0.90,z0,z1); box('marble',L1,13.98,14.12,0.86,0.90,z0,z1); }
+box('marble',L1,14.09,14.12,0.90,1.05,6.40,11.30);
+box('marble',L1,14.10,14.12,1.05,2.40,6.40,6.90); box('marble',L1,14.10,14.12,1.05,2.40,10.0,11.30);
+// twin undermount sinks with brushed-steel gooseneck taps
+for(const z of [7.95,8.75]){ box('porcelain',L1,13.61,13.99,0.68,0.70,z-0.28,z+0.28); for(const [x0,x1,z0,z1] of [[13.61,13.62,z-0.28,z+0.28],[13.98,13.99,z-0.28,z+0.28]]) box('porcelain',L1,x0,x1,0.70,0.86,z0,z1); box('porcelain',L1,13.61,13.99,0.70,0.86,z-0.28,z-0.27); box('porcelain',L1,13.61,13.99,0.70,0.86,z+0.27,z+0.28); cyl('brushedSteel',L1,13.8,z,0.70,0.704,0.025,{seg:16});
+  place(14.03,0.90,z,'W',()=>{ cyl('brushedSteel',L1,0,0,0,0.04,0.028,{seg:20}); cyl('brushedSteel',L1,0,0,0.04,0.36,0.012,{seg:14});
+    const g=new THREE.TorusGeometry(0.11,0.012,10,24,Math.PI); g.rotateY(-Math.PI/2); g.translate(0,0.36,0.11); addGeo(g,'brushedSteel',L1); cyl('brushedSteel',L1,0,0.22,0.27,0.36,0.012,{seg:14});
+    box('brushedSteel',L1,0.05,0.09,0.12,0.135,-0.006,0.006); }); }
+// induction hob (black glass, bevelled) with zone rings
+rb('hobGlass',L1,13.58,14.04,0.90,0.906,10.22,10.84,0.003);
+for(const [x,z,r] of [[13.70,10.38,0.09],[13.70,10.68,0.07],[13.92,10.38,0.07],[13.92,10.68,0.09]]){ const g=new THREE.TorusGeometry(r,0.0025,6,40); g.rotateX(Math.PI/2); g.translate(x,0.9065,z); addGeo(g,'frame',L1); }
+box('frame',L1,13.62,13.66,0.9065,0.907,10.48,10.58);
+// open oak shelf with ceramics
+box('oak',L1,13.85,14.10,1.45,1.48,10.15,10.95); box('oak',L1,13.85,14.10,2.02,2.05,10.15,10.95); box('oak',L1,13.85,14.10,1.45,2.05,10.12,10.15); box('oak',L1,13.85,14.10,1.45,2.05,10.95,10.98); box('oak',L1,13.85,14.10,1.74,1.76,10.15,10.95);
+lathe('ceramic',L1,13.97,1.48,10.32,[[0,0],[0.06,0],[0.075,0.1],[0.05,0.2],[0,0.2]]); lathe('limewash',L1,13.97,1.48,10.55,[[0,0],[0.05,0],[0.05,0.12],[0,0.12]]);
+for(let k=0;k<4;k++) lathe('limewash',L1,13.98,1.76+k*0.012,10.78,[[0,0],[0.1,0],[0.11,0.01],[0,0.01]]);
+lathe('artDark',L1,13.96,1.76,10.4,[[0,0],[0.04,0],[0.045,0.16],[0.02,0.2],[0.022,0.23],[0,0.23]]);
+// counter styling: oak board with bread, kettle, fruit bowl with lemons, oil and vinegar, herb pot, utensil crock
+{ rb('oak',L1,13.62,13.98,0.90,0.925,9.15,9.55,0.006); rb('bread',L1,13.72,13.88,0.925,0.99,9.25,9.48,0.04);
+  lathe('white',L1,13.85,0.90,9.85,[[0,0],[0.085,0],[0.095,0.08],[0.08,0.2],[0.04,0.23],[0,0.23]]); box('black',L1,13.83,13.87,1.07,1.13,9.93,9.96);
+  lathe('ceramic',L1,13.8,0.90,7.10,[[0,0],[0.06,0],[0.14,0.05],[0.16,0.09],[0.15,0.095],[0.12,0.05],[0,0.03]]);
+  { const rr=rng(31); for(let k=0;k<6;k++){ const a=k/6*6.28; sph('lemon',L1,13.8+Math.cos(a)*0.07,0.97+(k%2)*0.03,7.10+Math.sin(a)*0.07,0.038,1,0.85,1.2); } }
+  for(const [dz,h,m] of [[0,0.28,'oil'],[0.08,0.24,'glassTint']]){ cyl(m,L1,13.98,10.0+dz,0.90,0.90+h,0.03,{seg:16}); cyl('black',L1,13.98,10.0+dz,0.90+h,0.92+h,0.012,{seg:10}); }
+  lathe('limewash',L1,13.96,0.90,6.65,[[0,0],[0.07,0],[0.075,0.14],[0,0.14]]); for(let k=0;k<5;k++) branch(13.96,1.0,6.65,13.96+(k-2)*0.025,1.22+k*0.01,6.65+(k%2)*0.03,0.006,0.004,'oak');
+  lathe('ceramic',L1,13.92,0.90,11.05,[[0,0],[0.08,0],[0.085,0.12],[0,0.12]]); { const rr=rng(37); for(let k=0;k<40;k++){ const a=rr()*6.28, d=rr()*0.08; FOL.push([13.92+Math.cos(a)*d,1.04+rr()*0.12,11.05+Math.sin(a)*d,0.02,[0.27,0.4,0.3+rr()*0.1],rr()*3,rr()*3,1.4]); } } }
+// island: lacquer body, fluted oak back, waterfall marble with eased edges
+box('lacquer',L1,11.32,12.30,0.10,0.86,7.22,9.10,{solid:true}); box('black',L1,11.38,12.24,0,0.10,7.28,9.04);
+for(let z=7.25; z<9.1; z+=0.47) for(const [y0,y1] of [[0.11,0.47],[0.485,0.80]]) rb('lacquer',L1,12.30,12.33,y0,y1,z+0.0015,z+0.4685,0.003);
+for(let z=7.26; z<9.08; z+=0.06) cyl('oak',L1,11.30,z+0.03,0.10,0.86,0.026,{seg:10});
+rb('marble',L1,11.24,12.36,0.86,0.92,7.16,9.10,0.006); rb('marble',L1,11.24,12.36,0,0.86,7.16,7.22,0.006);
+// oak dining extension on a slab leg
+rb('oak',L1,11.35,12.25,0.71,0.75,9.10,10.70,0.008,0,0,{solid:true}); box('oak',L1,11.66,11.94,0,0.71,10.18,10.62);
+for(const z of [7.45,7.9,8.35,8.8]) place(10.95,0,z,'E',()=>F.stool(L1,'oak'));
+for(const z of [9.55,10.3]){ place(10.98,0,z,'E',()=>F.elbow(L1,'fabSage','oak')); place(12.62,0,z,'W',()=>F.elbow(L1,'fabSage','oak')); }
+// island styling: oak tray, stoneware jug with olive branches
+rb('oak',L1,11.55,11.95,0.92,0.94,8.30,8.75,0.008); lathe('limewash',L1,11.75,0.94,8.5,[[0,0],[0.06,0],[0.08,0.1],[0.05,0.2],[0.035,0.26],[0.04,0.28],[0,0.28]]);
+{ const rr=rng(41); for(let k=0;k<6;k++){ const a=rr()*6.28, h=0.3+rr()*0.25, tx=11.75+Math.cos(a)*0.2, tz=8.5+Math.sin(a)*0.2; branch(11.75,1.2,8.5,tx,1.2+h,tz,0.005,0.003,'trunk');
+  for(let q=0;q<6;q++) LEAF.push([11.75+(tx-11.75)*(0.35+q*0.13),1.2+h*(0.35+q*0.13),8.5+(tz-8.5)*(0.35+q*0.13),0.13+rr()*0.06,[0.2,0.14,0.42],rr()*6.28,rr()*6.28,1]); } }
+// slim black linear pendant over the island and a globe over the table
+rod('black',L1,11.8,7.6,1.85,GC,0.003); rod('black',L1,11.8,9.0,1.85,GC,0.003);
+rb('black',L1,11.77,11.83,1.82,1.86,7.45,9.15,0.01); box('lamp',L1,11.775,11.825,1.815,1.82,7.5,9.1);
+rod('black',L1,11.8,9.9,2.05,GC,0.003); sph('lamp',L1,11.8,1.9,9.9,0.15,1,1,1,{seg:20});
+// tall white cabinets + window seat
+box('lacquer',L1,9.56,10.16,0,2.62,7.60,8.62,{solid:true}); box('lacquer',L1,9.56,10.16,0,2.62,10.60,11.62,{solid:true});
+box('frame',L1,10.16,10.165,0.05,2.55,8.11,8.115); box('frame',L1,10.16,10.165,0.05,2.55,11.1,11.105);
+box('oak',L1,9.56,10.10,0,0.45,8.62,10.60,{solid:true}); box('fabCream',L1,9.6,10.08,0.45,0.52,8.67,10.55,{r:.03});
+box('oak',L1,9.56,10.10,2.60,2.64,8.62,10.60);
+/* oak lining all around the seat window: jambs, head and sill from the glass to the seat front */
+box('oak',L1,9.27,10.10,0.45,2.64,8.62,8.66); box('oak',L1,9.27,10.10,0.45,2.64,10.56,10.60);
+box('oak',L1,9.27,10.10,2.56,2.64,8.62,10.60); box('oak',L1,9.27,9.56,0.45,0.49,8.62,10.60);
+
+/* ===================================================================
+   FURNITURE — UPPER FLOOR
+   =================================================================== */
+// master suite
+box('limewash',L2,0.35,3.70,U0,UC,8.39,8.41);
+box('oak',L2,0.75,3.55,U0,U0+1.25,8.41,8.47);
+box('fabLinen',L2,1.35,2.95,U0+0.32,U0+1.18,8.47,8.55,{r:.03}); box('fabLinen',L2,0.82,1.30,U0+0.32,U0+1.18,8.47,8.55,{r:.03}); box('fabLinen',L2,3.0,3.48,U0+0.32,U0+1.18,8.47,8.55,{r:.03});
+place(2.15,U0,9.62,'S',()=>F.bed(L2,1.8,2.1,'fabLinen',{cushion:'fabGrey'}));
+for(const x of [0.85,3.12]) box('oak',L2,x,x+0.33,U0+0.42,U0+0.6,8.47,8.85);
+for(const x of [1.0,3.3]){ place(x,U0+1.62,8.42,'S',()=>{ F.sconce(L2,'artDark'); sph('lamp',L2,0,0,0.07,0.065); }); }
+addFan(L2,2.15,9.9,UC);
+place(2.2,U0,10.4,'S',()=>F.rug(L2,2.6,2.0,'rugWhite'));
+place(3.95,U0,10.95,'S',()=>{ cyl('fabCream',L2,0,0,0,0.38,0.32,{seg:20,solid:true}); sph('fabCream',L2,0,0.36,0,0.3,1,0.35,1); });
+box('art',L2,4.86,4.88,U0+1.05,U0+1.95,9.4,10.6); box('artDark',L2,4.855,4.86,U0+1.2,U0+1.8,9.9,10.3);
+box('fabWhite',L2,0.40,0.82,U0+0.02,UC-0.04,11.45,11.62,{r:.05}); box('fabWhite',L2,4.55,4.86,U0+0.02,UC-0.04,11.45,11.62,{r:.05});
+// closet room: hanging wardrobe along the bedroom wall, folding closet (linen) facing the room
+box('lacquer',L2,0.36,3.54,U0,UC-0.05,7.81,8.32,{solid:true});   /* front flush with the window edge */
+for(let x=0.36;x<3.5;x+=0.53){ box('frame',L2,x+0.06,x+0.47,U0+0.08,UC-0.12,7.805,7.81); }
+box('lacquer',L2,2.37,3.54,U0,UC-0.05,6.15,6.58,{solid:true}); box('frame',L2,2.43,3.48,U0+0.08,UC-0.12,6.58,6.585);
+place(1.95,U0,7.14,'S',()=>F.rug(L2,2.4,0.8,'rugCheck'));
+// master bath (stone) — layout per plan: vanity on the north wall, tub on the west wall, shower NE, toilet on the east wall
+finish('bath',L2,0.35,3.54,4.25,6.48,U0,UC,{w:[[4.26,6.56,U0+1.2,U0+2.4]],s:[[1.45,2.26,U0,U0+2.25]]});
+box('bath',L2,0.35,3.54,U0,U0+0.006,4.25,6.48);
+box('bath',L2,0.37,1.08,U0,U0+0.55,4.76,6.44,{solid:true}); box('water',L2,0.47,0.98,U0+0.45,U0+0.5,4.88,6.32);
+box('oak',L2,0.37,2.35,U0+0.08,U0+0.72,4.26,4.70,{solid:true}); box('bath',L2,0.37,2.37,U0+0.72,U0+0.9,4.26,4.72);
+box('porcelain',L2,1.32,1.88,U0+0.86,U0+0.901,4.34,4.64);
+place(1.6,U0+1.0,4.27,'S',()=>F.tap(L2,'bronze'));
+box('mirror',L2,0.70,2.30,U0+1.1,U0+2.2,4.26,4.27);
+box('glassTint',L2,2.37,2.39,U0,U0+2.1,4.72,5.24); box('glassTint',L2,2.37,2.82,U0,U0+2.1,5.23,5.25);
+place(3.13,U0+2.1,4.26,'S',()=>{ box('black',L2,-0.01,0.01,0,0.3,0,0.3); cyl('black',L2,0,0.32,-0.01,0,0.12,{seg:20}); });
+place(3.54,U0,5.62,'W',()=>F.toilet(L2));
+// kids bedroom 2 & 1: two single beds each, oak wardrobe, ceiling fan
+for(const [x0,x1,wx0,wx1,wz0] of [[5.52,8.32,0,0,0],[8.42,11.22,8.45,10.05,3.35],[11.32,14.15,13.60,14.15,2.60]]){
+  place(x0+0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage'}));
+  place(x1-0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabCream'}));
+  box('oak',L2,(x0+x1)/2-0.22,(x0+x1)/2+0.22,U0,U0+0.5,0.52,0.92,{solid:true});
+  place((x0+x1)/2,U0+0.5,0.72,'S',()=>{ cyl('ceramic',L2,0,0,0,0.05,0.07); cyl('lamp',L2,0,0,0.05,0.3,0.1,{r2:0.07}); });
+  place((x0+x1)/2,U0,2.6,'S',()=>F.rug(L2,1.6,2.0,'rugCheck'));
+  addFan(L2,(x0+x1)/2,2.1,UC);
+}
+place(9.25,U0,3.62,'S',()=>F.wardrobe(L2,1.6,2.55,0.55,'oak',0.53));
+place(6.35,U0,3.62,'S',()=>F.wardrobe(L2,1.6,2.55,0.55,'oak',0.53));
+place(13.87,U0,3.25,'W',()=>F.wardrobe(L2,1.3,2.55,0.55,'oak',0.65));
+// laundry
+/* laundry furniture removed: the room is now bedroom 3 */
+// single bedroom (former service balcony): bed against the west wall, nightstand, wardrobe, rug, ceiling fan
+place(0.82,U0,1.49,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage'}));   /* in the NW corner, along the west wall, facing the wardrobe */
+box('oak',L2,1.32,1.72,U0,U0+0.5,0.47,0.87,{solid:true});
+place(1.52,U0+0.5,0.67,'S',()=>{ cyl('ceramic',L2,0,0,0,0.05,0.07); cyl('lamp',L2,0,0,0.05,0.3,0.1,{r2:0.07}); });
+place(3.14,U0,1.15,'W',()=>F.wardrobe(L2,1.3,2.40,0.55,'oak',0.65));
+place(2.0,U0,1.6,'S',()=>F.rug(L2,1.2,1.8,'rugCheck'));
+addFan(L2,1.9,2.2,UC);
+// laundry: counter with sink and upper cabinets on the north wall, stacked washer + dryer on the east wall
+box('lacquer',L2,10.88,13.55,U0,U0+0.88,7.56,8.16,{solid:true}); box('marble',L2,10.88,13.55,U0+0.88,U0+0.92,7.56,8.18);
+box('lacquer',L2,10.88,13.55,U0+1.55,UC-0.05,7.56,7.92);
+place(12.2,U0+0.92,7.62,'S',()=>{ box('porcelain',L2,-0.25,0.25,-0.04,0.01,0,0.36); F.tap(L2,'chrome',{handle:false}); });
+for(const y of [U0,U0+0.86]){ box('white',L2,13.55,14.14,y,y+0.85,7.75,8.40,{solid:true}); cyl('glassTint',L2,13.545,8.075,y+0.42,y+0.43,0.2,{seg:24}); }
+box('lacquer',L2,13.55,14.14,U0+1.72,UC-0.05,7.75,8.40);
+// office: computer desk perpendicular to the south wall, chair, full-height bookcase on the west wall
+box('oak',L2,11.98,12.78,U0+0.72,U0+0.76,10.01,11.66,{solid:true}); box('oak',L2,12.0,12.04,U0,U0+0.72,10.05,11.62); box('oak',L2,12.72,12.76,U0,U0+0.72,10.05,11.62);
+box('screen',L2,12.10,12.13,U0+0.86,U0+1.22,10.45,11.05); box('black',L2,12.13,12.20,U0+0.76,U0+0.86,10.72,10.78); box('black',L2,12.35,12.55,U0+0.76,U0+0.78,10.55,10.95);
+place(12.95,U0,10.75,'W',()=>F.chair(L2,'fabGrey','black'));
+box('oak',L2,9.45,9.82,U0,UC-0.05,9.14,11.60,{solid:true});
+for(let y=U0+0.4;y<UC-0.2;y+=0.42){ box('white',L2,9.47,9.82,y,y+0.02,9.16,11.58); for(let i=0;i<15;i++) box(i%3?'book':'artDark',L2,9.50,9.78,y+0.02,y+0.24+(i%4)*0.03,9.25+i*0.15,9.31+i*0.15); }
+place(10.4,U0,8.0,'S',()=>F.plant(L2,0.9,'concrete'));
+// kids bath A — white tile, oak vanity, glass shower
+finish('wtile',L2,12.35,14.15,4.02,5.65,U0,UC,{n:[[12.45,13.15,U0,U0+2.2]],e:[[4.45,5.25,U0+1.2,U0+2.4]]});
+box('terrazzo',L2,12.35,14.15,U0,U0+0.006,4.02,5.65);
+place(12.85,U0+0.45,5.63,'N',()=>{ box('oak',L2,-0.4,0.4,0,0.42,0,0.45,{solid:true}); box('frame',L2,-0.39,0.39,0.2,0.205,0.45,0.452); box('porcelain',L2,-0.42,0.42,0.42,0.48,0,0.47); place(0,0.48,0.02,'S',()=>F.tap(L2,'chrome')); box('oak',L2,-0.35,0.35,0.75,1.45,0,0.04); box('mirror',L2,-0.32,0.2,0.78,1.42,0.04,0.045); sph('lamp',L2,0.28,1.25,0.08,0.06); sph('lamp',L2,0.28,1.05,0.08,0.06); });
+box('glassTint',L2,13.30,13.32,U0,U0+2.0,4.6,5.65); box('glassTint',L2,13.30,14.15,U0,U0+2.0,4.58,4.60); place(14.15,U0,4.30,'W',()=>F.toilet(L2));
+// kids bath B — terrazzo + stick tiles, six-drawer vanity, bathtub
+finish('terrazzo',L2,10.90,12.25,5.20,5.75,U0,UC,{n:[[11.48,12.23,U0,U0+2.2]],s:[[10.90,12.25]]}); box('terrazzo',L2,10.90,12.25,U0,U0+0.006,5.20,5.75);
+finish('terrazzo',L2,10.90,14.15,5.75,7.45,U0,UC,{n:[[10.90,12.25]],e:[[6.20,7.00,U0+1.2,U0+2.4]]});
+box('stick',L2,11.35,12.55,U0,U0+1.0,7.42,7.435);
+box('terrazzo',L2,10.90,14.15,U0,U0+0.006,5.75,7.45);
+/* layout per plan 1-1: vanity + toilet on the south wall, tub along the east wall */
+place(11.95,U0+0.42,7.43,'N',()=>{ box('oak',L2,-0.55,0.55,0,0.45,0,0.46,{solid:true}); for(const x of [-0.55,-0.18,0.18]) for(const y of [0.02,0.24]) box('oak',L2,x+0.01,x+0.36,y,y+0.2,0.46,0.475); box('white',L2,-0.56,0.56,0.45,0.48,0,0.48); place(0,0.48,0.02,'S',()=>F.tap(L2,'chrome')); box('mirror',L2,-0.45,0.3,0.75,1.55,0,0.01); box('oak',L2,0.3,0.55,0.75,1.55,0,0.14); });
+box('white',L2,13.42,14.14,U0,U0+0.55,5.80,7.40,{solid:true}); box('water',L2,13.5,14.06,U0+0.46,U0+0.5,5.9,7.3);
+place(13.0,U0,7.45,'N',()=>F.toilet(L2));
+// hallway: bench
+
+/* ===================================================================
+   BUILD MESHES
+   =================================================================== */
+/* coplanar-surface priority: finishes win over structure, so overlapping faces never flicker */
+const MAT_RANK={ stone:0,woodClad:0,bath:0,bathGrey:0,terrazzo:0,wtile:0,stick:0,limewash:0,marble:0,rugWhite:0,rugCheck:0,gravel:0,tile:0,oakFloor:0,paving:0,cobble:0,deck:0,canvasArt:0,mirror:0,screen:0,oakDoor:0,
+  oakPanel:1,oak:1,white:2,frame:2,lacquer:2,black:2,teak:2,fabWhite:2,fabCream:2,fabLinen:2,fabGrey:2,fabMustard:2,fabOlive:2,fabSage:2,book:2,artDark:2,art:2,porcelain:2,bronze:2,brass:2,
+  chrome:1, ext:3, plaster:4, ceiling:5, roof:5, concrete:6, asphalt:7, grass:6, field:8, hedge:4 };
+for(const [k,m] of Object.entries(M)){ const r=MAT_RANK[k]??2; if(r>0){ m.polygonOffset=true; m.polygonOffsetFactor=0; m.polygonOffsetUnits=r*4;   /* constant bias: no slope term, so no seam lines at grazing angles */ } }
+const layerObjs = {s:[],g:[],u:[],r:[]};
+const raycastables=[];
+for(const [k,geos] of buckets){
+  const [L,m]=k.split('|');
+  const g=mergeGeometries(geos,false); g.computeBoundingSphere();
+  const mesh=new THREE.Mesh(g,M[m]); mesh.castShadow=!NO_SHADOW.has(m); mesh.receiveShadow=true;
+  mesh.userData.orig=M[m]; mesh.userData.L=L; scene.add(mesh); layerObjs[L].push(mesh);
+  if(m!=='glass'&&m!=='glassTint'&&m!=='water') raycastables.push(mesh);
+}
+const unitBox=new THREE.BoxGeometry(1,1,1), unitCyl=new THREE.CylinderGeometry(0.5,0.5,1,8);
+for(const [k,o] of inst){
+  const im=new THREE.InstancedMesh(o.shape==='box'?unitBox:unitCyl, M[o.m], o.list.length);
+  o.list.forEach((mt,i)=>im.setMatrixAt(i,mt)); im.instanceMatrix.needsUpdate=true; im.computeBoundingSphere();
+  im.castShadow=true; im.receiveShadow=true; im.userData.orig=M[o.m]; scene.add(im); layerObjs[o.L].push(im);
+}
+fans.forEach(f=>layerObjs[f.userData.L].push(Object.assign(f,{userData:{...f.userData,orig:M.white}})));
+/* ===================================================================
+   SOUTHERN VIEW: rolling farmland patchwork, wildflower meadow, olive grove, hills
+   =================================================================== */
+{ const Z0=PZ1+0.25, W=320, D=250, X0=-160, r=rng(2024), CN=IS_TOUCH?1024:2048;
+  const hgt=(x,z)=>{ const d=z-Z0; if(d<=0) return -0.34; const s=Math.min(1,Math.max(0,(d-8)/55)); const k=s*s*(3-2*s);
+    return -0.34 + k*(1.3*Math.sin(x*0.019+0.7)*Math.sin(d*0.016+0.4) + 0.9*Math.sin(x*0.047+2.1)*0.5 + 0.014*d); };
+  // patchwork texture: strips running toward the horizon, split into fields with crop rows
+  const c=canvasN(CN), g=c.getContext('2d'), px=CN/W, pz=CN/D;
+  const pal=[['#d8b75e','#c9a64f'],['#e4d08f','#d4bf7c'],['#8fb056','#7c9c48'],['#6c903f','#5c7f35'],['#a9b47a','#97a36a'],['#b99a72','#a7896a'],['#d2c06e','#c1ae5f']];
+  g.fillStyle='#9fb066'; g.fillRect(0,0,CN,CN);
+  let x=X0; const hedges=[];
+  while(x<X0+W){ const w=10+r()*26; let z=Z0+12; 
+    while(z<Z0+D){ const L=22+r()*55, col=pal[(r()*pal.length)|0];
+      const X=(x-X0)*px, Y=(D-(z-Z0)-L)*pz; g.fillStyle=col[0]; g.fillRect(X,Y,w*px,L*pz);
+      g.strokeStyle=col[1]; g.lineWidth=Math.max(1,px*0.25); const rowsVertical=r()>0.35;
+      for(let k=0;k<(rowsVertical?w:L);k+=0.9){ g.beginPath(); if(rowsVertical){ g.moveTo(X+k*px,Y); g.lineTo(X+k*px,Y+L*pz); } else { g.moveTo(X,Y+k*pz); g.lineTo(X+w*px,Y+k*pz); } g.stroke(); }
+      if(r()>0.55) hedges.push([x,z,w,'h']); z+=L; }
+    if(r()>0.5) hedges.push([x,Z0+12,D,'v']); x+=w; }
+  // meadow right behind the garden wall + a farm track toward the horizon
+  g.fillStyle='#8fae58'; g.fillRect(0,(D-12)*pz,CN,12*pz);
+  g.strokeStyle='#cdbb94'; g.lineWidth=2.6*px; g.beginPath(); g.moveTo((22-X0)*px,(D-12)*pz); g.bezierCurveTo((30-X0)*px,(D-70)*pz,(5-X0)*px,(D-150)*pz,(18-X0)*px,0); g.stroke();
+  const id=g.getImageData(0,0,CN,CN), dd=id.data; for(let i=0;i<CN*CN;i++){ const f=(hsh(i%CN,(i/CN)|0,21)-0.5)*16+(hsh((i%CN)>>4,((i/CN)|0)>>4,22)-0.5)*12; dd[i*4]+=f; dd[i*4+1]+=f; dd[i*4+2]+=f*0.6; } g.putImageData(id,0,0);
+  // hedgerows painted dark
+  g.fillStyle='#4a6a30'; for(const [hx,hz,len,o] of hedges){ if(o==='h') g.fillRect((hx-X0)*px,(D-(hz-Z0))*pz-1.5*pz,len*px,1.5*pz); else g.fillRect((hx-X0)*px-0.75*px,0,1.5*px,(D-12)*pz); }
+  const ft=colorTex(c,0,1); ft.repeat.set(1,1);
+  const gd=texGrass(3); gd.normalMap.repeat.set(W/3,D/3);
+  const geo=new THREE.PlaneGeometry(W,D,IS_TOUCH?120:220,IS_TOUCH?100:180); geo.rotateX(-Math.PI/2); geo.translate(X0+W/2,0,Z0+D/2);
+  const pp=geo.attributes.position; for(let i=0;i<pp.count;i++) pp.setY(i,hgt(pp.getX(i),pp.getZ(i))); geo.computeVertexNormals();
+  const fmat=new THREE.MeshStandardMaterial({map:ft, normalMap:gd.normalMap, normalScale:new THREE.Vector2(0.6,0.6), roughness:1}); ALL_MATS.push(fmat);
+  const field=new THREE.Mesh(geo,fmat); field.receiveShadow=true; field.userData.orig=fmat; field.userData.L='s'; scene.add(field); layerObjs.s.push(field);
+  // blob trees for hedgerows and the olive grove (merged, cheap)
+  const tG=[], cG=[], oG=[];
+  const blob=(x,z,s,olive)=>{ const y=hgt(x,z); const t=new THREE.CylinderGeometry(0.12*s,0.18*s,1.6*s,6); t.translate(x,y+0.8*s,z); tG.push(t.toNonIndexed());
+    for(let k=0;k<3;k++){ const sp=new THREE.IcosahedronGeometry((olive?1.1:1.5)*s*(0.8+r()*0.4),1); sp.scale(1,olive?0.7:0.85,1); sp.translate(x+(r()-0.5)*1.4*s,y+(olive?1.9:2.5)*s+r()*0.6*s,z+(r()-0.5)*1.4*s); (olive?oG:cG).push(sp.toNonIndexed()); } };
+  for(const [hx,hz,len,o] of hedges) for(let k=3;k<len;k+=4+r()*7){ if(r()<0.5) continue; const X=o==='h'?hx+k:hx, Z=o==='h'?hz:hz+k; if(Z<Z0+20) continue; blob(X,Z,0.9+r()*0.7,false); }
+  for(let i=0;i<9;i++) for(let j=0;j<6;j++) blob(26+i*5.5+(r()-0.5),Z0+38+j*6+(r()-0.5),0.85+r()*0.2,true);   // olive grove
+  const mk=(arr,m)=>{ if(!arr.length) return; const mm=new THREE.Mesh(mergeGeometries(arr),m); mm.receiveShadow=true; mm.userData.orig=m; mm.userData.L='s'; scene.add(mm); layerObjs.s.push(mm); };
+  mk(tG,M.trunk); mk(cG,M.plantDark); mk(oG,M.olive);
+  // distant hills, hazed by the atmosphere
+  for(const [zz,amp,base,col] of [[Z0+215,9,3,0x8a9c72],[Z0+265,18,6,0x93a3a6]]){ const hg=new THREE.PlaneGeometry(700,60,140,8); hg.rotateX(-Math.PI/2); hg.translate(7,0,zz);
+    const hp=hg.attributes.position; for(let i=0;i<hp.count;i++){ const X=hp.getX(i), Zr=(hp.getZ(i)-zz+30)/60; const ridge=base+amp*(0.55+0.3*Math.sin(X*0.013+zz)+0.25*Math.sin(X*0.037+1.3)+0.1*Math.sin(X*0.11)); hp.setY(i,-0.3+ridge*Math.sin(Math.min(1,Zr)*Math.PI)*(Zr<0.5?1:1)); }
+    hg.computeVertexNormals(); const hm=new THREE.MeshStandardMaterial({color:col,roughness:1}); ALL_MATS.push(hm); const hill=new THREE.Mesh(hg,hm); hill.userData.orig=hm; hill.userData.L='s'; scene.add(hill); layerObjs.s.push(hill); }
+  // wildflower meadow beyond the garden wall: poppies, chrysanthemums, daisies and grasses
+  const NF=IS_TOUCH?900:2600;
+  for(let i=0;i<NF;i++){ const X=-12+r()*40, Z=Z0+0.4+Math.pow(r(),1.4)*11.5, y=hgt(X,Z), k=r();
+    if(k<0.4){ for(let b=0;b<4;b++){ const a=r()*6.28; BLADE.push([X+Math.cos(a)*0.03,y,Z+Math.sin(a)*0.03,0.25+r()*0.25,0.012,0.3+r()*0.5,a,[0.18+r()*0.07,0.35+r()*0.2,0.36+r()*0.14]]); } continue; }
+    const hsl= k<0.65?[0.0+r()*0.02,0.82,0.5]: k<0.85?[0.13+r()*0.02,0.85,0.55]:[0.12,0.25,0.93];
+    FOL.push([X,y+0.22+r()*0.18,Z,0.035+r()*0.02,hsl,0,0,0.45]); }
+}
+scene.fog=new THREE.Fog(0xdbe9f5,110,360);
+if(FOL.length){ const fm=new THREE.MeshStandardMaterial({color:0xffffff, roughness:.82}); ALL_MATS.push(fm);
+  const im=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,1),fm,FOL.length), m4=new THREE.Matrix4(), q=new THREE.Quaternion(), eu=new THREE.Euler(), col=new THREE.Color();
+  FOL.forEach((f,i)=>{ q.setFromEuler(eu.set(f[5],f[6],0)); m4.compose(_p.set(f[0],f[1],f[2]),q,_s.set(f[3],f[3]*(f[7]||1),f[3])); im.setMatrixAt(i,m4); im.setColorAt(i,col.setHSL(f[4][0],f[4][1],Math.max(0.05,f[4][2]))); });
+  im.instanceMatrix.needsUpdate=true; im.instanceColor.needsUpdate=true; im.computeBoundingSphere(); im.castShadow=true; im.receiveShadow=true; im.userData.orig=fm; im.userData.L='s'; im.userData.foliage=true; scene.add(im); layerObjs.s.push(im); }
+if(BLADE.length){ const bg=new THREE.BufferGeometry(), pos=[], seg=4;
+  for(let k=0;k<seg;k++){ const t0=k/seg, t1=(k+1)/seg, w0=0.5*(1-t0), w1=0.5*(1-t1), b0=t0*t0*0.35, b1=t1*t1*0.35;
+    pos.push(-w0,t0,b0, w0,t0,b0, w1,t1,b1, -w0,t0,b0, w1,t1,b1, -w1,t1,b1); }
+  bg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); bg.computeVertexNormals();
+  const bm=new THREE.MeshStandardMaterial({color:0xffffff, side:THREE.DoubleSide, roughness:.8}); ALL_MATS.push(bm);
+  const im=new THREE.InstancedMesh(bg,bm,BLADE.length), m4=new THREE.Matrix4(), q=new THREE.Quaternion(), eu=new THREE.Euler(), col=new THREE.Color();
+  BLADE.forEach((b,i)=>{ q.setFromEuler(eu.set(0,b[6],0,'YXZ')); m4.compose(_p.set(b[0],b[1],b[2]),q,_s.set(b[4],b[3],b[3]*b[5])); im.setMatrixAt(i,m4); im.setColorAt(i,col.setHSL(b[7][0],b[7][1],b[7][2])); });
+  im.instanceMatrix.needsUpdate=true; im.instanceColor.needsUpdate=true; im.computeBoundingSphere(); im.castShadow=false; im.receiveShadow=true; im.userData.orig=bm; im.userData.L='s'; im.userData.foliage=true; scene.add(im); layerObjs.s.push(im); }
+const noAO=[];
+if(LEAF.length){ const c=canvasN(256), g=c.getContext('2d'), r=rng(99);
+  const stem=(x0,y0,ang,len,depth)=>{ const x1=x0+Math.cos(ang)*len, y1=y0+Math.sin(ang)*len; g.strokeStyle='rgb(90,80,65)'; g.lineWidth=depth?1.2:2; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke();
+      for(let t=0.15;t<1;t+=0.09){ const bx=x0+(x1-x0)*t, by=y0+(y1-y0)*t; for(const sgn of [-1,1]){ const la=ang+sgn*(0.55+r()*0.35), L=22+r()*14, v=(150+r()*100)|0;
+        g.save(); g.translate(bx,by); g.rotate(la); g.fillStyle=`rgb(${v},${v},${v})`; g.beginPath(); g.moveTo(0,0); g.quadraticCurveTo(L*0.5,-L*0.13,L,0); g.quadraticCurveTo(L*0.5,L*0.13,0,0); g.fill();
+        g.strokeStyle='rgba(255,255,255,.35)'; g.lineWidth=0.7; g.beginPath(); g.moveTo(1,0); g.lineTo(L*0.9,0); g.stroke(); g.restore(); } }
+      if(depth<1) for(let k=0;k<2;k++) stem(x0+(x1-x0)*(0.35+k*0.25),y0+(y1-y0)*(0.35+k*0.25),ang+(k?0.7:-0.7),len*0.45,depth+1); };
+  stem(128,236,-Math.PI/2+(r()-0.5)*0.2,200,0);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=ANI;
+  const lm=new THREE.MeshStandardMaterial({map:t, alphaTest:0.5, side:THREE.DoubleSide, roughness:.7}); ALL_MATS.push(lm);
+  const im=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),lm,LEAF.length), m4=new THREE.Matrix4(), q=new THREE.Quaternion(), eu=new THREE.Euler(), col=new THREE.Color();
+  LEAF.forEach((f,i)=>{ q.setFromEuler(eu.set(f[5],f[6],f[5]*0.5)); m4.compose(_p.set(f[0],f[1],f[2]),q,_s.set(f[3],f[3],f[3])); im.setMatrixAt(i,m4); im.setColorAt(i,col.setHSL(f[4][0],f[4][1],Math.max(0.05,f[4][2]+0.12))); });
+  im.instanceMatrix.needsUpdate=true; im.instanceColor.needsUpdate=true; im.computeBoundingSphere(); im.castShadow=true; im.receiveShadow=true; im.userData.orig=lm; im.userData.L='s'; im.userData.foliage=true; scene.add(im); layerObjs.s.push(im); }
+// gradient sky dome (clear blue like the renders); the physical Sky stays only for the sun direction
+const skyDome=new THREE.Mesh(new THREE.SphereGeometry(300,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,toneMapped:false,
+  uniforms:{top:{value:new THREE.Color(0x2f6fc9)},mid:{value:new THREE.Color(0x7fb0e6)},hor:{value:new THREE.Color(0xdbe9f5)},gnd:{value:new THREE.Color(0xc9d0b8)}},
+  vertexShader:'varying vec3 vP; void main(){ vP=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+  fragmentShader:'uniform vec3 top,mid,hor,gnd; varying vec3 vP; void main(){ float h=vP.y; vec3 c= h>0.0 ? mix(hor, mix(mid,top,smoothstep(0.25,0.9,h)), smoothstep(0.0,0.25,h)) : mix(hor,gnd,smoothstep(0.0,-0.08,h)); gl_FragColor=vec4(c,1.0); }'}));
+skyDome.position.set(7,0,7); scene.add(skyDome); sky.visible=false; noAO.push(skyDome);
+const SKY_DAY={top:new THREE.Color(0x2f6fc9),mid:new THREE.Color(0x7fb0e6),hor:new THREE.Color(0xdbe9f5)}, SKY_NIGHT={top:new THREE.Color(0x05070d),mid:new THREE.Color(0x0b1220),hor:new THREE.Color(0x1d2433)}, SKY_DUSK=new THREE.Color(0xf2b483);
+// soft clouds around the sky dome
+const cloudMats=[];
+{ const c=canvasN(256), g=c.getContext('2d'), r=rng(5);
+  for(let i=0;i<46;i++){ const x=40+r()*176, y=96+r()*60, rad=18+r()*42, gr=g.createRadialGradient(x,y,0,x,y,rad); gr.addColorStop(0,'rgba(255,255,255,.5)'); gr.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=gr; g.fillRect(0,0,256,256); }
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  for(let i=0;i<16;i++){ const m=new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,fog:false}); cloudMats.push(m); const sp=new THREE.Sprite(m), a=i/16*Math.PI*2+r()*0.3, d=170+r()*90;
+    sp.position.set(7+Math.cos(a)*d,50+r()*55,7+Math.sin(a)*d); sp.scale.set(80+r()*60,34+r()*20,1); scene.add(sp); noAO.push(sp); } }
+scene.traverse(o=>{ if((o.isMesh&&o.material&&['glass','glassTint','water'].includes(o.material.name))||o.userData.foliage) noAO.push(o); });
+
+/* night lights (always present so shaders don't recompile) */
+const nightLights=[];
+for(const [x,y,z] of [[7.4,0.4,10.2],[6.6,0.35,-2.6],[10.9,0.25,-0.6],[16.0,0.35,13.6],[2.5,0.35,13.6],[2.4,2.4,5.8],[2.5,2.4,9.4],[11.8,2.3,8.6],[7.2,3.0,4.0],[2.2,2.6,2.0],[2.2,6.1,10.0],[9.8,6.1,4.5],[12.8,6.1,2.0]]){
+  const p=new THREE.PointLight(0xffd6a0,0,9,2); p.position.set(x,y,z); scene.add(p); nightLights.push(p);
+}
+
+/* ===================================================================
+   SUN
+   =================================================================== */
+function sunPos(utcMs){
+  const n=utcMs/86400000+2440587.5-2451545.0;
+  const L=((280.460+0.9856474*n)%360+360)%360;
+  const g=(((357.528+0.9856003*n)%360+360)%360)*D2R;
+  const lam=(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*D2R;
+  const eps=(23.439-0.0000004*n)*D2R;
+  const ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam));
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+  const gmst=((280.46061837+360.98564736629*n)%360+360)%360;
+  const H=(gmst+LON)*D2R-ra, la=LAT*D2R;
+  const alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(H));
+  const az=Math.atan2(-Math.sin(H),Math.cos(la)*Math.tan(dec)-Math.sin(la)*Math.cos(H));
+  return {alt, az:(az+2*Math.PI)%(2*Math.PI)};
+}
+const YEAR=new Date().getFullYear();
+const daysInYear=((YEAR%4===0&&YEAR%100!==0)||YEAR%400===0)?366:365;
+function lastSunday(y,m){ const d=new Date(Date.UTC(y,m+1,0)); while(d.getUTCDay()!==0) d.setUTCDate(d.getUTCDate()-1); return d; }
+const dstStart=(()=>{ const d=lastSunday(YEAR,2); d.setUTCDate(d.getUTCDate()-2); return d; })();
+const dstEnd=lastSunday(YEAR,9);
+function israelOffset(doy){ const d=new Date(Date.UTC(YEAR,0,doy)); return (d>=dstStart&&d<dstEnd)?3:2; }
+function utcOf(doy,min){ return Date.UTC(YEAR,0,doy)+min*60000-israelOffset(doy)*3600000; }
+const HEB_M=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DIRS=['צפון','צפון-מזרח','מזרח','דרום-מזרח','דרום','דרום-מערב','מערב','צפון-מערב'];
+const hhmm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(Math.round(m%60)).padStart(2,'0');
+const sunState={doy:172,min:14*60,playing:false};
+let sunDirty=true, shadowFrames=3;
+const sunVec=new THREE.Vector3();
+const cWarm=new THREE.Color(0xffb46e), cDay=new THREE.Color(0xfff4e4);
+function smooth(a,b,x){ const t=Math.min(1,Math.max(0,(x-a)/(b-a))); return t*t*(3-2*t); }
+function riseSet(doy){ let rise=null,set=null,prev=null; for(let m=180;m<=1260;m+=2){ const a=sunPos(utcOf(doy,m)).alt/D2R+0.833; if(prev!==null){ if(prev<0&&a>=0) rise=m; if(prev>=0&&a<0) set=m; } prev=a; } return {rise,set}; }
+let rsCache={doy:-1};
+function applySun(){
+  const {alt,az}=sunPos(utcOf(sunState.doy,sunState.min));
+  const phi=az+NORTH_DEG*D2R;
+  sunVec.set(Math.cos(alt)*Math.sin(phi), Math.sin(alt), -Math.cos(alt)*Math.cos(phi));
+  su.sunPosition.value.copy(sunVec);
+  sun.position.copy(SHADOW_CENTER).addScaledVector(sunVec,60);
+  const altD=alt/D2R, day=smooth(-4,8,altD);
+  sun.intensity=3.8*smooth(-1,6,altD);
+  sun.color.copy(cWarm).lerp(cDay,smooth(2,22,altD));
+  hemi.intensity=0.06+0.5*day;
+  hemi.color.setHSL(0.58,0.35,0.55+0.3*day);
+  const env=0.06+0.6*day; for(const m of ALL_MATS) m.envMapIntensity= m.name==='glass'? env*0.3 : env;
+  const night=1-smooth(-6,4,altD);
+  M.lamp.emissiveIntensity=night*2.2;
+  { const u=skyDome.material.uniforms, dusk=smooth(-4,3,altD)*(1-smooth(4,14,altD));
+    u.top.value.copy(SKY_NIGHT.top).lerp(SKY_DAY.top,day); if(scene.fog) scene.fog.color.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day); u.mid.value.copy(SKY_NIGHT.mid).lerp(SKY_DAY.mid,day); u.hor.value.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day).lerp(SKY_DUSK,dusk*0.7); }
+  cloudMats.forEach(m=>{ m.opacity=0.9*day; m.color.copy(sun.color).lerp(new THREE.Color(0xffffff),0.6); });
+  nightLights.forEach(l=>l.intensity=night*14);
+  renderer.toneMappingExposure=(0.66+0.4*day+0.3*night)*(mode==='walk'?1.08:1);
+  shadowFrames=3;
+  // UI
+  const date=new Date(Date.UTC(YEAR,0,sunState.doy));
+  document.getElementById('sunTitle').innerHTML=`<span>${hhmm(sunState.min)}</span><small>${date.getUTCDate()} ב${HEB_M[date.getUTCMonth()]}</small>`;
+  if(rsCache.doy!==sunState.doy) rsCache={doy:sunState.doy,...riseSet(sunState.doy)};
+  const azD=((az/D2R)%360+360)%360;
+  document.getElementById('sunMeta').innerHTML = altD>-0.8
+    ? `השמש ב${DIRS[Math.round(azD/45)%8]} (${azD.toFixed(0)}°), בגובה ${altD.toFixed(0)}° · זריחה ${rsCache.rise?hhmm(rsCache.rise):'—'} · שקיעה ${rsCache.set?hhmm(rsCache.set):'—'}`
+    : `לילה — השמש מתחת לאופק · זריחה ${rsCache.rise?hhmm(rsCache.rise):'—'} · שקיעה ${rsCache.set?hhmm(rsCache.set):'—'}`;
+  document.getElementById('time').value=sunState.min; document.getElementById('day').value=sunState.doy;
+}
+
+/* ===================================================================
+   VIEW MODES, CUTAWAY, WALKING
+   =================================================================== */
+const controls=new OrbitControls(camera,renderer.domElement);
+controls.target.set(7.25,2.2,7.2); controls.enableDamping=true; controls.dampingFactor=0.08;
+controls.minDistance=4; controls.maxDistance=70; controls.maxPolarAngle=Math.PI*0.495;
+// 2D plan view: orthographic camera straight down, street at the top (as on the drawings)
+const PLAN_H=26; const ortho=new THREE.OrthographicCamera(-1,1,1,-1,0.1,200);
+ortho.up.set(0,0,-1); ortho.position.set(7.25,80,8.5); ortho.lookAt(7.25,0,8.5);
+function fitOrtho(){ const a=innerWidth/innerHeight; const h=a<1?8.4/a:PLAN_H/2; /* portrait: fit the house width */ ortho.top=h; ortho.bottom=-h; ortho.left=-h*a; ortho.right=h*a; ortho.updateProjectionMatrix(); }
+fitOrtho();
+const planControls=new OrbitControls(ortho,renderer.domElement);
+planControls.target.set(7.25,0,8.5); planControls.enableRotate=false; planControls.screenSpacePanning=true;
+planControls.enableDamping=true; planControls.dampingFactor=0.12; planControls.minZoom=0.6; planControls.maxZoom=10;
+planControls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.PAN};
+planControls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_PAN};
+planControls.enabled=false; planControls.update();
+let activeCam=camera, orthoZoomGoal=null;
+function smoothOrtho(dt){ if(orthoZoomGoal===null) return; ortho.zoom+=(orthoZoomGoal-ortho.zoom)*(1-Math.exp(-dt*9)); ortho.updateProjectionMatrix(); if(Math.abs(orthoZoomGoal-ortho.zoom)<0.002) orthoZoomGoal=null; }
+planControls.addEventListener('start',()=>{ orthoZoomGoal=null; });
+// smooth wheel zoom: intercept the wheel before OrbitControls (pinch-zoom on phones stays with OrbitControls)
+let zoomGoal=null; const _zdir=new THREE.Vector3();
+stage.addEventListener('wheel',e=>{
+  e.preventDefault(); e.stopPropagation();
+  if(mode==='walk') return;
+  let d=e.deltaY; if(e.deltaMode===1) d*=16; else if(e.deltaMode===2) d*=innerHeight;
+  d=Math.max(-120,Math.min(120,d));
+  if(mode==='plan'){ orthoZoomGoal=Math.min(planControls.maxZoom,Math.max(planControls.minZoom,(orthoZoomGoal??ortho.zoom)*Math.exp(-d*0.0018))); return; }
+  const cur=camera.position.distanceTo(controls.target);
+  zoomGoal=Math.min(controls.maxDistance,Math.max(controls.minDistance,(zoomGoal??cur)*Math.exp(d*0.0018)));
+},{capture:true,passive:false});
+controls.addEventListener('start',()=>{ zoomGoal=null; });
+function smoothZoom(dt){
+  if(zoomGoal===null) return;
+  _zdir.subVectors(camera.position,controls.target); const cur=_zdir.length();
+  const next=cur+(zoomGoal-cur)*(1-Math.exp(-dt*9));
+  camera.position.copy(controls.target).addScaledVector(_zdir.normalize(),next);
+  if(Math.abs(zoomGoal-next)<0.005) zoomGoal=null;
+}
+camera.position.set(-10.5,12.5,27.5);
+if(innerWidth/innerHeight<1){ const k=Math.min(1.9,1/(innerWidth/innerHeight)*0.85); camera.position.sub(controls.target).multiplyScalar(k).add(controls.target); }
+controls.update();
+let mode='orbit', cut='all';
+function setCut(c){
+  cut=c; document.querySelectorAll('#cut button').forEach(b=>b.classList.toggle('on',b.dataset.c===c));
+  const hide={all:[],noroof:['r'],ground:['r','u']}[c];
+  for(const L of ['g','u','r','s']) for(const o of layerObjs[L]){ o.material = hide.includes(L)? ghost : o.userData.orig; }
+}
+const EYE=1.62, STEP=0.3, RAD=0.22;
+const player={x:6.5,y:GRADE,z:-3.4,yaw:Math.PI,pitch:-0.05,vy:0};
+function blocked(x,z,feet){
+  const lo=feet+STEP, hi=feet+1.75;
+  for(const s of solids){ if(s.y1<=lo||s.y0>=hi) continue; if(x+RAD>s.x0&&x-RAD<s.x1&&z+RAD>s.z0&&z-RAD<s.z1) return true; }
+  const FR=0.1; for(const f of floors){ if(f.top<=lo||f.y0>=hi) continue; if(x+FR>f.x0&&x-FR<f.x1&&z+FR>f.z0&&z-FR<f.z1) return true; }
+  return false;
+}
+function groundAt(x,z,feet){ let best=-5; for(const f of floors){ if(x>=f.x0&&x<=f.x1&&z>=f.z0&&z<=f.z1&&f.top<=feet+STEP+1e-3&&f.top>best) best=f.top; } return best; }
+const orbitSaved={pos:camera.position.clone(),target:new THREE.Vector3(7.25,2.2,7.2)};
+function setMode(m){
+  if(mode==='orbit'&&m!=='orbit'){ orbitSaved.pos.copy(camera.position); orbitSaved.target.copy(controls.target); }
+  zoomGoal=null; mode=m; document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  document.body.classList.toggle('walk',m==='walk');
+  controls.enabled = m==='orbit'; planControls.enabled = m==='plan'; activeCam = m==='plan'? ortho : camera; orthoZoomGoal=null;
+  if(m==='plan' && cut==='all') setCut('noroof');
+  if(m==='walk'){ if(cut!=='all') setCut('all'); if(innerWidth<700) document.getElementById('sun').classList.add('min'); camera.fov=innerWidth<innerHeight?88:(IS_TOUCH?72:68); }
+  else { camera.fov=55; camera.position.copy(orbitSaved.pos); controls.target.copy(orbitSaved.target); controls.update(); }
+  camera.updateProjectionMatrix(); showHint(); sunDirty=true;
+}
+function showHint(){
+  const h=document.getElementById('hint');
+  h.textContent = mode==='plan'
+    ? (IS_TOUCH?'גרירה להזזה · צביטה לזום · נגיעה כפולה בחדר כדי להיכנס':'גרירה להזזה · גלגלת לזום · לחיצה כפולה על חדר כדי להיכנס')
+    : mode==='walk'
+    ? (IS_TOUCH?'ג׳ויסטיק משמאל להליכה · גרירה להסתכלות · נגיעה ברצפה ללכת אליה':'W A S D או חצים להליכה · גרירה עם העכבר להסתכלות · Shift לריצה · לחיצה על הרצפה ללכת אליה')
+    : (IS_TOUCH?'גרירה לסיבוב · צביטה לזום · נגיעה כפולה ברצפה כדי להיכנס':'גרירה לסיבוב · גלגלת לזום · לחיצה כפולה על רצפה כדי להיכנס לשם');
+  h.style.opacity=1; clearTimeout(showHint.t); showHint.t=setTimeout(()=>h.style.opacity=0.0,7000);
+}
+const ROOMS=[
+  ['כניסה מהרחוב',6.5,GRADE,-3.4,Math.PI],
+  ['מבואה וחלל כפול',6.9,0,2.8,Math.PI*0.95],
+  ['פינת משפחה (במה מוגבהת)',2.9,PL,3.3,0.35],
+  ['פינת אוכל',3.8,0,4.6,Math.PI*0.85],
+  ['סלון',3.9,0,7.6,Math.PI*0.8],
+  ['מטבח',10.6,0,6.7,-Math.PI*0.62],
+  ['פטיו פנימי עם העץ',7.2,0,8.4,Math.PI],
+  ['ממ״ד',12.6,0,2.9,0],
+  ['מזווה ומעבר ליחידת האירוח',10.0,0,4.3,-Math.PI/2],
+  ['שירותי אורחים',8.6,0,3.0,0],
+  ['מקלחת אורחים',9.9,0,3.2,0],
+  ['גינה ופרגולה',7.4,GRADE,15.3,0],
+  ['מסדרון קומה א׳',5.0,U0,4.55,-Math.PI/2],
+  ['סוויטת הורים',3.9,U0,11.2,0.25],
+  ['חדר ארונות',3.0,U0,7.2,Math.PI/2],
+  ['חדר רחצה הורים',1.9,U0,6.2,0.1],
+  ['חדר שינה 1',12.8,U0,3.5,0],
+  ['חדר שינה 2',9.8,U0,3.5,0],
+  ['חדר רחצה ילדים',12.0,U0,6.6,-Math.PI/2],
+  ['חדר שינה 3',6.9,U0,3.5,0],
+  ['משרד וחדר כביסה',10.0,U0,7.9,Math.PI],
+  ['חדר שינה יחיד',2.9,U0,3.4,0.9],
+];
+const roomSel=document.getElementById('room');
+roomSel.innerHTML='<option value="">בחירת חדר…</option>'+ROOMS.map((r,i)=>`<option value="${i}">${r[0]}</option>`).join('');
+roomSel.addEventListener('change',()=>{ const r=ROOMS[+roomSel.value]; if(!r) return; Object.assign(player,{x:r[1],y:r[2],z:r[3],yaw:r[4],pitch:-0.08,vy:0}); autoTarget=null; setMode('walk'); roomSel.blur(); });
+
+// input
+const keys={};
+addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return; keys[e.code]=true; if(mode==='walk'&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault(); });
+addEventListener('keyup',e=>{ keys[e.code]=false; });
+addEventListener('blur',()=>{ for(const k in keys) keys[k]=false; });
+const joy={x:0,y:0,id:null};
+const joyEl=document.getElementById('joy'), knob=document.getElementById('knob');
+joyEl.addEventListener('pointerdown',e=>{ joy.id=e.pointerId; joyEl.setPointerCapture(e.pointerId); moveJoy(e); e.preventDefault(); });
+joyEl.addEventListener('pointermove',e=>{ if(e.pointerId===joy.id) moveJoy(e); });
+const endJoy=e=>{ if(e.pointerId!==joy.id) return; joy.id=null; joy.x=joy.y=0; knob.style.transform=''; };
+joyEl.addEventListener('pointerup',endJoy); joyEl.addEventListener('pointercancel',endJoy);
+function moveJoy(e){ const r=joyEl.getBoundingClientRect(); let dx=(e.clientX-(r.left+r.width/2))/(r.width/2), dy=(e.clientY-(r.top+r.height/2))/(r.height/2); const l=Math.hypot(dx,dy); if(l>1){dx/=l;dy/=l;} joy.x=dx; joy.y=dy; knob.style.transform=`translate(${dx*36}px,${dy*36}px)`; autoTarget=null; }
+const look={id:null,x:0,y:0,sx:0,sy:0,t:0};
+const cv=renderer.domElement;
+cv.addEventListener('pointerdown',e=>{ look.sx=e.clientX; look.sy=e.clientY; look.t=performance.now(); if(mode!=='walk') return; look.id=e.pointerId; look.x=e.clientX; look.y=e.clientY; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener('pointermove',e=>{ if(mode!=='walk'||e.pointerId!==look.id) return; const k=IS_TOUCH?0.0055:0.0042; player.yaw+=(e.clientX-look.x)*k; player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch+(e.clientY-look.y)*k)); look.x=e.clientX; look.y=e.clientY; });
+cv.addEventListener('pointerup',e=>{ const moved=Math.hypot(e.clientX-look.sx,e.clientY-look.sy), dt=performance.now()-look.t; if(e.pointerId===look.id) look.id=null;
+  if(moved<8&&dt<350) onTap(e); });
+let lastTap=0;
+const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+function pickFloor(e){ ndc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(ndc,activeCam);
+  const vis=raycastables.filter(o=>o.material!==ghost);
+  const hits=ray.intersectObjects(vis,false); for(const h of hits){ if(h.face && h.face.normal.y>0.7) return h.point; if(h.face) return null; } return null; }
+let autoTarget=null;
+function onTap(e){
+  const now=performance.now();
+  if(mode==='walk'){ const p=pickFloor(e); if(p&&Math.hypot(p.x-player.x,p.z-player.z)>0.4&&Math.abs(p.y-player.y)<1.2) autoTarget={x:p.x,z:p.z,t:0}; }
+  else { if(now-lastTap<380){ const p=pickFloor(e); if(p){ const dx=p.x-camera.position.x, dz=p.z-camera.position.z; Object.assign(player,{x:p.x,z:p.z,y:p.y,yaw:mode==='plan'?Math.PI:Math.atan2(-dx,-dz),pitch:-0.05,vy:0}); if(cut!=='all'){ /* cut view: entering keeps chosen floor */ } setMode('walk'); } } }
+  lastTap=now;
+}
+cv.addEventListener('dblclick',e=>e.preventDefault());
+
+function stepWalk(dt){
+  let f=0,s=0;
+  if(keys.KeyW||keys.ArrowUp) f+=1; if(keys.KeyS||keys.ArrowDown) f-=1;
+  if(keys.KeyA) s-=1; if(keys.KeyD) s+=1;
+  if(keys.ArrowLeft) player.yaw+=1.9*dt; if(keys.ArrowRight) player.yaw-=1.9*dt;
+  f+=-joy.y; s+=joy.x;
+  if(f||s) autoTarget=null;
+  const run=keys.ShiftLeft||keys.ShiftRight;
+  let speed=(run?3.2:1.55);
+  let dx,dz;
+  if(autoTarget){ const vx=autoTarget.x-player.x, vz=autoTarget.z-player.z, d=Math.hypot(vx,vz);
+    if(d<0.12){ autoTarget=null; dx=dz=0; } else { const sp=Math.min(speed*dt,d); dx=vx/d*sp; dz=vz/d*sp;
+      const want=Math.atan2(-vx,-vz); let diff=((want-player.yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI; player.yaw+=diff*Math.min(1,dt*4); } }
+  else { const l=Math.hypot(f,s); if(l>1){f/=l;s/=l;} const fx=-Math.sin(player.yaw), fz=-Math.cos(player.yaw), rx=Math.cos(player.yaw), rz=-Math.sin(player.yaw);
+    dx=(fx*f+rx*s)*speed*dt; dz=(fz*f+rz*s)*speed*dt; }
+  const steps=Math.ceil(Math.max(Math.abs(dx),Math.abs(dz))/0.08)||1; let stuck=false;
+  for(let i=0;i<steps;i++){ const nx=player.x+dx/steps, nz=player.z+dz/steps;
+    if(!blocked(nx,player.z,player.y)) player.x=nx; else stuck=true;
+    if(!blocked(player.x,nz,player.y)) player.z=nz; else stuck=true; }
+  if(autoTarget&&stuck){ autoTarget.t+=dt; if(autoTarget.t>0.6) autoTarget=null; }
+  const g=groundAt(player.x,player.z,player.y);
+  if(g<player.y-0.005){ player.vy-=9.8*dt; player.y=Math.max(g,player.y+player.vy*dt); if(player.y===g) player.vy=0; }
+  else { player.vy=0; player.y+= (g-player.y)*Math.min(1,dt*18); }
+  camera.position.set(player.x,player.y+EYE,player.z);
+  camera.rotation.set(player.pitch,player.yaw,0,'YXZ');
+}
+
+/* ===================================================================
+   UI wiring
+   =================================================================== */
+document.querySelectorAll('#mode button').forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.m==='walk'&&mode!=='walk'){ /* start where we last were, or the street */ } setMode(b.dataset.m); }));
+document.querySelectorAll('#cut button').forEach(b=>b.addEventListener('click',()=>{ if(mode==='walk') setMode('orbit'); setCut(b.dataset.c); }));
+const tEl=document.getElementById('time'), dEl=document.getElementById('day');
+dEl.max=daysInYear;
+tEl.addEventListener('input',()=>{ sunState.min=+tEl.value; sunDirty=true; });
+dEl.addEventListener('input',()=>{ sunState.doy=+dEl.value; sunDirty=true; });
+document.querySelectorAll('[data-d]').forEach(b=>b.addEventListener('click',()=>{ sunState.doy=+b.dataset.d; sunDirty=true; }));
+const playBtn=document.getElementById('play');
+playBtn.addEventListener('click',()=>{ sunState.playing=!sunState.playing; playBtn.classList.toggle('on',sunState.playing); playBtn.textContent=sunState.playing?'❚❚':'▶'; });
+function israelNow(){ const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Jerusalem',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date()); const v=t=>+parts.find(p=>p.type===t).value; const doy=Math.round((Date.UTC(YEAR,v('month')-1,v('day'))-Date.UTC(YEAR,0,0))/86400000); return {doy,min:(v('hour')%24)*60+v('minute')}; }
+document.getElementById('now').addEventListener('click',()=>{ const n=israelNow(); sunState.doy=n.doy; sunState.min=Math.min(1260,Math.max(240,n.min)); sunDirty=true; });
+const sunCard=document.getElementById('sun');
+document.getElementById('sunToggle').addEventListener('click',()=>sunCard.classList.toggle('min'));
+if(innerWidth<700||matchMedia('(max-width:700px)').matches) sunCard.classList.add('min');
+// start: today, at the current Israeli time if it is daytime, otherwise 10:30
+{ const n=israelNow(); sunState.doy=n.doy; const rs=riseSet(n.doy); sunState.min=(rs.rise&&n.min>rs.rise+40&&n.min<rs.set-40)?n.min:630; }
+
+addEventListener('resize',()=>{ if(mode==='walk') camera.fov=innerWidth<innerHeight?88:(IS_TOUCH?72:68); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); fitOrtho(); renderer.setSize(innerWidth,innerHeight); });
+const needle=document.getElementById('needle'); const fwd=new THREE.Vector3();
+const clock=new THREE.Clock();
+function frame(){ update(Math.min(0.05,clock.getDelta())); requestAnimationFrame(frame); }
+let postFX=null, hq=!IS_TOUCH;
+(async()=>{ try{
+  const [{EffectComposer},{RenderPass},{GTAOPass},{OutputPass}]=await Promise.all([import('three/addons/postprocessing/EffectComposer.js'),import('three/addons/postprocessing/RenderPass.js'),import('three/addons/postprocessing/GTAOPass.js'),import('three/addons/postprocessing/OutputPass.js')]);
+  const comp=new EffectComposer(renderer); comp.addPass(new RenderPass(scene,camera));
+  const ao=new GTAOPass(scene,camera,innerWidth,innerHeight);
+  ao.updateGtaoMaterial({radius:0.55,distanceExponent:1.6,thickness:1.4,scale:1.25,samples:16});
+  ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:5,rings:2,samples:16});
+  const r0=ao.render.bind(ao); ao.render=(...args)=>{ noAO.forEach(o=>o.visible=false); r0(...args); noAO.forEach(o=>o.visible=true); };
+  comp.addPass(ao); comp.addPass(new OutputPass());
+  addEventListener('resize',()=>comp.setSize(innerWidth,innerHeight)); postFX=comp;
+}catch(e){ console.warn('ambient occlusion unavailable',e); } })();
+document.querySelectorAll('#qual button').forEach(b=>{ b.classList.toggle('on',(b.dataset.q==='hq')===hq); b.addEventListener('click',()=>{ hq=b.dataset.q==='hq'; document.querySelectorAll('#qual button').forEach(x=>x.classList.toggle('on',x===b)); }); });
+function update(dt){
+  if(sunState.playing){ sunState.min+=dt*45; if(sunState.min>1260) sunState.min=240; sunDirty=true; }
+  if(sunDirty){ applySun(); sunDirty=false; }
+  if(shadowFrames>0){ renderer.shadowMap.needsUpdate=true; shadowFrames--; }
+  if(mode==='walk') stepWalk(dt); else if(mode==='plan'){ smoothOrtho(dt); planControls.update(); } else { smoothZoom(dt); controls.update(); }
+  for(const f of fans) f.rotation.y+=dt*2.2;
+  if(mode==='plan') fwd.set(0,0,-1); else camera.getWorldDirection(fwd); const b=Math.atan2(fwd.x,-fwd.z)/D2R; needle.style.transform=`rotate(${NORTH_DEG-b}deg)`;
+  if(postFX&&hq&&mode!=='plan') postFX.render(dt); else renderer.render(scene,activeCam);
+}
+/* image-based lighting from a soft daylight sky + ground (reflections in glass and metal) */
+{ const es=new THREE.Scene();
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(50,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,
+    vertexShader:'varying vec3 vP; void main(){ vP=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+    fragmentShader:'varying vec3 vP; void main(){ float h=vP.y; vec3 sky=mix(vec3(1.0,0.99,0.96),vec3(0.55,0.68,0.85),smoothstep(0.0,0.7,h)); vec3 gnd=mix(vec3(0.62,0.6,0.5),vec3(0.4,0.42,0.33),smoothstep(0.0,-0.5,h)); gl_FragColor=vec4((h>0.0?sky:gnd)*1.1,1.0); }'}));
+  es.add(dome); const sunBall=new THREE.Mesh(new THREE.SphereGeometry(3,16,8),new THREE.MeshBasicMaterial({color:new THREE.Color(6,5.6,5)})); sunBall.position.set(20,30,-25); es.add(sunBall);
+  scene.environment=pmrem.fromScene(es,0.02).texture; }
+setCut('all'); applySun(); showHint();
+document.getElementById('loading').hidden=true;
+requestAnimationFrame(frame);
+window.__house={M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
+</script>
+</body></html>
