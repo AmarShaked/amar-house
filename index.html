@@ -448,7 +448,7 @@ function texHedge(metres){ const n=TS/2|0, r=rng(83), c=canvasN(n), g=c.getConte
     g.putImageData(im,0,0); setM(M[key],colorTex(c,metres),normalTex(H,n,2,metres),{roughness:key==='bath'?.4:.6}); }
   // interior plaster + ceilings: fine sand texture
   setM(M.plaster,PL.map,PL.normalMap,{roughness:.92}); M.plaster.normalScale.set(0.5,0.5); M.plaster.color.set(0xf7f5f0);
-  setM(M.ceiling,PL.map,PL.normalMap,{roughness:.95}); M.ceiling.normalScale.set(0.3,0.3);
+  setM(M.ceiling,null,PL.normalMap,{roughness:.95}); M.ceiling.normalScale.set(0.25,0.25); M.ceiling.color.set(0xffffff); M.ceiling.emissive.set(0xffffff); M.ceiling.emissiveIntensity=0;   /* pure white ceilings */
   setM(M.lacquer,PL.map,null,{roughness:.38}); M.lacquer.color.set(0xf4f1eb);
   // abstract canvas for the living-room wall (mapped once over 1.1 x 1.3 m)
   { const W=440, Hh=520, c=document.createElement('canvas'); c.width=W; c.height=Hh; const g=c.getContext('2d'), rr=rng(515);
@@ -475,7 +475,7 @@ function texHedge(metres){ const n=TS/2|0, r=rng(83), c=canvasN(n), g=c.getConte
       wrapDraw(n,x,y,(X,Y)=>{ g.fillStyle=col; g.beginPath(); g.ellipse(X,Y,rx,ry,a,0,7); g.fill(); g.fillStyle='rgba(255,255,255,.18)'; g.beginPath(); g.ellipse(X-rx*0.25,Y-ry*0.3,rx*0.5,ry*0.4,a,0,7); g.fill();
         const gr=hg.createRadialGradient(X,Y,0,X,Y,rx); gr.addColorStop(0,'#fff'); gr.addColorStop(1,'#222'); hg.fillStyle=gr; hg.beginPath(); hg.ellipse(X,Y,rx,ry,a,0,7); hg.fill(); }); }
     Object.assign(M.gravel,{map:colorTex(c,1), normalMap:normalTex(blurH(hFromCanvas(h,n),n,1),n,4,1), roughness:.85}); M.gravel.color.set(0xffffff); M.gravel.needsUpdate=true; }
-  const cp=new THREE.MeshPhysicalMaterial({color:0x3b3e44, metalness:0.55, roughness:0.32, clearcoat:1, clearcoatRoughness:0.06}); cp.name='carPaint'; M.carPaint=cp; ALL_MATS.push(cp);
+  const cp=new THREE.MeshPhysicalMaterial({color:0x1b3fb4, metalness:0.6, roughness:0.28, clearcoat:1, clearcoatRoughness:0.05});   /* Alfa Romeo MiTo blue metallic */ cp.name='carPaint'; M.carPaint=cp; ALL_MATS.push(cp);
   if(!IS_TOUCH){ const gl=new THREE.MeshPhysicalMaterial({color:0xf2f7f8, metalness:0, roughness:0.03, transparent:true, opacity:0.06, depthWrite:false, specularIntensity:1, side:THREE.DoubleSide});   /* crisp clear glass (no blurred transmission buffer) */
     gl.name='glass'; ALL_MATS.splice(ALL_MATS.indexOf(M.glass),1,gl); M.glass=gl; }
   else { Object.assign(M.glass,{opacity:.22, roughness:.02}); M.glass.color.set(0xcfdde3); }
@@ -715,11 +715,39 @@ box('paving','s',-2.8,0.1,GRADE,-0.13,PZ0+0.2,0.0,{walk:true}); // side path
 // parking: stone paving 2 x 2.50, open (no roof), markers between the spaces
 box('paving','s',12.36,PX1,GRADE,-0.13,PZ0,0.08,{walk:true});
 box('white','s',14.86,14.92,-0.13,-0.125,PZ0+0.3,-0.4);
-// a parked car on the east space
-place(16.15,-0.13,-2.55,'S',()=>{ box('carPaint','s',-0.88,0.88,0.28,0.82,-2.25,2.25,{r:.18,solid:true});
-  box('glassTint','s',-0.78,0.78,0.82,1.28,-1.05,0.95,{r:.12}); box('carPaint','s',-0.76,0.76,1.26,1.32,-0.9,0.8,{r:.05});
-  for(const [x,z] of [[-0.82,-1.45],[0.82,-1.45],[-0.82,1.45],[0.82,1.45]]) box('black','s',x-0.1,x+0.1,0,0.62,z-0.31,z+0.31,{r:.12});
-  box('lamp','s',-0.75,-0.45,0.62,0.72,2.24,2.26); box('lamp','s',0.45,0.75,0.62,0.72,2.24,2.26); });
+// a parked car on the east space: blue Alfa Romeo MiTo (3-door hatch, 4.06 x 1.72 x 1.45 m), front to the street
+mat('carGlass',{color:0x1a1f26, roughness:.05, metalness:.3}); mat('tailRed',{color:0x8c1414, roughness:.2, emissive:0x400000, emissiveIntensity:.4}); mat('rimDark',{color:0x2b2c2f, roughness:.35, metalness:.8});
+place(16.15,-0.13,-2.55,'N',()=>{ const L='s', rot=(g,ax,a)=>{ if(ax==='x') g.rotateX(a); else g.rotateZ(a); return g; };
+  // lower body + sills
+  /* body: one side-profile extrusion (short sloping bonnet, rising beltline, short rear overhang) */
+  { const b=new THREE.Shape(); b.moveTo(1.90,0.30); b.quadraticCurveTo(2.04,0.34,2.03,0.52); b.quadraticCurveTo(2.02,0.70,1.86,0.74); b.quadraticCurveTo(1.2,0.80,0.62,0.86);
+    b.lineTo(-1.62,0.92); b.quadraticCurveTo(-1.96,0.92,-1.98,0.70); b.lineTo(-1.98,0.42); b.quadraticCurveTo(-1.97,0.30,-1.80,0.30); b.lineTo(1.90,0.30);
+    const g=new THREE.ExtrudeGeometry(b,{depth:1.62,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:4,curveSegments:16}); g.rotateY(-Math.PI/2); g.translate(0.81,0,0); addGeo(g,'carPaint',L,{keepUV:true}); solid(-0.86,0.86,0,1.4,-2.0,2.05); }
+  box('black',L,-0.84,0.84,0.22,0.32,-1.6,1.6,{r:.04});
+  // glasshouse: side-profile extrusion (steep windscreen, coupe roofline, raked hatch), painted roof on top
+  { const sh=new THREE.Shape(); sh.moveTo(0.60,0.84); sh.lineTo(0.12,1.31); sh.quadraticCurveTo(-0.55,1.37,-1.22,1.33); sh.lineTo(-1.62,0.90); sh.lineTo(0.60,0.84);
+    const g=new THREE.ExtrudeGeometry(sh,{depth:1.40,bevelEnabled:true,bevelThickness:0.03,bevelSize:0.03,bevelSegments:3}); g.rotateY(-Math.PI/2); g.translate(0.70,0,0); addGeo(g,'carGlass',L,{keepUV:true});
+    const r=new THREE.Shape(); r.moveTo(0.10,1.31); r.quadraticCurveTo(-0.55,1.37,-1.24,1.33); r.lineTo(-1.24,1.39); r.quadraticCurveTo(-0.55,1.43,0.10,1.37); r.lineTo(0.10,1.31);
+    const gr=new THREE.ExtrudeGeometry(r,{depth:1.44,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02,bevelSegments:2}); gr.rotateY(-Math.PI/2); gr.translate(0.72,0.015,0); addGeo(gr,'carPaint',L,{keepUV:true}); }
+  // wheel arches + wheels (dark multi-spoke rims, red calipers)
+  for(const [x,z] of [[-0.78,1.22],[0.78,1.22],[-0.78,-1.30],[0.78,-1.30]]){ const sx=Math.sign(x);
+    { const g=new THREE.TorusGeometry(0.36,0.05,8,24,Math.PI); g.rotateY(Math.PI/2); g.translate(x+sx*0.07,0.31,z); addGeo(g,'black',L); }
+    { const g=new THREE.CylinderGeometry(0.31,0.31,0.21,28); g.rotateZ(Math.PI/2); g.translate(x,0.31,z); addGeo(g,'black',L,{keepUV:true}); }
+    { const g=new THREE.CylinderGeometry(0.22,0.22,0.02,28); g.rotateZ(Math.PI/2); g.translate(x+sx*0.105,0.31,z); addGeo(g,'rimDark',L,{keepUV:true}); }
+    for(let k=0;k<5;k++){ const a=k/5*Math.PI*2; const g=new THREE.BoxGeometry(0.012,0.04,0.2); g.translate(0,0,0.1); g.rotateX(a); g.translate(x+sx*0.118,0.31,z); addGeo(g,'chrome',L,{keepUV:true}); }
+    box('tailRed',L,x+sx*0.06-0.02,x+sx*0.06+0.02,0.36,0.5,z-0.12,z+0.02); }
+  // front: Alfa shield ('scudetto') grille, split lower intakes, round-edged headlamps, foglights
+  { const sh=new THREE.Shape(); sh.moveTo(-0.13,0.11); sh.lineTo(0.13,0.11); sh.quadraticCurveTo(0.12,-0.02,0,-0.17); sh.quadraticCurveTo(-0.12,-0.02,-0.13,0.11);
+    const g=new THREE.ExtrudeGeometry(sh,{depth:0.04,bevelEnabled:true,bevelThickness:0.01,bevelSize:0.012,bevelSegments:2}); g.translate(0,0.50,2.02); addGeo(g,'chrome',L,{keepUV:true});
+    const g2=new THREE.ShapeGeometry(sh); g2.scale(0.85,0.85,1); g2.translate(0,0.50,2.075); addGeo(g2,'black',L,{keepUV:true}); }
+  for(const sx of [-1,1]){ rb('black',L,Math.min(sx*0.22,sx*0.66),Math.max(sx*0.22,sx*0.66),0.34,0.46,1.98,2.07,0.03); sph('lamp',L,sx*0.55,0.40,2.07,0.035,1,1,0.5);
+    sph('carGlass',L,sx*0.56,0.72,1.86,0.16,1.25,0.55,0.7); sph('lamp',L,sx*0.58,0.73,1.93,0.07,1,0.9,0.5); }
+  box('black',L,-0.26,0.26,0.30,0.40,2.05,2.08);   /* number plate recess */
+  // rear: round LED tail lamps, hatch spoiler
+  for(const sx of [-1,1]){ sph('tailRed',L,sx*0.60,0.74,-2.0,0.10,1,1,0.4); sph('carGlass',L,sx*0.60,0.74,-2.03,0.05,1,1,0.4); }
+  rb('carPaint',L,-0.64,0.64,1.38,1.43,-1.34,-1.14,0.02);   /* hatch spoiler */
+  // door mirrors
+  for(const sx of [-1,1]) rb('carPaint',L,sx*0.84-0.06,sx*0.84+0.06,0.95,1.05,0.42,0.56,0.03); });
 // garden between the path and the parking: stepping stones, cacti and low planting
 for(let i=0;i<6;i++){ const x=7.95+i*0.72, z=-0.85-Math.sin(i*0.9)*0.25; sph('paving','s',x,-0.13,z,0.32,1,0.06,0.72); }
 for(const [x,z,h] of [[8.4,-0.35,1.7],[9.6,-0.4,1.4],[10.8,-0.35,1.8]]) cactus(x,z,h);
@@ -763,6 +791,7 @@ box('gravel',L1,5.27,9.27,-0.04,-0.012,7.58,11.95,{walk:true});
 const PL=0.18;
 box('oakFloor',L1,0.38,3.62,0,PL,0.38,4.10,{walk:true});
 box('oakFloor',L1,3.62,4.52,0,PL,2.92,4.10,{walk:true});
+box('oakFloor',L1,3.62,4.52,0,PL,0.38,2.92,{walk:true});   /* parquet continues under the upper stair flight */
 
 // ---- exterior walls: stone skin + plaster core, height 0..3.30
 const EXT_STONE='stone';
@@ -1508,6 +1537,7 @@ function applySun(){
   const env=0.06+0.6*day; for(const m of ALL_MATS) m.envMapIntensity= m.name==='glass'? env*0.3 : env;
   const night=1-smooth(-6,4,altD);
   M.lamp.emissiveIntensity=night*2.2;
+  if(M.ceiling) M.ceiling.emissiveIntensity=0.32*day+0.05;   /* keeps ceilings reading white in daylight (they only get bounce light) */
   { const u=skyDome.material.uniforms, dusk=smooth(-4,3,altD)*(1-smooth(4,14,altD));
     u.top.value.copy(SKY_NIGHT.top).lerp(SKY_DAY.top,day); if(scene.fog) scene.fog.color.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day); u.mid.value.copy(SKY_NIGHT.mid).lerp(SKY_DAY.mid,day); u.hor.value.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day).lerp(SKY_DUSK,dusk*0.7); }
   cloudMats.forEach(m=>{ m.opacity=0.9*day; m.color.copy(sun.color).lerp(new THREE.Color(0xffffff),0.6); });
