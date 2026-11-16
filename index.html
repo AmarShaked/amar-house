@@ -1195,6 +1195,14 @@ F.chair2=(L,seat,leg)=>{ // oak dining chair: splayed tapered legs, slim rails, 
   rb(seat,L,-0.225,0.225,0.425,0.5,-0.2,0.235,0.03,0,0,{puff:0.35});
   for(const x of [-0.19,0.19]) strut(leg,L,x,0.43,-0.17,x*1.03,0.84,-0.24,0.016,0.012,10);
   rb(seat,L,-0.225,0.225,0.6,0.85,-0.275,-0.215,0.025,-0.1,0,{bend:0.45,puff:0.3}); };
+F.counter=(L,seat,leg)=>{ // counter stool to match: splayed oak legs, footrest rails, boucle seat pad, low curved back
+  for(const [x,z] of [[-.17,.16],[.17,.16],[-.17,-.16],[.17,-.16]]) strut(leg,L,x+Math.sign(x)*0.035,0,z+Math.sign(z)*0.035,x,0.63,z,0.012,0.018,10);
+  for(const z of [0.18,-0.18]) box(leg,L,-0.19,0.19,0.22,0.245,z-0.011,z+0.011);
+  for(const x of [-0.19,0.19]) box(leg,L,x-0.011,x+0.011,0.22,0.245,-0.18,0.18);
+  box(leg,L,-0.18,0.18,0.6,0.64,-0.17,0.17);
+  rb(seat,L,-0.2,0.2,0.635,0.7,-0.19,0.21,0.028,0,0,{puff:0.35});
+  for(const x of [-0.17,0.17]) strut(leg,L,x,0.63,-0.16,x*1.03,0.9,-0.2,0.014,0.011,10);
+  rb(seat,L,-0.2,0.2,0.77,0.92,-0.235,-0.185,0.022,-0.08,0,{bend:0.5,puff:0.3}); };
 // dining table perpendicular to the west window: solid oak top on two slab legs, linen runner, upholstered chairs
 place(2.65,0,5.68,'S',()=>{ rb('oak',L1,-1.35,1.35,0.732,0.76,-0.5,0.5,0.008,0,0,{solid:true}); box('oak',L1,-1.27,1.27,0.705,0.732,-0.42,0.42);   /* slim top over a recessed apron */
   const leg=new THREE.Shape([new THREE.Vector2(-0.36,0),new THREE.Vector2(0.36,0),new THREE.Vector2(0.26,0.705),new THREE.Vector2(-0.26,0.705)]);   /* tapered trestle blades */
@@ -1317,8 +1325,8 @@ for(let z=7.26; z<9.08; z+=0.06) cyl('oak',L1,11.30,z+0.03,0.10,0.86,0.026,{seg:
 rb('marble',L1,11.24,12.36,0.86,0.92,7.16,9.10,0.006); rb('marble',L1,11.24,12.36,0,0.86,7.16,7.22,0.006);
 // oak dining extension on a slab leg
 rb('oak',L1,11.35,12.25,0.71,0.75,9.10,10.70,0.008,0,0,{solid:true}); box('oak',L1,11.66,11.94,0,0.71,10.18,10.62);
-for(const z of [7.45,7.9,8.35,8.8]) place(10.95,0,z,'E',()=>F.stool(L1,'oak'));
-for(const z of [9.55,10.3]){ place(10.98,0,z,'E',()=>F.elbow(L1,'fabSage','oak')); place(12.62,0,z,'W',()=>F.elbow(L1,'fabSage','oak')); }
+for(const z of [7.45,7.9,8.35,8.8]) place(10.95,0,z,'E',()=>F.counter(L1,'fabCream','oak'));
+for(const z of [9.55,10.3]){ place(10.98,0,z,'E',()=>F.chair2(L1,'fabCream','oak')); place(12.62,0,z,'W',()=>F.chair2(L1,'fabCream','oak')); }
 // island styling: oak tray, stoneware jug with olive branches
 rb('oak',L1,11.55,11.95,0.92,0.94,8.30,8.75,0.008); lathe('limewash',L1,11.75,0.94,8.5,[[0,0],[0.06,0],[0.08,0.1],[0.05,0.2],[0.035,0.26],[0.04,0.28],[0,0.28]]);
 { const rr=rng(41); for(let k=0;k<6;k++){ const a=rr()*6.28, h=0.3+rr()*0.25, tx=11.75+Math.cos(a)*0.2, tz=8.5+Math.sin(a)*0.2; branch(11.75,1.2,8.5,tx,1.2+h,tz,0.005,0.003,'trunk');
@@ -1747,7 +1755,7 @@ function moveJoy(e){ const r=joyEl.getBoundingClientRect(); let dx=(e.clientX-(r
 const look={id:null,x:0,y:0,sx:0,sy:0,t:0};
 const cv=renderer.domElement;
 cv.addEventListener('pointerdown',e=>{ look.sx=e.clientX; look.sy=e.clientY; look.t=performance.now(); if(mode!=='walk') return; look.id=e.pointerId; look.x=e.clientX; look.y=e.clientY; cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove',e=>{ if(mode!=='walk'||e.pointerId!==look.id) return; const k=IS_TOUCH?0.0055:0.0042; player.yaw+=(e.clientX-look.x)*k; player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch+(e.clientY-look.y)*k)); look.x=e.clientX; look.y=e.clientY; });
+cv.addEventListener('pointermove',e=>{ if(mode!=='walk'||e.pointerId!==look.id) return; const k=IS_TOUCH?0.0055:0.0042, sg=e.pointerType==='mouse'?-1:1;   /* mouse = look where you drag; touch = drag the view */ player.yaw+=sg*(e.clientX-look.x)*k; player.pitch=Math.max(-1.3,Math.min(1.3,player.pitch+sg*(e.clientY-look.y)*k)); look.x=e.clientX; look.y=e.clientY; });
 cv.addEventListener('pointerup',e=>{ const moved=Math.hypot(e.clientX-look.sx,e.clientY-look.sy), dt=performance.now()-look.t; if(e.pointerId===look.id) look.id=null;
   if(moved<8&&dt<350) onTap(e); });
 let lastTap=0;
