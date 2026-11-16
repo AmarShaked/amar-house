@@ -1308,13 +1308,13 @@ mat('lemon',{color:0xe8c34a, roughness:.55}); mat('brushedSteel',{color:0xbfc1c3
 mat('oil',{color:0x9a8a2a, roughness:.05, transparent:true, opacity:.75}); mat('bread',{color:0xc08a4e, roughness:.85});
 // base run: carcass, recessed plinth, handleless fronts with 3 mm shadow gaps and a grip channel
 box('lacquer',L1,13.56,14.12,0.10,0.86,6.40,11.30,{solid:true});
-box('black',L1,13.60,14.12,0,0.10,6.40,11.30);
+box('lacquer',L1,13.60,14.12,0,0.10,6.40,11.30);
 { const cols=[[6.40,7.00],[7.00,7.65],[7.65,8.25],[8.25,9.05],[9.05,9.70],[9.70,10.15],[10.15,10.90],[10.90,11.30]];
   for(const [z0,z1] of cols){ const wide=z1-z0>0.62;
     if(z0>=10.15&&z1<=10.90){ for(const [y0,y1] of [[0.11,0.36],[0.375,0.60],[0.615,0.80]]) rb('lacquer',L1,13.50,13.53,y0,y1,z0+0.0015,z1-0.0015,0.003); }
     else rb('lacquer',L1,13.50,13.53,0.11,0.80,z0+0.0015,z1-0.0015,0.003);
     if(wide) box('black',L1,13.505,13.51,0.12,0.79,(z0+z1)/2-0.0015,(z0+z1)/2+0.0015); }
-  box('black',L1,13.52,13.56,0.80,0.855,6.40,11.30); }
+  box('lacquer',L1,13.52,13.56,0.80,0.855,6.40,11.30); }
 // worktop: 4 cm calacatta with 2 cm overhang, full-height marble splash around the window
 /* worktop with two undermount sink cut-outs */
 rb('marble',L1,13.48,14.12,0.86,0.90,6.40,7.68,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,8.22,8.48,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,9.02,11.30,0.004);
@@ -1344,7 +1344,7 @@ lathe('artDark',L1,13.96,1.76,10.4,[[0,0],[0.04,0],[0.045,0.16],[0.02,0.2],[0.02
   lathe('limewash',L1,13.96,0.90,6.65,[[0,0],[0.07,0],[0.075,0.14],[0,0.14]]); for(let k=0;k<5;k++) branch(13.96,1.0,6.65,13.96+(k-2)*0.025,1.22+k*0.01,6.65+(k%2)*0.03,0.006,0.004,'oak');
   lathe('ceramic',L1,13.92,0.90,11.05,[[0,0],[0.08,0],[0.085,0.12],[0,0.12]]); { const rr=rng(37); for(let k=0;k<40;k++){ const a=rr()*6.28, d=rr()*0.08; FOL.push([13.92+Math.cos(a)*d,1.04+rr()*0.12,11.05+Math.sin(a)*d,0.02,[0.27,0.4,0.3+rr()*0.1],rr()*3,rr()*3,1.4]); } } }
 // island: lacquer body, fluted oak back, waterfall marble with eased edges
-box('lacquer',L1,11.32,12.30,0.10,0.86,7.22,9.10,{solid:true}); box('black',L1,11.38,12.24,0,0.10,7.28,9.04);
+box('lacquer',L1,11.32,12.30,0.10,0.86,7.22,9.10,{solid:true}); box('lacquer',L1,11.38,12.24,0,0.10,7.28,9.04);
 for(let z=7.25; z<9.1; z+=0.47) for(const [y0,y1] of [[0.11,0.47],[0.485,0.80]]) rb('lacquer',L1,12.30,12.33,y0,y1,z+0.0015,z+0.4685,0.003);
 for(let z=7.26; z<9.08; z+=0.06) cyl('oak',L1,11.30,z+0.03,0.10,0.86,0.026,{seg:10});
 rb('marble',L1,11.24,12.36,0.86,0.92,7.16,9.10,0.006); rb('marble',L1,11.24,12.36,0,0.86,7.16,7.22,0.006);
