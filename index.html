@@ -527,7 +527,7 @@ function addGeo(geo, m, L, o={}){
     if(o.walk) floors.push({x0:b.min.x,x1:b.max.x,z0:b.min.z,z1:b.max.z,y0:b.min.y,top:b.max.y}); }
 }
 /* upholstery: subdivided rounded box with a crowned face and faint creases, so cushions read soft rather than boxy */
-function softGeo(w,h,d,r,puff){ const sg=v=>Math.max(3,Math.min(16,Math.round(v/0.05)));
+function softGeo(w,h,d,r,puff,bend=0){ const sg=v=>Math.max(3,Math.min(16,Math.round(v/0.05)));
   const g0=new THREE.BoxGeometry(w,h,d,sg(w),sg(h),sg(d)); g0.deleteAttribute('normal'); g0.deleteAttribute('uv'); const g=mergeVertices(g0), P=g.attributes.position;
   const H=[w/2,h/2,d/2], th=H.indexOf(Math.min(...H)), a=(th+1)%3, b=(th+2)%3; if(Math.max(w,h,d)>2.3) puff=Math.min(puff,0.04);
   const v=new THREE.Vector3(), c=new THREE.Vector3(), q=new THREE.Vector3();
@@ -536,14 +536,14 @@ function softGeo(w,h,d,r,puff){ const sg=v=>Math.max(3,Math.min(16,Math.round(v/
     q.subVectors(v,c); if(q.lengthSq()>1e-12) v.copy(c).add(q.normalize().multiplyScalar(r));
     const f=Math.max(0,1-u[a]*u[a])*Math.max(0,1-u[b]*u[b]), t=v.getComponent(th), pa=v.getComponent(a), pb=v.getComponent(b);
     const crease=0.0035*Math.sin(pa*21+pb*6.3)*Math.sin(pb*17-pa*4.1);
-    v.setComponent(th, t*(1+puff*f)+Math.sign(t)*f*crease); P.setXYZ(i,v.x,v.y,v.z); }
+    v.setComponent(th, t*(1+puff*f)+Math.sign(t)*f*crease); if(bend) v.z+=bend*v.x*v.x; P.setXYZ(i,v.x,v.y,v.z); }
   g.computeVertexNormals(); g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(P.count*2),2)); return g; }
 const isFab=m=>typeof m==='string'&&m.startsWith('fab');
 function box(m,L,x0,x1,y0,y1,z0,z1,o={}){
   if(x1<x0)[x0,x1]=[x1,x0]; if(y1<y0)[y0,y1]=[y1,y0]; if(z1<z0)[z0,z1]=[z1,z0];
   const w=x1-x0,h=y1-y0,d=z1-z0; if(w<1e-4||h<1e-4||d<1e-4) return;
   let g;
-  if(o.r){ const r=Math.min(o.r, w/2-1e-3, h/2-1e-3, d/2-1e-3); g = r>0.003? (isFab(m)? softGeo(w,h,d,r,o.puff??0.28) : new RoundedBoxGeometry(w,h,d,o.seg||2,r)) : new THREE.BoxGeometry(w,h,d); }
+  if(o.r){ const r=Math.min(o.r, w/2-1e-3, h/2-1e-3, d/2-1e-3); g = r>0.003? (isFab(m)? softGeo(w,h,d,r,o.puff??0.28,o.bend) : new RoundedBoxGeometry(w,h,d,o.seg||2,r)) : new THREE.BoxGeometry(w,h,d); }
   else g=new THREE.BoxGeometry(w,h,d);
   g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); addGeo(g,m,L,o.r?o:{...o,_box:true});
 }
@@ -636,11 +636,12 @@ const F = {
     for(let i=0;i<n;i++){ const x=-n*0.37+i*0.74; box(m,L,x+0.01,x+0.73,0,0.4,-0.45,0.45,{r:.1,solid:true}); box(m,L,x+0.03,x+0.71,0.4,0.78,-0.45,-0.22,{r:.1});
       for(let k=0;k<3;k++) box(m,L,x+0.05+k*0.22,x+0.05+k*0.22+0.2,0.38,0.44,-0.2,0.42,{r:.05}); }
   },
-  lounge(L,seat,frame){ // oak framed armchair with cushions
-    box(frame,L,-0.38,-0.33,0,0.62,-0.38,0.38,{solid:true}); box(frame,L,0.33,0.38,0,0.62,-0.38,0.38);
-    box(frame,L,-0.33,0.33,0.22,0.27,-0.36,0.36);
-    box(seat,L,-0.33,0.33,0.27,0.45,-0.33,0.36,{r:.06}); box(seat,L,-0.33,0.33,0.4,0.85,-0.38,-0.16,{r:.08});
-    box(seat,L,-0.2,0.2,0.45,0.75,-0.2,-0.05,{r:.08});
+  lounge(L,seat,frame){ // low lounge chair: rounded solid-wood side panels, raked seat, reclined back cushion, linen lumbar pillow
+    for(const sd of [-1,1]) rb(frame,L,sd*0.405-0.035,sd*0.405+0.035,0,0.6,-0.42,0.38,0.03,0,0,sd<0?{solid:true}:{});
+    box(frame,L,-0.37,0.37,0.14,0.2,-0.4,0.36); rb(frame,L,-0.37,0.37,0.14,0.7,-0.45,-0.4,0.015);
+    rb(seat,L,-0.365,0.365,0.2,0.4,-0.36,0.38,0.06,-0.05,0,{puff:0.32});
+    rb(seat,L,-0.36,0.36,0.34,0.9,-0.42,-0.2,0.07,-0.24,0,{puff:0.3});
+    rb('fabLinen',L,-0.2,0.2,0.44,0.7,-0.2,-0.08,0.05,-0.28,0,{puff:0.5});
   },
   tubChair(L,m){ cyl(m,L,0,0,0,0.42,0.42,{seg:24,solid:true}); const g=new THREE.TorusGeometry(0.36,0.1,10,24,Math.PI*1.25); g.rotateX(Math.PI/2); g.rotateY(Math.PI*0.125+Math.PI); g.translate(0,0.55,0); addGeo(g,m,L); },
   chair(L,seat,leg){ for(const [x,z] of [[-.2,-.2],[.2,-.2],[-.2,.2],[.2,.2]]) cyl(leg,L,x,z,0,0.45,0.017,{seg:8}); box(seat,L,-0.23,0.23,0.43,0.47,-0.22,0.23,{r:.015}); box(seat,L,-0.23,0.23,0.47,0.88,-0.25,-0.21,{r:.015}); },
@@ -651,11 +652,28 @@ const F = {
     if(o.trestle){ for(const x of [-w/2+0.3,w/2-0.3]) box(leg,L,x-0.05,x+0.05,0,h-0.05,-d/2+0.12,d/2-0.12); box(leg,L,-w/2+0.3,w/2-0.3,0.25,0.33,-0.04,0.04); }
     else if(o.block){ box(leg,L,-w/2+o.block,w/2-o.block,0,h-0.05,-d/2+o.block,d/2-o.block); }
     else for(const [x,z] of [[-w/2+.06,-d/2+.06],[w/2-.06,-d/2+.06],[-w/2+.06,d/2-.06],[w/2-.06,d/2-.06]]) box(leg,L,x-0.03,x+0.03,0,h-0.05,z-0.03,z+0.03); },
-  bed(L,w,l,base,o={}){ box(base,L,-w/2,w/2,0.0,0.32,-l/2,l/2,{r:.05,solid:true}); box('fabWhite',L,-w/2+0.04,w/2-0.04,0.32,0.55,-l/2+0.03,l/2-0.03,{r:.06});
-    box(o.duvet||'fabWhite',L,-w/2+0.01,w/2-0.01,0.5,0.6,-l/2+0.55,l/2+0.01,{r:.05});
-    if(o.throw) box(o.throw,L,-w/2-0.01,w/2+0.01,0.59,0.63,l/2-0.6,l/2-0.15,{r:.02});
-    const np=w>1.2?2:1; for(let i=0;i<np;i++){ const x= np===1?0:(i?w/4:-w/4); box('fabWhite',L,x-w/(np*2)+0.06,x+w/(np*2)-0.06,0.55,0.75,-l/2+0.08,-l/2+0.42,{r:.07}); }
-    if(w>1.2) box(o.cushion||'fabLinen',L,-0.22,0.22,0.6,0.82,-l/2+0.36,-l/2+0.48,{r:.05}); },
+  bed(L,w,l,base,o={}){ // upholstered frame on a shadow plinth, draped duvet with a turned-back cuff, layered pillows, foot throw
+    const hw=w/2, hl=l/2, dv=o.duvet||'fabWhite', dz=-hl+0.6;
+    box('black',L,-hw+0.08,hw-0.08,0,0.08,-hl+0.08,hl-0.08);
+    rb(base,L,-hw,hw,0.08,0.34,-hl,hl,0.04,0,0,{solid:true,puff:0.06});
+    rb('fabWhite',L,-hw+0.04,hw-0.04,0.32,0.52,-hl+0.04,hl-0.03,0.05,0,0,{puff:0.08});
+    rb(dv,L,-hw-0.02,hw+0.02,0.5,0.6,dz,hl+0.03,0.045,0,0,{puff:0.35});
+    for(const sd of [-1,1]) rb(dv,L,sd<0?-hw-0.045:hw+0.005,sd<0?-hw-0.005:hw+0.045,0.27,0.58,dz+0.02,hl+0.02,0.018,0,0,{puff:0.22});
+    rb(dv,L,-hw-0.02,hw+0.02,0.27,0.58,hl+0.005,hl+0.045,0.018,0,0,{puff:0.22});
+    rb(dv,L,-hw-0.012,hw+0.012,0.57,0.66,dz-0.03,dz+0.22,0.04,0,0,{puff:0.4});
+    const np=w>1.2?2:1;
+    for(let i=0;i<np;i++){ const cx=np===1?0:(i?w/4:-w/4), pw=np===1?w-0.22:w/2-0.1;
+      rb('fabWhite',L,cx-pw/2,cx+pw/2,0.52,0.88,-hl+0.06,-hl+0.22,0.07,-0.28,0,{puff:0.45});
+      rb('fabWhite',L,cx-pw/2+0.03,cx+pw/2-0.03,0.52,0.65,-hl+0.24,-hl+0.56,0.06,0,0,{puff:0.4}); }
+    if(w>1.2){ rb(o.cushion||'fabLinen',L,-0.52,-0.06,0.6,1.0,-hl+0.25,-hl+0.39,0.06,-0.25,0.12,{puff:0.45});
+      rb(o.cushion2||'fabSage',L,0.06,0.52,0.6,1.0,-hl+0.25,-hl+0.39,0.06,-0.25,-0.12,{puff:0.45});
+      rb(o.cushion||'fabLinen',L,-0.24,0.24,0.62,0.86,-hl+0.41,-hl+0.53,0.05,-0.2,0,{puff:0.5}); }
+    else rb(o.throw||'fabLinen',L,-0.19,0.19,0.62,0.92,-hl+0.26,-hl+0.39,0.05,-0.25,0.1,{puff:0.45});
+    if(o.throw){ rb(o.throw,L,-hw-0.03,hw+0.03,0.6,0.635,hl-0.62,hl-0.18,0.015,0,0,{puff:0.2});
+      for(const sd of [-1,1]) rb(o.throw,L,sd<0?-hw-0.075:hw+0.045,sd<0?-hw-0.045:hw+0.075,0.3,0.63,hl-0.62,hl-0.18,0.012,0,0,{puff:0.15}); }
+    if(o.head){ const n=Math.max(4,Math.round((w+0.06)/0.17)), cw=(w+0.06)/n;   /* channel-tufted headboard */
+      for(let i=0;i<n;i++){ const x0=-hw-0.03+i*cw; rb(o.head,L,x0+0.002,x0+cw-0.002,0.3,1.12,-hl-0.07,-hl-0.005,0.03,0,0,{puff:0.55}); } }
+  },
   toilet(L){ box('porcelain',L,-0.18,0.18,0.28,0.44,-0.02,0.5,{r:.12,solid:true}); box('porcelain',L,-0.19,0.19,0.43,0.46,0.02,0.52,{r:.06}); box('black',L,-0.12,0.12,1.0,1.15,-0.02,-0.005); },
   basin(L,w,d,m){ box(m,L,-w/2,w/2,0,0.14,-d/2,d/2,{r:.02}); box('porcelain',L,-w/2+0.05,w/2-0.05,0.13,0.141,-d/2+0.05,d/2-0.06); },
   tap(L,m,o={}){ box(m,L,-0.025,0.025,0,0.05,0,0.03); box(m,L,-0.012,0.012,0.012,0.032,0,0.2); if(o.handle!==false){ cyl(m,L,0.11,0.01,0.0,0.05,0.022,{seg:12}); } },
@@ -1158,7 +1176,7 @@ place(2.5,2.18,3.9,'S',()=>F.plant(L1,0.3,'white'));
 // dining
 /* ---------- detailed furniture helpers (local coords, front = +z) ---------- */
 function rb(m,L,x0,x1,y0,y1,z0,z1,r,rotX=0,rotY=0,o={}){ const w=x1-x0,h=y1-y0,d=z1-z0, rr=Math.min(r,w/2-1e-3,h/2-1e-3,d/2-1e-3);
-  const g=isFab(m)? softGeo(w,h,d,Math.max(0.004,rr),o.puff??0.28) : new RoundedBoxGeometry(w,h,d,4,Math.max(0.002,rr)); if(rotX) g.rotateX(rotX); if(rotY) g.rotateY(rotY); g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); addGeo(g,m,L,o); }
+  const g=isFab(m)? softGeo(w,h,d,Math.max(0.004,rr),o.puff??0.28,o.bend) : new RoundedBoxGeometry(w,h,d,4,Math.max(0.002,rr)); if(rotX) g.rotateX(rotX); if(rotY) g.rotateY(rotY); g.translate((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); addGeo(g,m,L,o); }
 function lathe(m,L,x,y,z,pts,seg=28){ const g=new THREE.LatheGeometry(pts.map(([r,h])=>new THREE.Vector2(r,h)),seg); g.translate(x,y,z); addGeo(g,m,L); }
 F.sofa2=(L,w,d,m)=>{ const n=Math.max(1,Math.round(w/0.95)), cw=w/n;
   box('teak',L,-w/2+0.06,w/2-0.06,0,0.08,-d/2+0.06,d/2-0.06,{solid:true});
@@ -1167,13 +1185,21 @@ F.sofa2=(L,w,d,m)=>{ const n=Math.max(1,Math.round(w/0.95)), cw=w/n;
   for(let i=0;i<n;i++){ const x0=-w/2+i*cw+0.006, x1=x0+cw-0.012;
     rb(m,L,x0,x1,0.39,0.57,-d/2+0.2,d/2-0.01,0.075);
     rb(m,L,x0+0.01,x1-0.01,0.5,0.98,-d/2+0.08,-d/2+0.32,0.1,-0.2); } };
-F.chair2=(L,seat,leg)=>{ for(const [x,z] of [[-.2,-.19],[.2,-.19],[-.2,.19],[.2,.19]]) cyl(leg,L,x,z,0,0.44,0.016,{seg:10,r2:0.021});
-  box(leg,L,-0.23,0.23,0.4,0.44,-0.22,0.22); rb(seat,L,-0.23,0.23,0.43,0.5,-0.21,0.23,0.03);
-  for(const x of [-0.2,0.2]) box(leg,L,x-0.017,x+0.017,0.44,0.86,-0.22,-0.19);
-  rb(seat,L,-0.22,0.22,0.58,0.86,-0.25,-0.19,0.03,-0.12); };
+/* tapered round strut between two local points (chair legs, posts) */
+function strut(m,L,x0,y0,z0,x1,y1,z1,r0,r1,seg=12){ const v=new THREE.Vector3(x1-x0,y1-y0,z1-z0), len=v.length(); const g=new THREE.CylinderGeometry(r1,r0,len,seg); g.translate(0,len/2,0);
+  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),v.normalize())); g.translate(x0,y0,z0); addGeo(g,m,L); }
+F.chair2=(L,seat,leg)=>{ // oak dining chair: splayed tapered legs, slim rails, padded seat, rear posts into a curved upholstered back
+  for(const [x,z] of [[-.19,.18],[.19,.18],[-.19,-.17],[.19,-.17]]) strut(leg,L,x+Math.sign(x)*0.025,0,z+Math.sign(z)*0.025,x,0.43,z,0.012,0.019,10);
+  for(const z of [0.18,-0.17]) box(leg,L,-0.19,0.19,0.37,0.43,z-0.011,z+0.011);
+  for(const x of [-0.19,0.19]) box(leg,L,x-0.011,x+0.011,0.37,0.43,-0.17,0.18);
+  rb(seat,L,-0.225,0.225,0.425,0.5,-0.2,0.235,0.03,0,0,{puff:0.35});
+  for(const x of [-0.19,0.19]) strut(leg,L,x,0.43,-0.17,x*1.03,0.84,-0.24,0.016,0.012,10);
+  rb(seat,L,-0.225,0.225,0.6,0.85,-0.275,-0.215,0.025,-0.1,0,{bend:0.45,puff:0.3}); };
 // dining table perpendicular to the west window: solid oak top on two slab legs, linen runner, upholstered chairs
-place(2.65,0,5.68,'S',()=>{ rb('oak',L1,-1.35,1.35,0.7,0.76,-0.5,0.5,0.012,0,0,{solid:true});
-  for(const x of [-0.95,0.95]){ box('oak',L1,x-0.045,x+0.045,0,0.7,-0.36,0.36,{solid:true}); box('oak',L1,x-0.09,x+0.09,0,0.03,-0.38,0.38); }
+place(2.65,0,5.68,'S',()=>{ rb('oak',L1,-1.35,1.35,0.732,0.76,-0.5,0.5,0.008,0,0,{solid:true}); box('oak',L1,-1.27,1.27,0.705,0.732,-0.42,0.42);   /* slim top over a recessed apron */
+  const leg=new THREE.Shape([new THREE.Vector2(-0.36,0),new THREE.Vector2(0.36,0),new THREE.Vector2(0.26,0.705),new THREE.Vector2(-0.26,0.705)]);   /* tapered trestle blades */
+  for(const x of [-0.92,0.92]){ const g=new THREE.ExtrudeGeometry(leg,{depth:0.07,bevelEnabled:true,bevelSize:0.006,bevelThickness:0.006,bevelSegments:2,curveSegments:1}); g.translate(0,0,-0.035); g.rotateY(Math.PI/2); g.translate(x,0,0); addGeo(g,'oak',L1,{solid:true}); }
+  box('oak',L1,-0.92,0.92,0.1,0.16,-0.025,0.025);
   box('fabLinen',L1,-1.15,1.15,0.76,0.764,-0.17,0.17); });
 for(const x of [1.67,2.32,2.97,3.62]){ place(x,0,4.88,'S',()=>F.chair2(L1,'fabCream','oak')); place(x,0,6.48,'N',()=>F.chair2(L1,'fabCream','oak')); }
 place(2.0,0,5.68,'E',()=>F.pendantOval(L1,2.25)); place(3.3,0,5.68,'E',()=>F.pendantOval(L1,2.25));
@@ -1317,7 +1343,7 @@ box('oak',L1,9.27,10.10,2.56,2.64,8.62,10.60); box('oak',L1,9.27,9.56,0.45,0.49,
 box('limewash',L2,0.35,3.70,U0,UC,8.39,8.41);
 box('oak',L2,0.75,3.55,U0,U0+1.25,8.41,8.47);
 box('fabLinen',L2,1.35,2.95,U0+0.32,U0+1.18,8.47,8.55,{r:.03}); box('fabLinen',L2,0.82,1.30,U0+0.32,U0+1.18,8.47,8.55,{r:.03}); box('fabLinen',L2,3.0,3.48,U0+0.32,U0+1.18,8.47,8.55,{r:.03});
-place(2.15,U0,9.62,'S',()=>F.bed(L2,1.8,2.1,'fabLinen',{cushion:'fabGrey'}));
+place(2.15,U0,9.62,'S',()=>F.bed(L2,1.8,2.1,'fabLinen',{cushion:'fabGrey',cushion2:'fabOlive',throw:'fabGrey'}));
 for(const x of [0.85,3.12]) box('oak',L2,x,x+0.33,U0+0.42,U0+0.6,8.47,8.85);
 for(const x of [1.0,3.3]){ place(x,U0+1.62,8.42,'S',()=>{ F.sconce(L2,'artDark'); sph('lamp',L2,0,0,0.07,0.065); }); }
 addFan(L2,2.15,9.9,UC);
@@ -1343,8 +1369,8 @@ place(3.13,U0+2.1,4.26,'S',()=>{ box('black',L2,-0.01,0.01,0,0.3,0,0.3); cyl('bl
 place(3.54,U0,5.62,'W',()=>F.toilet(L2));
 // kids bedroom 2 & 1: two single beds each, oak wardrobe, ceiling fan
 for(const [x0,x1,wx0,wx1,wz0] of [[5.52,8.32,0,0,0],[8.42,11.22,8.45,10.05,3.35],[11.32,14.15,13.60,14.15,2.60]]){
-  place(x0+0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage'}));
-  place(x1-0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabCream'}));
+  place(x0+0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage',head:'fabLinen'}));
+  place(x1-0.5,U0,1.56,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabCream',head:'fabLinen'}));
   box('oak',L2,(x0+x1)/2-0.22,(x0+x1)/2+0.22,U0,U0+0.5,0.52,0.92,{solid:true});
   place((x0+x1)/2,U0+0.5,0.72,'S',()=>{ cyl('ceramic',L2,0,0,0,0.05,0.07); cyl('lamp',L2,0,0,0.05,0.3,0.1,{r2:0.07}); });
   place((x0+x1)/2,U0,2.6,'S',()=>F.rug(L2,1.6,2.0,'rugCheck'));
@@ -1356,7 +1382,7 @@ place(13.87,U0,3.25,'W',()=>F.wardrobe(L2,1.3,2.55,0.55,'oak',0.65));
 // laundry
 /* laundry furniture removed: the room is now bedroom 3 */
 // single bedroom (former service balcony): bed against the west wall, nightstand, wardrobe, rug, ceiling fan
-place(0.82,U0,1.49,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage'}));   /* in the NW corner, along the west wall, facing the wardrobe */
+place(0.82,U0,1.49,'S',()=>F.bed(L2,0.9,2.0,'fabLinen',{duvet:'fabWhite',throw:'fabSage',head:'fabLinen'}));   /* in the NW corner, along the west wall, facing the wardrobe */
 box('oak',L2,1.32,1.72,U0,U0+0.5,0.47,0.87,{solid:true});
 place(1.52,U0+0.5,0.67,'S',()=>{ cyl('ceramic',L2,0,0,0,0.05,0.07); cyl('lamp',L2,0,0,0.05,0.3,0.1,{r2:0.07}); });
 place(3.14,U0,1.15,'W',()=>F.wardrobe(L2,1.3,2.40,0.55,'oak',0.65));
