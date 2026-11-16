@@ -68,6 +68,13 @@ body.walk #cutRow{display:none}
 #compass b{position:absolute;top:1px;font-size:10px;color:var(--ink-soft);font-weight:700}
 #joy{position:fixed;left:max(24px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 24px);width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.55);z-index:6;touch-action:none;display:none;box-shadow:0 4px 18px rgba(0,0,0,.18)}
 #knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#measLayer{position:fixed;inset:0;pointer-events:none;z-index:4}
+.mlab{position:absolute;transform:translate(-50%,-50%);background:var(--sun);color:#fff;font:700 13px var(--font);padding:3px 8px;border-radius:999px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.25);font-variant-numeric:tabular-nums;direction:ltr}
+.mlab.live{opacity:.85}
+.rlab{position:absolute;transform:translate(-50%,-50%);text-align:center;font:500 11.5px var(--font);color:#2b2722;background:rgba(255,255,255,.82);padding:2px 7px;border-radius:7px;white-space:nowrap;line-height:1.35;direction:rtl}
+.rlab b{display:block;font-weight:700;font-variant-numeric:tabular-nums;direction:ltr}
+#measBtn.on{background:var(--sun);color:#fff}
+#measHint{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font:500 12.5px var(--font);color:var(--ink);z-index:6;direction:rtl;white-space:nowrap;pointer-events:none}
 #ptStatus{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font:500 12.5px var(--font);color:var(--ink);z-index:6;direction:rtl;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--ink);z-index:4;direction:rtl;white-space:nowrap;pointer-events:none;transition:opacity .4s}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--stage);z-index:20;direction:rtl;font-size:15px;color:var(--ink-soft)}
@@ -110,6 +117,13 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
     </div>
   </div>
   <div class="row">
+    <span class="lbl">מדידה</span>
+    <div class="seg" style="flex:1" role="group" aria-label="מדידה">
+      <button id="measBtn" aria-pressed="false" title="לחצו על שתי נקודות במודל כדי למדוד מרחק">📏 מדידת מרחק</button>
+      <button id="measClear" title="מחק את כל המדידות">נקה</button>
+    </div>
+  </div>
+  <div class="row">
     <label class="lbl" for="room">קפיצה ל</label>
     <select id="room"></select>
   </div>
@@ -138,6 +152,8 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
 <div id="joy" aria-hidden="true"><div id="knob"></div></div>
 <div id="hint"></div>
 <div id="ptStatus" hidden></div>
+<div id="measLayer"></div>
+<div id="measHint" class="pill" hidden></div>
 
 <script type="importmap">
 {"imports":{
@@ -1838,11 +1854,52 @@ function pickFloor(e){ ndc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)
 let autoTarget=null;
 function onTap(e){
   const now=performance.now();
+  if(MEAS.on){ measTap(e); lastTap=now; return; }
   if(mode==='walk'){ if(e.pointerType!=='mouse') return; const p=pickFloor(e); if(p&&Math.hypot(p.x-player.x,p.z-player.z)>0.4&&Math.abs(p.y-player.y)<1.2) autoTarget={x:p.x,z:p.z,t:0}; }
   else { if(now-lastTap<380){ const p=pickFloor(e); if(p){ const dx=p.x-camera.position.x, dz=p.z-camera.position.z; Object.assign(player,{x:p.x,z:p.z,y:p.y,yaw:mode==='plan'?Math.PI:Math.atan2(-dx,-dz),pitch:-0.05,vy:0}); if(cut!=='all'){ /* cut view: entering keeps chosen floor */ } setMode('walk'); } } }
   lastTap=now;
 }
 cv.addEventListener('dblclick',e=>e.preventDefault());
+
+/* ---------- measuring tool: tap two points; snaps to the nearest axis when almost straight ---------- */
+const MEAS={on:false,a:null,list:[],live:null};
+const measGroup=new THREE.Group(); measGroup.renderOrder=999; scene.add(measGroup);
+const measLayer=document.getElementById('measLayer'), measHint=document.getElementById('measHint'), measBtn=document.getElementById('measBtn');
+const mMat=new THREE.LineBasicMaterial({color:0xd98b2b,depthTest:false,transparent:true}), dMat=new THREE.MeshBasicMaterial({color:0xd98b2b,depthTest:false,transparent:true}), dGeo=new THREE.SphereGeometry(1,14,10);
+function pickAny(e){ ndc.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(ndc,activeCam);
+  const vis=raycastables.filter(o=>o.material!==ghost); const h=ray.intersectObjects(vis,false)[0]; return h? h.point.clone() : null; }
+function measSnap(a,b){ const d=b.clone().sub(a), L=d.length(); if(L<1e-3) return b;
+  for(const ax of ['x','y','z']){ if(Math.abs(d[ax])/L>Math.cos(4*D2R)){ const q=a.clone(); q[ax]=b[ax]; return q; } } return b; }
+const fmt=m=> m<1? Math.round(m*100)+' ס״מ' : m.toFixed(2)+' מ׳';
+function measMake(a,b,live){ const g=new THREE.Group(); g.renderOrder=999;
+  const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,b]),mMat); ln.renderOrder=999; g.add(ln);
+  for(const p of [a,b]){ const d=new THREE.Mesh(dGeo,dMat); d.position.copy(p); d.renderOrder=999; d.userData.dot=true; g.add(d); }
+  const el=document.createElement('div'); el.className='mlab'+(live?' live':''); el.textContent=fmt(a.distanceTo(b)); measLayer.appendChild(el);
+  measGroup.add(g); return {a,b,g,el}; }
+function measDrop(m){ if(!m) return; measGroup.remove(m.g); m.g.children[0].geometry.dispose(); m.el.remove(); }
+/* in the 2D plan: snap to the nearest wall face (8 cm) and measure on the floor plane */
+const tallSolids=()=>solids.filter(b=>b.y1-b.y0>0.3&&b.y1>1.9);   /* walls, columns and lintels above openings */
+function planSnap(p){ if(mode!=='plan') return p; const tol=0.08*Math.max(1,1/ortho.zoom); let bx=null,bz=null,dx=tol,dz=tol;
+  const fy=p.y>U0-0.3?U0:0; for(const b of tallSolids()){ if(b.y1<fy+1.9||b.y0>fy+3.2) continue;
+    if(p.z>b.z0-0.3&&p.z<b.z1+0.3) for(const x of [b.x0,b.x1]) if(Math.abs(p.x-x)<dx){ dx=Math.abs(p.x-x); bx=x; }
+    if(p.x>b.x0-0.3&&p.x<b.x1+0.3) for(const z of [b.z0,b.z1]) if(Math.abs(p.z-z)<dz){ dz=Math.abs(p.z-z); bz=z; } }
+  const q=p.clone(); if(bx!==null) q.x=bx; if(bz!==null) q.z=bz; return q; }
+function measTap(e){ let p=pickAny(e); if(!p) return; p=planSnap(p); if(mode==='plan'&&MEAS.a) p.y=MEAS.a.y;
+  if(!MEAS.a){ MEAS.a=p; measDrop(MEAS.live); MEAS.live=measMake(p,p.clone(),true); measHint.textContent='בחרו את הנקודה השנייה'; }
+  else { const b=measSnap(MEAS.a,p); measDrop(MEAS.live); MEAS.live=null; MEAS.list.push(measMake(MEAS.a,b,false)); MEAS.a=null; measHint.textContent='לחצו על נקודה נוספת למדידה חדשה'; } }
+cv.addEventListener('pointermove',e=>{ if(!MEAS.on||!MEAS.a||e.pointerType!=='mouse'||e.buttons) return; let p=pickAny(e); if(!p) return; p=planSnap(p); if(mode==='plan') p.y=MEAS.a.y; const b=measSnap(MEAS.a,p);
+  measDrop(MEAS.live); MEAS.live=measMake(MEAS.a,b,true); });
+function measSet(on){ MEAS.on=on; measBtn.classList.toggle('on',on); measBtn.setAttribute('aria-pressed',String(on)); MEAS.a=null; measDrop(MEAS.live); MEAS.live=null;
+  measHint.hidden=!on; measHint.textContent=IS_TOUCH?'הקישו על שתי נקודות במודל':'לחצו על שתי נקודות במודל · Esc לביטול'; }
+measBtn.addEventListener('click',()=>measSet(!MEAS.on));
+document.getElementById('measClear').addEventListener('click',()=>{ MEAS.list.forEach(measDrop); MEAS.list=[]; MEAS.a=null; measDrop(MEAS.live); MEAS.live=null; });
+addEventListener('keydown',e=>{ if(e.code==='Escape'&&MEAS.on){ if(MEAS.a){ MEAS.a=null; measDrop(MEAS.live); MEAS.live=null; } else measSet(false); } });
+const _mv=new THREE.Vector3();
+function placeLabel(el,p){ _mv.copy(p).project(activeCam); const vis=_mv.z<1&&_mv.z>-1; el.style.display=vis?'':'none'; if(vis){ el.style.left=((_mv.x+1)/2*innerWidth)+'px'; el.style.top=((1-_mv.y)/2*innerHeight)+'px'; } }
+function measFrame(){ const ortho2=activeCam.isOrthographicCamera, k= ortho2? (activeCam.top-activeCam.bottom)/activeCam.zoom*0.005 : 0;
+  for(const m of [...MEAS.list,MEAS.live]){ if(!m) continue; placeLabel(m.el,_mv.copy(m.a).add(m.b).multiplyScalar(0.5).clone());
+    for(const d of m.g.children) if(d.userData.dot){ const s= ortho2? k : Math.max(0.012,d.position.distanceTo(activeCam.position)*0.006); d.scale.setScalar(s); } }
+}
 
 function stepWalk(dt){
   let f=0,s=0;
@@ -1989,6 +2046,7 @@ function update(dt){
   if(mode==='walk') stepWalk(dt); else if(mode==='plan'){ smoothOrtho(dt); planControls.update(); } else { smoothZoom(dt); controls.update(); }
   for(const f of fans) f.rotation.y+=dt*2.2;
   if(mode==='plan') fwd.set(0,0,-1); else camera.getWorldDirection(fwd); const b=Math.atan2(fwd.x,-fwd.z)/D2R; needle.style.transform=`rotate(${NORTH_DEG-b}deg)`;
+  measFrame();
   if(quality==='pt'&&mode!=='plan') ptRender(); else if(postFX&&quality!=='std'&&mode!=='plan') postFX.render(dt); else renderer.render(scene,activeCam);
 }
 /* image-based lighting from a soft daylight sky + ground (reflections in glass and metal) */
@@ -2001,6 +2059,6 @@ function update(dt){
 setCut('all'); applySun(); showHint();
 document.getElementById('loading').hidden=true;
 requestAnimationFrame(frame);
-window.__house={FIXLIGHTS,PTR,get quality(){return quality},M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
+window.__house={MEAS,FIXLIGHTS,PTR,get quality(){return quality},M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
 </script>
 </body></html>
