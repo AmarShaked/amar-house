@@ -1,4 +1,4 @@
-<!doctype html><html lang="he"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
 <title>בית עמר באלומה</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,6 +121,13 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
     <div class="seg" style="flex:1" role="group" aria-label="מדידה">
       <button id="measBtn" aria-pressed="false" title="לחצו על שתי נקודות במודל כדי למדוד מרחק">📏 מדידת מרחק</button>
       <button id="measClear" title="מחק את כל המדידות">נקה</button>
+    </div>
+  </div>
+  <div class="row">
+    <span class="lbl">חיפוי</span>
+    <div class="seg" id="stoneSeg" style="flex:1" role="group" aria-label="חיפוי אבן בחזית">
+      <button data-s="1" title="חיפוי אבן גיר בחזית ובגדר">עם אבן</button>
+      <button data-s="0" title="אותם קירות בטיח לבן">בלי אבן</button>
     </div>
   </div>
   <div class="row">
@@ -1597,7 +1604,16 @@ for(const [k,o] of inst){
 fans.forEach(f=>layerObjs[f.userData.L].push(Object.assign(f,{userData:{...f.userData,orig:M.white}})));
 /* ---------- real-world assets (CC0 photoscans from Poly Haven), loaded progressively over the procedural look ---------- */
 const ASSETS='assets/';
+/* facade stone cladding: the chosen rough limestone (seamless tile made from the client's photo), switchable to plain plaster */
+let STONE_ON=true; try{ STONE_ON=localStorage.getItem('amarStone')!=='0'; }catch(e){}
+const STONE={ proc:{map:M.stone.map, normalMap:M.stone.normalMap}, photo:null };
+function stoneApply(){ const m=M.stone, s=STONE_ON? (STONE.photo||STONE.proc) : {map:M.ext.map, normalMap:M.ext.normalMap}, k=STONE_ON&&STONE.photo?1.4:1;
+  m.map=s.map; m.normalMap=s.normalMap; m.normalScale.set(k,k); m.roughness=STONE_ON?.9:.92; m.color.set(STONE_ON?0xffffff:M.ext.color); m.needsUpdate=true;
+  try{ PTR.dirty=true; }catch(e){} }
+stoneApply();
 { const TL=new THREE.TextureLoader();
+  { const SW=1.1, SH=SW*714/478, rep=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/SW,1/SH); t.anisotropy=ANI; return t; };
+    TL.load(ASSETS+'tex/stone_wall_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace; STONE.photo={map:rep(t), normalMap:rep(TL.load(ASSETS+'tex/stone_wall_nor.jpg'))}; stoneApply(); }); }
   const fabric=(name,metres,keys)=>TL.load(ASSETS+'tex/'+name+'_diff.jpg',src=>{
     /* neutralise the photo to grey with a fixed mean, so each material keeps its own colour and the weave only adds texture */
     const im=src.image, n=Math.min(TS,im.width), c=canvasN(n), g=c.getContext('2d'); g.drawImage(im,0,0,n,n); const D=g.getImageData(0,0,n,n), d=D.data; let sum=0;
@@ -1951,6 +1967,10 @@ cv.addEventListener('pointermove',e=>{ if(!MEAS.on||!MEAS.a||e.pointerType!=='mo
 function measSet(on){ MEAS.on=on; measBtn.classList.toggle('on',on); measBtn.setAttribute('aria-pressed',String(on)); MEAS.a=null; measDrop(MEAS.live); MEAS.live=null;
   measHint.hidden=!on; measHint.textContent=IS_TOUCH?'הקישו על שתי נקודות במודל':'לחצו על שתי נקודות במודל · Esc לביטול'; }
 measBtn.addEventListener('click',()=>measSet(!MEAS.on));
+const stoneSeg=document.getElementById('stoneSeg');
+function stoneUI(){ for(const b of stoneSeg.querySelectorAll('button')){ const on=(b.dataset.s==='1')===STONE_ON; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); } }
+stoneSeg.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; STONE_ON=b.dataset.s==='1'; try{ localStorage.setItem('amarStone',STONE_ON?'1':'0'); }catch(err){} stoneApply(); stoneUI(); });
+stoneUI();
 document.getElementById('measClear').addEventListener('click',()=>{ MEAS.list.forEach(measDrop); MEAS.list=[]; MEAS.a=null; measDrop(MEAS.live); MEAS.live=null; });
 addEventListener('keydown',e=>{ if(e.code==='Escape'&&MEAS.on){ if(MEAS.a){ MEAS.a=null; measDrop(MEAS.live); MEAS.live=null; } else measSet(false); } });
 const _mv=new THREE.Vector3();
