@@ -295,6 +295,8 @@ mat('pianoWhite',{color:0xf3f2ee, roughness:.14});
 mat('keyWhite',{color:0xf6f3ea, roughness:.28});
 mat('keyBlack',{color:0x121212, roughness:.22});
 mat('fabLeather',{color:0xf0ede7, roughness:.42});
+mat('terracotta',{color:0xc98a5e, roughness:.88});
+mat('soil',{color:0x4b3b2d, roughness:1});
 mat('fabCream',{color:0xe4ddd0, roughness:1});
 mat('fabLinen',{color:0xd5cec2, roughness:1});
 mat('fabGrey',{color:0xaeaaa3, roughness:1});
@@ -941,33 +943,61 @@ box('ext',L1,5.20,5.27,0,2.55,8.31,10.92);
 const ckOps=[{a:8.62,b:10.60,s:0.45,h:2.60,type:'fix',mull:99,casing:'oak'}];   /* single fixed pane over the window seat */
 wall('plaster',L1,'z',9.32,9.56,7.60,11.65,0,GC,ckOps,{ext:-1});
 wall('ext',L1,'z',9.27,9.32,7.60,11.65,0,GC,ckOps,{noFill:true,solid:false});
-// courtyard: sculpted olive tree, pebble bed, ornamental grasses, lavender, rosemary and boulders
-(function(){ const L='g', r=rng(4242), TX0=7.2, TZ0=9.9;
-  // gnarled twin-stem trunk
-  const stems=[[[7.12,-0.02,9.96],[6.98,0.55,9.82],[7.22,1.15,9.74],[7.08,1.75,9.88]],[[7.3,-0.02,9.84],[7.46,0.65,10.02],[7.26,1.25,10.12],[7.45,1.8,9.96]]];
-  for(const st of stems) for(let k=0;k<st.length-1;k++){ const a=st[k], b=st[k+1], r0=0.16-k*0.03, r1=0.13-k*0.03; branch(a[0],a[1],a[2],b[0],b[1],b[2],r0,r1); sph('trunk','s',b[0],b[1],b[2],r1*1.05,1,1,1,{seg:10}); }
-  sph('trunk','s',7.21,0.05,9.9,0.24,1.2,0.35,1.1,{seg:12});   // root flare
-  // main limbs and canopy clusters of silver-green leaves
+// courtyard, Mediterranean: old gnarled olive in a limestone raised bed with boxwood balls and white bacopa,
+// terracotta urns (white hydrangea; young olive), lavender, cream gravel, limestone threshold, black lanterns
+(function(){ const L='g', r=rng(4242), TX0=7.2, TZ0=9.9, LS='bath';
+  /* raised bed: limestone blocks with 6 mm joints + overhanging coping, soil inside */
+  const BX0=6.1, BX1=8.45, BZ0=8.85, BZ1=11.0, BH=0.36, T=0.12;
+  const blocks=(a0,a1,fn)=>{ const n=Math.max(1,Math.round((a1-a0)/0.48)), w=(a1-a0)/n; for(let q=0;q<n;q++) fn(a0+q*w+0.003,a0+(q+1)*w-0.003); };
+  for(const z of [BZ0,BZ1-T]) blocks(BX0,BX1,(a,b)=>box(LS,L,a,b,-0.02,BH-0.05,z,z+T,{solid:true}));
+  for(const x of [BX0,BX1-T]) blocks(BZ0+T,BZ1-T,(a,b)=>box(LS,L,x,x+T,-0.02,BH-0.05,a,b,{solid:true}));
+  for(const z of [BZ0-0.025,BZ1-T]) blocks(BX0-0.025,BX1+0.025,(a,b)=>rb(LS,L,a,b,BH-0.05,BH,z,z+T+0.025,0.008));
+  for(const x of [BX0-0.025,BX1-T]) blocks(BZ0+T,BZ1-T,(a,b)=>rb(LS,L,x,x+T+0.025,BH-0.05,BH,a,b,0.008));
+  box('soil',L,BX0+T,BX1-T,-0.02,BH-0.08,BZ0+T,BZ1-T);
+  /* limestone threshold at the garden opening + a stepping slab toward the urns */
+  blocks(5.3,9.24,(a,b)=>box(LS,L,a,b,-0.03,-0.004,11.2,11.62));
+  /* the olive: three twisted stems wound around each other, root flare, gnarled limbs */
+  const top=[]; for(let s3=0;s3<3;s3++){ let prev=null; const ph=s3*2.094;
+    for(let q=0;q<=6;q++){ const y=q*0.3, ang=ph+q*0.55, rad=0.12*(1-q/8)+0.03, p=[TX0+Math.cos(ang)*rad,y-0.02,TZ0+Math.sin(ang)*rad], rr0=0.165-q*0.015;
+      if(prev){ branch(prev[0],prev[1],prev[2],p[0],p[1],p[2],rr0+0.012,rr0); sph('trunk','s',p[0],p[1],p[2],rr0*1.08,1,1,1,{seg:10}); } prev=p; } top.push(prev); }
+  for(let q=0;q<5;q++){ const a=q*1.26+r()*0.5; sph('trunk','s',TX0+Math.cos(a)*0.2,0.04,TZ0+Math.sin(a)*0.2,0.14,1.4,0.4,0.9,{seg:10}); }
+  sph('trunk','s',TX0,0.06,TZ0,0.36,1.15,0.35,1.1,{seg:14}); sph('trunk','s',TX0,0.55,TZ0,0.2,1.05,1.4,1.0,{seg:14});
   const tips=[];
-  for(let b=0;b<6;b++){ const a=b/6*Math.PI*2+r()*0.5, st=stems[b%2][3], len=0.9+r()*0.5;
-    const mx=st[0]+Math.cos(a)*len*0.55, my=st[1]+0.55+r()*0.3, mz=st[2]+Math.sin(a)*len*0.55;
-    const ex=st[0]+Math.cos(a)*len, ey=my+0.45+r()*0.4, ez=st[2]+Math.sin(a)*len;
-    branch(st[0],st[1],st[2],mx,my,mz,0.085,0.06); sph('trunk','s',mx,my,mz,0.062,1,1,1,{seg:8}); branch(mx,my,mz,ex,ey,ez,0.06,0.03);
-    for(let t=0;t<3;t++){ const ta=a+(r()-0.5)*1.4, tx=ex+Math.cos(ta)*0.45, tz=ez+Math.sin(ta)*0.45, ty=ey+0.1+r()*0.35; branch(ex,ey,ez,tx,ty,tz,0.028,0.012); tips.push([tx,ty,tz]); }
+  for(let b=0;b<7;b++){ const a=b/7*Math.PI*2+r()*0.45, st=top[b%3], len=1.0+r()*0.6;
+    const mx=st[0]+Math.cos(a)*len*0.5, my=st[1]+0.45+r()*0.35, mz=st[2]+Math.sin(a)*len*0.5;
+    const ex=st[0]+Math.cos(a)*len, ey=my+0.5+r()*0.45, ez=st[2]+Math.sin(a)*len;
+    branch(st[0],st[1],st[2],mx,my,mz,0.08,0.055); sph('trunk','s',mx,my,mz,0.058,1,1,1,{seg:8}); branch(mx,my,mz,ex,ey,ez,0.055,0.025);
+    for(let t=0;t<3;t++){ const ta=a+(r()-0.5)*1.5, tx=ex+Math.cos(ta)*0.5, tz=ez+Math.sin(ta)*0.5, ty=ey+0.1+r()*0.4; branch(ex,ey,ez,tx,ty,tz,0.024,0.01); tips.push([tx,ty,tz]); }
     tips.push([ex,ey+0.15,ez]); }
-  for(const [x,y,z] of tips) for(let k=0;k<150;k++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.4)*0.62, sx=Math.sqrt(1-u*u);
-    LEAF.push([x+Math.cos(th)*sx*rad*1.15, y+u*rad*0.6, z+Math.sin(th)*sx*rad*1.15, 0.3+r()*0.2, [0.2+r()*0.05, 0.14+r()*0.12, 0.34+r()*0.14+(u>0?0.04:-0.04)], r()*6.28, r()*6.28, 1]); }
-  // boulders (soft-edged limestone)
-  for(const [x,z,s,sy] of [[5.95,8.25,0.42,0.55],[8.55,11.05,0.36,0.6],[8.7,8.2,0.26,0.7]]){ const g=new THREE.IcosahedronGeometry(s,3), pp=g.attributes.position;
-    for(let i=0;i<pp.count;i++){ const v=new THREE.Vector3().fromBufferAttribute(pp,i), n=1+0.12*Math.sin(v.x*9+v.z*4)+0.08*Math.sin(v.y*13+v.x*5); v.multiplyScalar(n); pp.setXYZ(i,v.x,v.y,v.z); }
-    g.scale(1.25,sy,1); g.computeVertexNormals(); g.translate(x,s*sy*0.55-0.03,z); addGeo(g,'rock',L,{keepUV:true}); }
-  // ornamental grasses (fountain grass), lavender and rosemary, kept clear of the trunk
-  const free=(x,z)=>Math.hypot(x-TX0,z-TZ0)>0.55 && Math.hypot(x-5.95,z-8.25)>0.55 && Math.hypot(x-8.55,z-11.05)>0.5 && Math.hypot(x-8.7,z-8.2)>0.38;
-  for(let i=0;i<34;i++){ const x=5.45+r()*3.65, z=7.8+r()*3.7; if(!free(x,z)) continue;
-    for(let k=0;k<2;k++) grassTuft(x+(r()-0.5)*0.1,z+(r()-0.5)*0.1,r,-0.02,0.65,[0.16+r()*0.04,0.3+r()*0.2,0.42+r()*0.12]);
-    if(r()>0.4) for(let k=0;k<6;k++){ const a=r()*6.28, d=0.18+r()*0.1; FOL.push([x+Math.cos(a)*d,0.55+r()*0.15,z+Math.sin(a)*d,0.013,[0.11,0.28,0.66],0.9*Math.cos(a),a,4]); } }
-  for(let i=0;i<10;i++){ const x=5.5+r()*3.5, z=7.85+r()*3.6; if(free(x,z)) lavender(x,z,r); }
-  for(let i=0;i<7;i++){ const x=5.5+r()*3.5, z=7.85+r()*3.6; if(free(x,z)) shrub(x,z,0.9,r); }
+  for(const [x,y,z] of tips) for(let q=0;q<170;q++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.45)*0.7, sx=Math.sqrt(1-u*u);
+    LEAF.push([x+Math.cos(th)*sx*rad*1.2, y+u*rad*0.55, z+Math.sin(th)*sx*rad*1.2, 0.26+r()*0.2, [0.19+r()*0.05, 0.13+r()*0.12, 0.36+r()*0.14+(u>0?0.05:-0.04)], r()*6.28, r()*6.28, 1]); }
+  /* in the bed: clipped boxwood balls and white bacopa spilling over the coping */
+  for(const [x,z,rb0] of [[6.55,9.3,0.3],[8.0,9.25,0.25],[7.95,10.55,0.33],[6.6,10.6,0.26],[7.3,10.7,0.2]]) sph('hedge',L,x,BH-0.1+rb0*0.85,z,rb0,1,0.9,1,{seg:22});
+  const bacopa=(x,z,y)=>{ for(let q=0;q<16;q++){ const a=r()*6.28, d=r()*0.12; FOL.push([x+Math.cos(a)*d,y+r()*0.06,z+Math.sin(a)*d,0.018,[0.3,0.4,0.22+r()*0.08],r()*3,r()*3,0.8]); }
+    for(let q=0;q<12;q++){ const a=r()*6.28, d=r()*0.13; FOL.push([x+Math.cos(a)*d,y+0.04+r()*0.05,z+Math.sin(a)*d,0.014,[0.14,0.25,0.93],0,0,0.6]); } };
+  for(let x=BX0+0.2;x<BX1-0.1;x+=0.17){ bacopa(x,BZ0+0.2,BH-0.04); bacopa(x,BZ1-0.2,BH-0.04); if(r()>0.4) bacopa(x,BZ1+0.02,BH-0.12); }
+  for(let z=BZ0+0.35;z<BZ1-0.2;z+=0.17){ bacopa(BX0+0.2,z,BH-0.04); bacopa(BX1-0.2,z,BH-0.04); if(r()>0.5) bacopa(BX0-0.02,z,BH-0.12); }
+  /* terracotta urns */
+  const urn=(x,z,s)=>{ lathe('terracotta',L,x,0,z,[[0,0],[0.17,0],[0.19,0.03],[0.27,0.16],[0.34,0.34],[0.355,0.44],[0.36,0.46],[0.35,0.48],[0.33,0.56],[0.27,0.66],[0.245,0.7],[0.265,0.72],[0.285,0.74],[0.28,0.77],[0.25,0.77],[0.24,0.74],[0,0.72]].map(([a,b])=>[a*s,b*s]),40); box('soil',L,x-0.2*s,x+0.2*s,0.72*s,0.73*s,z-0.2*s,z+0.2*s); return 0.73*s; };
+  const hy=urn(5.88,8.2,1.0);
+  for(let q=0;q<70;q++){ const a=r()*6.28, d=Math.pow(r(),0.6)*0.38; FOL.push([5.88+Math.cos(a)*d,hy+0.05+r()*0.38,8.2+Math.sin(a)*d,0.075,[0.27,0.42,0.22+r()*0.1],r()*3,r()*3,0.55]); }
+  for(let h=0;h<8;h++){ const a=h/8*6.28+r()*0.4, d=0.18+r()*0.17, cx=5.88+Math.cos(a)*d, cz=8.2+Math.sin(a)*d, cy=hy+0.32+r()*0.2;
+    for(let q=0;q<46;q++){ const u=r()*2-1, th=r()*6.28, sx=Math.sqrt(1-u*u), rr0=0.11*Math.cbrt(r()); FOL.push([cx+Math.cos(th)*sx*rr0,cy+Math.abs(u)*rr0*0.8,cz+Math.sin(th)*sx*rr0,0.026,[0.14,0.35,0.9+r()*0.06],r()*3,r()*3,1]); } }
+  const oy=urn(8.68,8.18,0.9); { const X=8.68, Z=8.18; branch(X,oy,Z,X+0.04,oy+0.8,Z-0.02,0.035,0.025); branch(X+0.04,oy+0.8,Z-0.02,X+0.2,oy+1.2,Z-0.08,0.02,0.01); branch(X+0.04,oy+0.8,Z-0.02,X-0.14,oy+1.25,Z+0.05,0.02,0.01);
+    for(let q=0;q<260;q++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.4)*0.45, sx=Math.sqrt(1-u*u); LEAF.push([X+0.03+Math.cos(th)*sx*rad, oy+1.25+u*rad*0.75, Z+Math.sin(th)*sx*rad,0.15+r()*0.08,[0.2+r()*0.04,0.14+r()*0.1,0.38+r()*0.12],r()*6.28,r()*6.28,1]); }
+    for(let q=0;q<5;q++) bacopa(X+(r()-0.5)*0.3,Z+(r()-0.5)*0.3,oy+0.01); }
+  /* boxwood balls on the gravel and lavender drifts */
+  for(const [x,z,rb0] of [[5.62,9.0,0.27],[9.0,9.05,0.22],[5.7,10.8,0.3],[8.95,10.75,0.25]]) sph('hedge',L,x,rb0*0.85-0.02,z,rb0,1,0.9,1,{seg:22});
+  const lav=(x,z)=>{ for(let q=0;q<3;q++) grassTuft(x+(r()-0.5)*0.16,z+(r()-0.5)*0.16,r,-0.02,0.26,[0.24+r()*0.04,0.16+r()*0.08,0.5+r()*0.08]);
+    for(let q=0;q<22;q++){ const a=r()*6.28, d=Math.pow(r(),0.6)*0.22, lean=0.18+r()*0.25, h=0.34+r()*0.18, sx=x+Math.cos(a)*d, sz=z+Math.sin(a)*d, tx=sx+Math.cos(a)*lean*h*0.6, tz=sz+Math.sin(a)*lean*h*0.6;
+      FOL.push([(sx+tx)/2,h*0.5,(sz+tz)/2,0.0035,[0.22,0.2,0.42],Math.sin(a)*lean,0,h/0.0035*0.5]);
+      FOL.push([tx,h+0.035,tz,0.011,[0.74+r()*0.03,0.32+r()*0.12,0.5+r()*0.1],Math.sin(a)*lean,r()*3,4.5]); } };
+  for(const [x,z] of [[5.6,9.6],[5.75,10.15],[6.0,9.75],[8.85,9.6],[9.0,10.15],[8.7,9.85],[6.3,11.06],[6.75,11.1],[7.85,11.1],[8.3,11.06]]) lav(x,z);
+  /* black lanterns on the stone columns, facing into the courtyard */
+  for(const [x,face] of [[5.27,Math.PI/2],[9.27,-Math.PI/2]]) place(x,1.75,11.8,face,()=>{ box('black',L,-0.035,0.035,0.18,0.22,0,0.06); box('black',L,-0.012,0.012,0.17,0.19,0.04,0.12);
+    box('black',L,-0.085,0.085,0,0.012,0.08,0.25); box('black',L,-0.095,0.095,0.26,0.275,0.07,0.26); lathe('black',L,0,0.275,0.165,[[0.1,0],[0.02,0.08],[0.012,0.1],[0,0.1]],4);
+    for(const [a,b] of [[-0.085,-0.075],[0.075,0.085]]) for(const [c,d] of [[0.08,0.09],[0.24,0.25]]) box('black',L,a,b,0.012,0.26,c,d);
+    box('lamp',L,-0.07,0.07,0.012,0.26,0.095,0.235); });
   // night uplight under the canopy
   cyl('lamp',L,7.55,10.35,-0.025,-0.015,0.06,{seg:16}); cyl('black',L,7.55,10.35,-0.03,-0.02,0.08,{seg:16});
 })();
