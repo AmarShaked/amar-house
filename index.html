@@ -1759,7 +1759,7 @@ function moveJoy(e){ const r=joyEl.getBoundingClientRect(); let dx=(e.clientX-(r
 const look={id:null,x:0,y:0,sx:0,sy:0,t:0,dyaw:0,dpitch:0};
 const cv=renderer.domElement;
 cv.addEventListener('pointerdown',e=>{ look.sx=e.clientX; look.sy=e.clientY; look.t=performance.now(); if(mode!=='walk') return; look.id=e.pointerId; look.x=e.clientX; look.y=e.clientY; cv.setPointerCapture(e.pointerId); });
-cv.addEventListener('pointermove',e=>{ if(mode!=='walk'||e.pointerId!==look.id) return; /* FPS look: drag right turns right, drag up looks up; touch sensitivity scales with screen width (a full swipe ≈ 145°) */ const k=e.pointerType==='mouse'?0.0042:2.5/Math.max(320,innerWidth); look.dyaw-=(e.clientX-look.x)*k; look.dpitch-=(e.clientY-look.y)*k; look.x=e.clientX; look.y=e.clientY; });
+cv.addEventListener('pointermove',e=>{ if(mode!=='walk'||e.pointerId!==look.id) return; /* drag right turns right; vertical: mouse drag up looks up, touch swipe down looks up (as asked); touch sensitivity scales with screen width (a full swipe ≈ 145°) */ const touch=e.pointerType!=='mouse', k=touch?2.5/Math.max(320,innerWidth):0.0042; look.dyaw-=(e.clientX-look.x)*k; look.dpitch+=(touch?1:-1)*(e.clientY-look.y)*k; look.x=e.clientX; look.y=e.clientY; });
 cv.addEventListener('pointerup',e=>{ const moved=Math.hypot(e.clientX-look.sx,e.clientY-look.sy), dt=performance.now()-look.t; if(e.pointerId===look.id) look.id=null;
   if(moved<8&&dt<350) onTap(e); });
 let lastTap=0;
