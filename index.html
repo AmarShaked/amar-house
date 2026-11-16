@@ -291,6 +291,10 @@ mat('screen',{color:0x0e0e0f, roughness:.15, metalness:.2});
 mat('mirror',{color:0xe8e8e8, roughness:.03, metalness:1});
 mat('fabWhite',{color:0xefece6, roughness:1});
 mat('fabBoucle',{color:0xf1ede5, roughness:1});
+mat('pianoWhite',{color:0xf3f2ee, roughness:.14});
+mat('keyWhite',{color:0xf6f3ea, roughness:.28});
+mat('keyBlack',{color:0x121212, roughness:.22});
+mat('fabLeather',{color:0xf0ede7, roughness:.42});
 mat('fabCream',{color:0xe4ddd0, roughness:1});
 mat('fabLinen',{color:0xd5cec2, roughness:1});
 mat('fabGrey',{color:0xaeaaa3, roughness:1});
@@ -1280,10 +1284,35 @@ place(2.55,0,9.10,'S',()=>{ rb('oak',L1,-0.62,0.62,0.33,0.38,-0.42,0.42,0.012,0,
 place(3.70,0,8.40,Math.atan2(2.55-3.70,9.10-8.40),()=>F.lounge(L1,'fabOlive','oak'));   /* armchair faces the sofa and coffee table */
 place(0.75,0,7.72,'S',()=>{ cyl('brass',L1,0,0,0,0.03,0.16); cyl('brass',L1,0,0,0,1.65,0.012); sph('brass',L1,0.12,1.55,0,0.14,1,1,0.7); sph('brass',L1,0.12,1.15,0,0.12,1,1,0.7); });
 box('canvasArt',L1,0.38,0.425,1.15,2.45,8.80,9.90);   /* abstract canvas over the sofa */
-place(4.94,0,9.62,'W',()=>{ // digital piano set into the wall niche
-  box('oak',L1,-0.7,0.7,0.62,0.78,-0.2,0.22,{solid:true}); box('oak',L1,-0.7,-0.66,0,0.62,-0.2,0.2); box('oak',L1,0.66,0.7,0,0.62,-0.2,0.2);
-  box('white',L1,-0.64,0.64,0.75,0.79,-0.02,0.2); box('black',L1,-0.64,0.64,0.785,0.8,0.0,0.06); box('oak',L1,-0.7,0.7,0.78,0.98,-0.2,-0.08);
-  box('oak',L1,-0.3,0.3,0.98,1.2,-0.16,-0.12); box('oak',L1,-0.35,0.35,0.0,0.5,0.45,0.75,{solid:true}); });
+/* Yamaha Clavinova (CLP-700 series, polished white) in the wall niche: 1461 × 927 × 459 mm, 88 keys, 3 pedals, matching bench */
+place(4.94,0,9.62,'W',()=>{ const W=0.7305, ZB=-0.21, ZF=0.249, P='pianoWhite';
+  /* side panels: full-depth leg, cheek at key level, stepped back to the console above */
+  const side=new THREE.Shape([[ZB,0],[ZF-0.012,0],[ZF,0.012],[ZF,0.80],[ZF-0.012,0.812],[0.11,0.812],[0.075,0.845],[0.075,0.927],[ZB,0.927]].map(([z,y])=>new THREE.Vector2(z,y)));
+  for(const sx of [-1,1]){ const g=new THREE.ExtrudeGeometry(side,{depth:0.034,bevelEnabled:true,bevelSize:0.004,bevelThickness:0.004,bevelSegments:2,curveSegments:1});
+    g.rotateY(-Math.PI/2); g.translate(sx*W+(sx<0?0.034:0),0,0); addGeo(g,P,L1,sx<0?{solid:true}:{}); }
+  box(P,L1,-W+0.03,W-0.03,0.06,0.927,ZB,ZB+0.018);                                  /* back board */
+  box(P,L1,-W+0.03,W-0.03,0.6,0.675,ZB,0.235,{solid:true});                         /* keybed */
+  box(P,L1,-W+0.03,W-0.03,0.675,0.927,ZB,0.068);                                   /* console behind the keys */
+  rb(P,L1,-W-0.004,W+0.004,0.925,0.942,ZB-0.004,0.082,0.004);                       /* top board */
+  box('black',L1,-0.62,0.62,0.765,0.778,0.06,0.0685);                              /* felt strip behind the keys */
+  box(P,L1,-W+0.03,W-0.03,0.675,0.738,0.218,0.245);                                 /* key slip */
+  for(const sx of [-1,1]) box(P,L1,Math.min(sx*0.617,sx*(W-0.03)),Math.max(sx*0.617,sx*(W-0.03)),0.675,0.792,0.06,0.245);   /* cheek blocks */
+  /* control panel on the left of the key slip: display + buttons; power on the right cheek */
+  box('screen',L1,-0.56,-0.47,0.7,0.722,0.2452,0.2462); for(let k=0;k<8;k++) box('keyWhite',L1,-0.455+k*0.022,-0.44+k*0.022,0.703,0.717,0.2452,0.2475);
+  cyl('keyBlack',L1,0.66,0.12,0.792,0.796,0.008,{seg:12});
+  /* 88 keys: 52 white (23.5 mm pitch) + 36 black */
+  const ww=1.227/52, x0=-0.6135;
+  for(let i=0;i<52;i++){ const a=x0+i*ww; box('keyWhite',L1,a+0.0006,a+ww-0.0006,0.742,0.765,0.07,0.216); }
+  for(let i=0;i<51;i++){ const n='ABCDEFG'[i%7]; if('ACDFG'.includes(n)){ const c=x0+(i+1)*ww; box('keyBlack',L1,c-0.0062,c+0.0062,0.765,0.778,0.07,0.163); } }
+  /* music rest, folded up and leaning back */
+  rb(P,L1,-0.4,0.4,0.944,1.235,-0.065,-0.052,0.004,-0.21); box(P,L1,-0.4,0.4,0.942,0.962,-0.03,0.0);
+  /* pedal box + three brass pedals */
+  box(P,L1,-0.2,0.2,0,0.075,0.03,0.225,{solid:true});
+  for(const px of [-0.075,0,0.075]){ rb('brass',L1,px-0.016,px+0.016,0.058,0.072,0.19,0.315,0.006); }
+  /* bench: padded white leatherette top on tapered legs, pulled up to the keyboard */
+  place(0,0,0.66,0,()=>{ for(const [lx,lz] of [[-0.34,-0.14],[0.34,-0.14],[-0.34,0.14],[0.34,0.14]]) strut(P,L1,lx*1.04,0,lz*1.08,lx,0.44,lz,0.017,0.022,12);
+    box(P,L1,-0.36,0.36,0.4,0.46,-0.16,0.16,{solid:true}); rb('fabLeather',L1,-0.38,0.38,0.455,0.52,-0.18,0.18,0.03,0,0,{puff:0.25}); });
+});
 box('white',L1,4.95,5.16,1.95,1.98,8.54,10.70); for(let i=0;i<10;i++) box('book',L1,4.98,5.14,1.98,2.18+(i%3)*0.03,9.9+i*0.045,9.935+i*0.045);
 place(5.06,1.98,9.05,'S',()=>glb('ceramic_vase_03',L1,{h:0.34})); place(5.06,1.98,8.8,'S',()=>glb('ceramic_vase_01',L1,{h:0.2}));
 place(3.85,0,11.05,'S',()=>{ cyl('oak',L1,0,0,0,0.46,0.12,{r2:0.18,seg:20,solid:true}); cyl('oak',L1,0.38,0.28,0,0.36,0.1,{r2:0.15,seg:20}); });
