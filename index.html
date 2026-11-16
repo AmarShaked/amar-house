@@ -196,7 +196,10 @@ const G0=0, GC=3.30, U0=3.80, UT=3.72, UC=6.60, RT=6.85, PT=7.25, GRADE=-0.15;
 /* ---------------- renderer / scene ---------------- */
 const stage = document.getElementById('stage');
 const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio, IS_TOUCH?1.5:2));
+/* adaptive resolution: starts at 1.5x (retina), drops toward 1x while frames are slow, climbs back when there is headroom */
+const PR_MAX=Math.min(devicePixelRatio, IS_TOUCH?1.5:2), PR_MIN=Math.min(1,PR_MAX);
+let prCur=Math.min(PR_MAX,1.5);
+renderer.setPixelRatio(prCur);
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1755,8 +1758,8 @@ const cloudMats=[];
     sp.position.set(7+Math.cos(a)*d,50+r()*55,7+Math.sin(a)*d); sp.scale.set(80+r()*60,34+r()*20,1); scene.add(sp); noAO.push(sp); } }
 scene.traverse(o=>{ if((o.isMesh&&o.material&&['glass','glassTint','water'].includes(o.material.name))||o.userData.foliage) noAO.push(o); });
 
-/* night lights (always present so shaders don't recompile) */
-const nightLights=[];
+/* night lights: hidden in daylight (a zero-intensity light still costs every pixel), shown from dusk */
+const nightLights=[]; let nightOn=true;
 { const cell=IS_TOUCH?4.5:3.2, groups=new Map();
   for(const [x,y,z,w] of FIXLIGHTS){ const k=Math.floor(x/cell)+','+Math.floor(z/cell)+','+(y>3.6?1:0); if(!groups.has(k)) groups.set(k,{x:0,y:0,z:0,w:0,n:0}); const g=groups.get(k); g.x+=x*w; g.y+=y*w; g.z+=z*w; g.w+=w; g.n++; }
   const list=[...groups.values()].sort((a,b)=>b.w-a.w).slice(0,IS_TOUCH?12:24);
@@ -1815,6 +1818,7 @@ function applySun(){
     u.top.value.copy(SKY_NIGHT.top).lerp(SKY_DAY.top,day); if(scene.fog) scene.fog.color.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day); u.mid.value.copy(SKY_NIGHT.mid).lerp(SKY_DAY.mid,day); u.hor.value.copy(SKY_NIGHT.hor).lerp(SKY_DAY.hor,day).lerp(SKY_DUSK,dusk*0.7); }
   cloudMats.forEach(m=>{ m.opacity=0.9*day; m.color.copy(sun.color).lerp(new THREE.Color(0xffffff),0.6); });
   nightLights.forEach(l=>l.intensity=night*11*(l.userData.k||1));
+  { const on=night>0.002; if(on!==nightOn){ nightOn=on; nightLights.forEach(l=>l.visible=on); } }
   renderer.toneMappingExposure=(0.66+0.4*day+0.3*night)*(mode==='walk'?1.08:1);
   shadowFrames=3;
   // UI
@@ -2061,17 +2065,24 @@ if(innerWidth<700||matchMedia('(max-width:700px)').matches) sunCard.classList.ad
 addEventListener('resize',()=>{ if(mode==='walk') camera.fov=innerWidth<innerHeight?88:(IS_TOUCH?72:68); camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); fitOrtho(); renderer.setSize(innerWidth,innerHeight); });
 const needle=document.getElementById('needle'); const fwd=new THREE.Vector3();
 const clock=new THREE.Clock();
-function frame(){ update(Math.min(0.05,clock.getDelta())); requestAnimationFrame(frame); }
+const DYN={ ema:1/60, n:0, hold:0 };
+function setPR(v){ prCur=v; renderer.setPixelRatio(v); renderer.setSize(innerWidth,innerHeight); if(postFX) postFX.setPixelRatio(v); }
+function frame(){ const raw=clock.getDelta(); update(Math.min(0.05,raw));
+  /* adapt only from frames that were really drawn while the view moved; ignore hidden-tab gaps */
+  if(quality!=='pt' && idleN===0 && raw<0.25){ DYN.ema+=(raw-DYN.ema)*0.08; DYN.n++; DYN.hold=Math.max(0,DYN.hold-raw);
+    if(DYN.n>40){ if(DYN.ema>1/38 && prCur>PR_MIN){ setPR(Math.max(PR_MIN,+(prCur-0.25).toFixed(2))); DYN.n=0; DYN.hold=8; DYN.ema=1/45; }
+      else if(DYN.ema<1/57 && prCur<PR_MAX && DYN.hold<=0){ setPR(Math.min(PR_MAX,+(prCur+0.25).toFixed(2))); DYN.n=0; DYN.hold=4; } } }
+  requestAnimationFrame(frame); }
 let postFX=null, quality=IS_TOUCH?'std':'hq';
 (async()=>{ try{
   const [{EffectComposer},{RenderPass},{GTAOPass},{OutputPass}]=await Promise.all([import('three/addons/postprocessing/EffectComposer.js'),import('three/addons/postprocessing/RenderPass.js'),import('three/addons/postprocessing/GTAOPass.js'),import('three/addons/postprocessing/OutputPass.js')]);
   const comp=new EffectComposer(renderer); comp.addPass(new RenderPass(scene,camera));
   const ao=new GTAOPass(scene,camera,innerWidth,innerHeight);
-  ao.updateGtaoMaterial({radius:0.55,distanceExponent:1.6,thickness:1.4,scale:1.25,samples:16});
-  ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:5,rings:2,samples:16});
+  ao.updateGtaoMaterial({radius:0.55,distanceExponent:1.6,thickness:1.4,scale:1.25,samples:10});
+  ao.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:5,rings:2,samples:8});
   const r0=ao.render.bind(ao); ao.render=(...args)=>{ noAO.forEach(o=>o.visible=false); r0(...args); noAO.forEach(o=>o.visible=true); };
   comp.addPass(ao); comp.addPass(new OutputPass());
-  addEventListener('resize',()=>comp.setSize(innerWidth,innerHeight)); postFX=comp;
+  comp.setPixelRatio(prCur); addEventListener('resize',()=>comp.setSize(innerWidth,innerHeight)); postFX=comp;
 }catch(e){ console.warn('ambient occlusion unavailable',e); } })();
 /* collapsible top menu, remembered per device */
 { const top=document.getElementById('top'), tb=document.getElementById('topToggle');
@@ -2156,8 +2167,16 @@ function update(dt){
   for(const f of fans) f.rotation.y+=dt*2.2;
   if(mode==='plan') fwd.set(0,0,-1); else camera.getWorldDirection(fwd); const b=Math.atan2(fwd.x,-fwd.z)/D2R; needle.style.transform=`rotate(${NORTH_DEG-b}deg)`;
   measFrame();
+  /* when nothing moves, draw every third frame (fans still turn, the GPU and the laptop stay cool) */
+  activeCam.updateMatrixWorld();
+  if(!nearM(idleM,activeCam.matrixWorld)||!nearM(idleP,activeCam.projectionMatrix)||sunState.playing||MEAS.live||document.hidden){ idleM.copy(activeCam.matrixWorld); idleP.copy(activeCam.projectionMatrix); idleN=0; } else idleN++;
+  if(quality!=='pt' && idleN>30 && idleN%3) return;
   if(quality==='pt'&&mode!=='plan') ptRender(); else if(postFX&&quality!=='std'&&mode!=='plan') postFX.render(dt); else renderer.render(scene,activeCam);
 }
+const idleM=new THREE.Matrix4(), idleP=new THREE.Matrix4(); let idleN=0;
+/* damping keeps nudging the camera by sub-micron amounts forever: treat that as still */
+function nearM(a,b){ const x=a.elements, y=b.elements; for(let i=0;i<16;i++) if(Math.abs(x[i]-y[i])>2e-5) return false; return true; }
+addEventListener('pointerdown',()=>idleN=0); addEventListener('keydown',()=>idleN=0); addEventListener('wheel',()=>idleN=0,{passive:true});
 /* image-based lighting from a soft daylight sky + ground (reflections in glass and metal) */
 { const es=new THREE.Scene();
   const dome=new THREE.Mesh(new THREE.SphereGeometry(50,32,16),new THREE.ShaderMaterial({side:THREE.BackSide,
@@ -2168,6 +2187,6 @@ function update(dt){
 setCut('all'); applySun(); showHint();
 document.getElementById('loading').hidden=true;
 requestAnimationFrame(frame);
-window.__house={MEAS,FIXLIGHTS,PTR,get quality(){return quality},M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
+window.__house={MEAS,FIXLIGHTS,PTR,get quality(){return quality},get prCur(){return prCur},get idleN(){return idleN},DYN,M,BX,MAT_RANK,ortho,planControls,tick:(n=1)=>{for(let i=0;i<n;i++) update(1/30);},scene,sun,renderer,camera,controls,THREE,layerObjs,player,solids,floors,setMode,setCut,sunState,ROOMS,get sunDirty(){return sunDirty},set sunDirty(v){sunDirty=v}};
 </script>
 </body></html>
