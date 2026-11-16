@@ -1,2 +1,3 @@
 Fabric textures and decor models: Poly Haven (polyhaven.com), CC0.
 stone_wall_diff/nor.jpg: seamless tile made from the owner's own reference photo of the chosen cladding stone.
+plaster_diff/nor.jpg: from the owner's own reference photo of the chosen exterior plaster.

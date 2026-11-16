@@ -124,10 +124,10 @@ body.walk.touch #sun{bottom:calc(env(safe-area-inset-bottom,0px) + 160px)}
     </div>
   </div>
   <div class="row">
-    <span class="lbl">חיפוי</span>
-    <div class="seg" id="stoneSeg" style="flex:1" role="group" aria-label="חיפוי אבן בחזית">
-      <button data-s="1" title="חיפוי אבן גיר בחזית ובגדר">עם אבן</button>
-      <button data-s="0" title="אותם קירות בטיח לבן">בלי אבן</button>
+    <span class="lbl">מבואה</span>
+    <div class="seg" id="stoneSeg" style="flex:1" role="group" aria-label="חיפוי אבן במבואת הכניסה">
+      <button data-s="1" title="קירות מבואת הכניסה בחיפוי אבן">עם אבן</button>
+      <button data-s="0" title="קירות מבואת הכניסה בטיח לבן">בלי אבן</button>
     </div>
   </div>
   <div class="row">
@@ -264,6 +264,7 @@ mat('plaster',{color:0xf2f0eb, roughness:.95});
 mat('ceiling',{color:0xf6f5f1, roughness:.95});
 mat('ext',{color:0xf3f2ee, roughness:.9});
 mat('stone',{map:TX.stone, roughness:.95});
+mat('stonePorch',{map:TX.stone, roughness:.95});   /* entrance porch cladding: switchable stone / white plaster */
 mat('tile',{map:TX.tile, roughness:.55});
 mat('oakFloor',{map:TX.oakFloor, roughness:.6});
 mat('oak',{map:TX.oak, roughness:.55});
@@ -792,8 +793,9 @@ solid(PX0-0.2,PX1+0.2,GRADE,GRADE+1.35,PZ1,PZ1+0.2);
 // ---- front development (per site plan): entrance path, garden with stepping stones, 2 open parking spaces
 // front wall H=1.36: stone cladding outside, plaster inside; white metal gates; stone pillars
 const FW1=GRADE+1.36, PIL=GRADE+1.50;
-function frontWall(x0,x1){ box('ext','s',x0,x1,GRADE,FW1,PZ0-0.17,PZ0,{solid:true}); box('stone','s',x0,x1,GRADE,FW1,PZ0-0.22,PZ0-0.17); box('stone','s',x0,x1,FW1,FW1+0.04,PZ0-0.22,PZ0); }
-function pillar(x0,x1){ box('stone','s',x0,x1,GRADE,PIL,PZ0-0.26,PZ0+0.04,{solid:true}); }
+/* front wall and pillars: white textured plaster (no stone), per the client */
+function frontWall(x0,x1){ box('ext','s',x0,x1,GRADE,FW1,PZ0-0.17,PZ0,{solid:true}); box('ext','s',x0,x1,GRADE,FW1,PZ0-0.22,PZ0-0.17); box('ext','s',x0,x1,FW1,FW1+0.04,PZ0-0.22,PZ0); }
+function pillar(x0,x1){ box('ext','s',x0,x1,GRADE,PIL,PZ0-0.26,PZ0+0.04,{solid:true}); }
 function gate(x0,x1,h){ const y1=GRADE+h; box('white','s',x0,x1,GRADE+0.08,GRADE+0.12,PZ0-0.13,PZ0-0.09); box('white','s',x0,x1,y1-0.05,y1,PZ0-0.13,PZ0-0.09);
   for(let x=x0+0.06;x<x1-0.03;x+=0.11) slat('white','s',x,x+0.025,GRADE+0.12,y1-0.05,PZ0-0.125,PZ0-0.095); solid(x0,x1,GRADE,y1,PZ0-0.15,PZ0-0.07); }
 frontWall(PX0-0.2,6.10);                 // west part, in front of the family room garden
@@ -895,6 +897,9 @@ wall('plaster',L1,'x',0.13,0.38,0.08,5.60,0,GC,topOps,{ext:-1});
 wall(EXT_STONE,L1,'x',0.08,0.13,0.08,5.60,0,GC,topOps,{noFill:true,solid:false});
 // porch recess walls
 wall('plaster',L1,'z',5.42,5.55,0.38,1.95,0,GC); wall('ext',L1,'z',5.55,5.60,0.08,1.95,0,GC,[],{solid:false});   // entrance porch: white
+/* porch stone skin (1.5 cm) on the three inner faces — switched with the 'מבואה' toggle */
+box('stonePorch',L1,5.60,5.615,0,GC,0.08,1.95); box('stonePorch',L1,7.675,7.69,0,GC,0.38,1.95);
+box('stonePorch',L1,5.615,5.95,0,GC,1.935,1.95); box('stonePorch',L1,7.15,7.675,0,GC,1.935,1.95); box('stonePorch',L1,5.95,7.15,2.70,GC,1.935,1.95);
 box('plaster',L1,5.42,5.60,0,GC,0.08,0.38,{solid:true});
 const doorOps=[{a:5.95,b:7.15,s:0,h:2.70,type:'door',leaf:{m:'oakDoor',side:1,hinge:'a',open:0},casing:'oak'}];
 /* long black pull on the front door, outside and inside */
@@ -1582,7 +1587,7 @@ addFan(L1,2.25,2.16,GC); addFan(L1,12.37,1.97,GC); addFan('s',2.5,13.92,3.42); a
    BUILD MESHES
    =================================================================== */
 /* coplanar-surface priority: finishes win over structure, so overlapping faces never flicker */
-const MAT_RANK={ stone:0,woodClad:0,bath:0,bathGrey:0,terrazzo:0,wtile:0,stick:0,limewash:0,marble:0,rugWhite:0,rugCheck:0,gravel:0,tile:0,oakFloor:0,paving:0,cobble:0,deck:0,canvasArt:0,mirror:0,screen:0,oakDoor:0,
+const MAT_RANK={ stone:0,stonePorch:0,woodClad:0,bath:0,bathGrey:0,terrazzo:0,wtile:0,stick:0,limewash:0,marble:0,rugWhite:0,rugCheck:0,gravel:0,tile:0,oakFloor:0,paving:0,cobble:0,deck:0,canvasArt:0,mirror:0,screen:0,oakDoor:0,
   oakPanel:1,oak:1,white:2,frame:2,lacquer:2,black:2,teak:2,fabWhite:2,fabCream:2,fabLinen:2,fabGrey:2,fabMustard:2,fabOlive:2,fabSage:2,book:2,artDark:2,art:2,porcelain:2,bronze:2,brass:2,
   chrome:1, ext:3, plaster:4, ceiling:5, roof:5, concrete:6, asphalt:7, grass:6, field:8, hedge:4 };
 for(const [k,m] of Object.entries(M)){ const r=MAT_RANK[k]??2; if(r>0){ m.polygonOffset=true; m.polygonOffsetFactor=0; m.polygonOffsetUnits=r*4;   /* constant bias: no slope term, so no seam lines at grazing angles */ } }
@@ -1604,15 +1609,23 @@ for(const [k,o] of inst){
 fans.forEach(f=>layerObjs[f.userData.L].push(Object.assign(f,{userData:{...f.userData,orig:M.white}})));
 /* ---------- real-world assets (CC0 photoscans from Poly Haven), loaded progressively over the procedural look ---------- */
 const ASSETS='assets/';
-/* facade stone cladding: the chosen rough limestone (seamless tile made from the client's photo), switchable to plain plaster */
+/* stone cladding: the chosen limestone (seamless tile made from the client's photo) on the facade;
+   the entrance porch has its own copy, switchable to white plaster with the 'מבואה' toggle */
 let STONE_ON=true; try{ STONE_ON=localStorage.getItem('amarStone')!=='0'; }catch(e){}
 const STONE={ proc:{map:M.stone.map, normalMap:M.stone.normalMap}, photo:null };
-function stoneApply(){ const m=M.stone, s=STONE_ON? (STONE.photo||STONE.proc) : {map:M.ext.map, normalMap:M.ext.normalMap}, k=STONE_ON&&STONE.photo?1.4:1;
-  m.map=s.map; m.normalMap=s.normalMap; m.normalScale.set(k,k); m.roughness=STONE_ON?.9:.92; m.color.set(STONE_ON?0xffffff:M.ext.color); m.needsUpdate=true;
+const STONE_LIFT=1.35;   /* brightens the photo stone a little */
+function stoneApply(){ const ph=STONE.photo||STONE.proc, k=STONE.photo?0.6:1.1;
+  const set=(m,t,k,col,r)=>{ m.map=t.map; m.normalMap=t.normalMap; m.normalScale.set(k,k); m.roughness=r; m.color.set(col); if(t===ph&&STONE.photo) m.color.multiplyScalar(STONE_LIFT); m.needsUpdate=true; };
+  set(M.stone,ph,k,0xffffff,.9);
+  if(STONE_ON) set(M.stonePorch,ph,k,0xffffff,.9); else set(M.stonePorch,{map:M.ext.map,normalMap:M.ext.normalMap},1,M.ext.color,.92);
   try{ PTR.dirty=true; }catch(e){} }
 stoneApply();
 { const TL=new THREE.TextureLoader();
-  { const SW=1.1, SH=SW*714/478, rep=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/SW,1/SH); t.anisotropy=ANI; return t; };
+  { const SW=1.7, SH=SW*906/682, rep=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/SW,1/SH); t.anisotropy=ANI; return t; };
+    /* exterior plaster (שליכט): the chosen textured render, ~0.5 m tile, on the facade and the boundary walls */
+    { const PW=0.5, rp=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/PW,1/PW); t.anisotropy=ANI; return t; };
+      TL.load(ASSETS+'tex/plaster_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace; Object.assign(M.ext,{map:rp(t), normalMap:rp(TL.load(ASSETS+'tex/plaster_nor.jpg')), roughness:.95});
+        M.ext.normalScale.set(1,1); M.ext.color.set(0xffffff); M.ext.needsUpdate=true; stoneApply(); }); }
     TL.load(ASSETS+'tex/stone_wall_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace; STONE.photo={map:rep(t), normalMap:rep(TL.load(ASSETS+'tex/stone_wall_nor.jpg'))}; stoneApply(); }); }
   const fabric=(name,metres,keys)=>TL.load(ASSETS+'tex/'+name+'_diff.jpg',src=>{
     /* neutralise the photo to grey with a fixed mean, so each material keeps its own colour and the weave only adds texture */
