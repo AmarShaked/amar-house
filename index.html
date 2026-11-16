@@ -1624,7 +1624,24 @@ stoneApply();
   { const SW=1.7, SH=SW*906/682, rep=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/SW,1/SH); t.anisotropy=ANI; return t; };
     /* exterior plaster (שליכט): the chosen textured render, ~0.5 m tile, on the facade and the boundary walls */
     { const PW=0.5, rp=t=>{ t.wrapS=t.wrapT=THREE.RepeatWrapping; t.repeat.set(1/PW,1/PW); t.anisotropy=ANI; return t; };
-      TL.load(ASSETS+'tex/plaster_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace; Object.assign(M.ext,{map:rp(t), normalMap:rp(TL.load(ASSETS+'tex/plaster_nor.jpg')), roughness:.95});
+      TL.load(ASSETS+'tex/plaster_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace;
+        const inMap=M.ext.map, inNor=M.ext.normalMap, K=(PW/2.5).toFixed(4);   /* smooth interior plaster (procedural, 2.5 m tile) */
+        Object.assign(M.ext,{map:rp(t), normalMap:rp(TL.load(ASSETS+'tex/plaster_nor.jpg')), roughness:.95});
+        /* the textured render only on faces that open to the outside; faces toward a room keep the smooth plaster.
+           A face is indoor when a point 3 cm in front of it lies inside the ground- or upper-floor outer envelope (walls and window reveals included, less porch and courtyard). */
+        const IND=`varying vec3 vWP; varying vec3 vWN; uniform sampler2D mapIn; uniform sampler2D norIn;
+          bool inBx(vec3 p, vec3 a, vec3 b){ return all(greaterThan(p,a)) && all(lessThan(p,b)); }
+          bool indoor(vec3 p){
+            bool g = inBx(p,vec3(0.08,-0.5,0.08),vec3(14.42,3.30,11.95)) && !inBx(p,vec3(5.60,-1.,-1.),vec3(7.69,4.,1.95)) && !inBx(p,vec3(5.27,-1.,7.58),vec3(9.27,4.,13.));
+            bool u = inBx(p,vec3(-0.2,3.29,-0.2),vec3(14.7,7.25,12.22)) && !inBx(p,vec3(5.27,3.,7.58),vec3(9.27,8.,13.));
+            return g || u; }`;
+        M.ext.onBeforeCompile=sh=>{ sh.uniforms.mapIn={value:inMap}; sh.uniforms.norIn={value:inNor};
+          sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWP; varying vec3 vWN;')
+            .replace('#include <worldpos_vertex>','#include <worldpos_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz; vWN=normalize(mat3(modelMatrix)*objectNormal);');
+          sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\n'+IND)
+            .replace('#include <map_fragment>','bool outW = !indoor(vWP + normalize(vWN)*0.03);\n'+THREE.ShaderChunk.map_fragment.replace('texture2D( map, vMapUv )','(outW ? texture2D( map, vMapUv ) : texture2D( mapIn, vMapUv*'+K+' ))'))
+            .replace('#include <normal_fragment_maps>',THREE.ShaderChunk.normal_fragment_maps.replace('texture2D( normalMap, vNormalMapUv )','(outW ? texture2D( normalMap, vNormalMapUv ) : texture2D( norIn, vNormalMapUv*'+K+' ))')); };
+        M.ext.customProgramCacheKey=()=>'extOutIn';
         M.ext.normalScale.set(1,1); M.ext.color.set(0xffffff); M.ext.needsUpdate=true; stoneApply(); }); }
     TL.load(ASSETS+'tex/stone_wall_diff.jpg',t=>{ t.colorSpace=THREE.SRGBColorSpace; STONE.photo={map:rep(t), normalMap:rep(TL.load(ASSETS+'tex/stone_wall_nor.jpg'))}; stoneApply(); }); }
   const fabric=(name,metres,keys)=>TL.load(ASSETS+'tex/'+name+'_diff.jpg',src=>{
