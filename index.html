@@ -273,6 +273,13 @@ mat('oakFloor',{map:TX.oakFloor, roughness:.6});
 mat('oak',{map:TX.oak, roughness:.55});
 mat('oakPanel',{map:TX.oakPanel, roughness:.55});
 mat('lacquer',{color:0xf1eee8, roughness:.5});
+mat('oakWhite',{color:0xe2d6c6, roughness:.5});   /* whitened oak (kitchen run + island fronts) */
+mat('paintC',{color:0xe6ddd3, roughness:.42});    /* baked paint, warm greige (window-seat wall) */
+mat('gapDark',{color:0x2b251f, roughness:1});     /* shadow gaps and recessed plinths */
+TX.cane=makeTex(256,0.04,(g,n,r)=>{ g.fillStyle='#3d2f22'; g.fillRect(0,0,n,n); const s=n/2; g.lineCap='round';
+  for(const [w,c] of [[n*0.085,'#b48f5c'],[n*0.04,'#d9bd8b']]){ g.strokeStyle=c; g.lineWidth=w;
+    for(let k=-2;k<=4;k++){ const o=k*s; for(const [x0,y0,x1,y1] of [[o,0,o,n],[0,o,n,o],[o,0,o+n,n],[o+n,0,o,n]]){ g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); } } } },9);
+mat('cane',{map:TX.cane, roughness:.8});
 mat('marble',{map:TX.marble, roughness:.3});
 mat('bath',{map:TX.bath, roughness:.5});
 mat('bathGrey',{map:TX.bath, color:0xd2cdc4, roughness:.8});
@@ -461,6 +468,7 @@ function texHedge(metres){ const n=TS/2|0, r=rng(83), c=canvasN(n), g=c.getConte
     const id=g.getImageData(0,0,n,n), d=id.data; for(let i=0;i<n*n;i++){ const f=(hsh(i%n,(i/n)|0,43)-0.5)*8; d[i*4]+=f; d[i*4+1]+=f; d[i*4+2]+=f; H[i]+=(hsh(i%n>>2,(i/n)|0,44)-0.5)*0.05; } g.putImageData(id,0,0);
     return [colorTex(c,metres),normalTex(H,n,2,metres)]; };
   { const [m1,n1]=oakFine(false); setM(M.oak,m1,n1,{roughness:.5}); const [m2,n2]=oakFine(true); setM(M.oakPanel,m2,n2,{roughness:.5});
+    { const c=canvasN(m1.image.width), g=c.getContext('2d'); g.drawImage(m1.image,0,0); g.fillStyle='rgba(244,238,229,.55)'; g.fillRect(0,0,c.width,c.height); setM(M.oakWhite,colorTex(c,1.2),n1,{roughness:.5}); }
     /* front door: same greige oak with 10 cm grooves */
     /* outdoor timber (posts, gate, garden furniture) in a deeper tone of the same greige */
     M.teak.color.set(0x9b8774); M.slatWood.color.set(0x9b8774); }
@@ -927,7 +935,7 @@ const westOps=[{a:4.60,b:6.75,s:0,h:GC,type:'fix',mull:99}];   /* dining: fixed 
 wall('plaster',L1,'z',0.13,0.38,0.08,11.95,0,GC,westOps,{ext:-1});
 wall(EXT_STONE,L1,'z',0.08,0.13,0.08,11.95,0,GC,westOps,{noFill:true,solid:false});
 // east wall: safe-room window + kitchen window
-const eastOps=[{a:1.25,b:2.75,s:1.10,h:2.20},{a:4.14,b:5.08,s:0,h:2.30,type:'door',leaf:{m:'frame',side:-1,hinge:'a'}},{a:6.90,b:10.00,s:1.05,h:2.40,lv:.4,mull:1.55}];
+const eastOps=[{a:1.25,b:2.75,s:1.10,h:2.20},{a:4.14,b:5.08,s:0,h:2.30,type:'door',leaf:{m:'frame',side:-1,hinge:'a'}},{a:7.01,b:10.31,s:1.20,h:2.60,lv:.4,mull:1.65}];
 wall('plaster',L1,'z',14.12,14.37,0.08,11.95,0,GC,eastOps,{ext:1});
 wall(EXT_STONE,L1,'z',14.37,14.42,0.08,11.95,0,GC,eastOps,{noFill:true,solid:false});
 // south (garden) wall: living slider | courtyard open | kitchen slider
@@ -955,7 +963,7 @@ box('plaster',L1,4.95,5.20,0,2.55,8.31,8.54,{solid:true}); box('plaster',L1,4.95
 box('plaster',L1,5.16,5.20,0,2.55,8.54,10.70,{solid:true});   /* niche back, ~21 cm deep */
 box('ext',L1,5.20,5.27,0,2.55,8.31,10.92);
 // kitchen side: window seat
-const ckOps=[{a:8.62,b:10.60,s:0.45,h:2.60,type:'fix',mull:99,casing:'oak'}];   /* single fixed pane over the window seat */
+const ckOps=[{a:8.88,b:10.71,s:0.40,h:2.97,type:'fix',mull:99,casing:'oak'}];   /* single fixed pane over the window seat */
 wall('plaster',L1,'z',9.32,9.56,7.60,11.65,0,GC,ckOps,{ext:-1});
 wall('ext',L1,'z',9.27,9.32,7.60,11.65,0,GC,ckOps,{noFill:true,solid:false});
 // courtyard, Mediterranean: old gnarled olive in a limestone raised bed with boxwood balls and white bacopa,
@@ -1032,12 +1040,12 @@ wall(P,L1,'x',3.21,3.44,10.73,14.12,0,GC,[{a:10.89,b:11.66,s:0,h:2.10,type:'door
 // ---- pantry block (measured from the plan): one inner space linking the hall (flush door 19),
 // the guest unit (safe-room door) and the pantry room. Every outside face is oak-clad for one unified volume.
 // flush door 19 from the hall, oak-clad on the hall side
-wall(P,L1,'z',9.38,9.45,3.65,4.77,0,GC,[{a:3.86,b:4.70,s:0,h:2.60,type:'door',leaf:{m:'oak',side:1,hinge:'a',open:0.25}}]);
-box('oak',L1,9.34,9.38,0,GC,3.65,3.86); box('oak',L1,9.34,9.38,2.60,GC,3.86,4.70); box('oak',L1,9.34,9.38,0,GC,4.70,4.77);
+wall(P,L1,'z',9.38,9.45,3.65,4.77,0,GC,[{a:3.86,b:4.70,s:0,h:2.10,type:'door',leaf:{m:'oak',side:1,hinge:'a',open:0.25}}]);
+box('oak',L1,9.34,9.38,0,GC,3.65,3.86); box('oak',L1,9.34,9.38,2.10,GC,3.86,4.70); box('oak',L1,9.34,9.38,0,GC,4.70,4.77);
 // coat closet facing the hall, rounded corner toward the kitchen
 // one continuous oak skin: square boxes sharing planes, only the hall/kitchen corner is rounded
 box('oak',L1,9.48,10.04,0,GC,4.77,6.10,{solid:true}); box('oak',L1,9.34,9.48,0,GC,4.77,5.96,{solid:true});
-cyl('oak',L1,9.48,5.96,0,GC,0.14,{seg:24});
+cyl('oak',L1,9.48,5.96,0,3.00,0.16,{seg:24});
 // straight 3 cm gypsum wall between the passage and the kitchen-side tall units (fridge etc.)
 box(P,L1,10.04,12.45,0,GC,5.22,5.25,{solid:true});
 // tall units opening to the kitchen: oak fronts flush along one line
@@ -1047,7 +1055,7 @@ box(P,L1,11.83,12.05,0,GC,3.44,4.05,{solid:true});   /* pier shortened to half i
 box('lacquer',L1,12.05,12.46,0,2.60,3.44,4.05,{solid:true});   /* tall closet ends with the shortened pier */
 // pantry room: door from the passage, door to the kitchen (oak-clad, flush)
 /* pantry west wall + door removed for now: the pantry is open to the passage */
-wall('oak',L1,'x',5.98,6.10,12.39,14.12,0,GC,[{a:12.48,b:13.38,s:0,h:2.40,type:'door',leaf:{m:'oak',side:-1,hinge:'b',open:0.25}}]);
+wall('oak',L1,'x',5.98,6.10,12.39,14.12,0,GC,[{a:12.48,b:13.38,s:0,h:2.10,type:'door',leaf:{m:'oak',side:-1,hinge:'b',open:0.25}}]);
 /* face-frame grid on the oak block (Scandinavian frame-and-panel: slim proud stiles and rails, recessed panels with fine shadow gaps) */
 function frameGrid(axis,plane,dir,segs,doors,ys){
   const S=(a0,a1,y0,y1,d0,d1,m)=>{ const p0=plane+dir*d0, p1=plane+dir*d1; if(axis==='z') box(m,L1,a0,a1,y0,y1,Math.min(p0,p1),Math.max(p0,p1)); else box(m,L1,Math.min(p0,p1),Math.max(p0,p1),y0,y1,a0,a1); };
@@ -1061,8 +1069,45 @@ function frameGrid(axis,plane,dir,segs,doors,ys){
     for(const y of ys) if(y>h+W) S(a0,a1,y-W/2,y+W/2,0,D,'oak'); S(a0,a1,ys[ys.length-1]-W/2,ys[ys.length-1]+W/2,0,D,'oak'); }
 }
 /* kitchen face (z = 6.10) and hall face (x = 9.34) of the block */
-frameGrid('z',6.10,1,[[9.48,12.48],[13.38,14.12]],[[12.48,13.38,2.40]],[0.10,0.92,2.12,GC-0.03]);
-frameGrid('x',9.34,-1,[[3.65,3.86],[4.70,5.96]],[[3.86,4.70,2.60]],[0.10,0.92,2.12,GC-0.03]);
+/* ---- joinery helpers (kitchen carpentry layouts). A cabinet face lies on plane pl (x = pl for axis 'x', z = pl for axis 'z')
+   and faces dir (+1/-1); a0..a1 run along the wall. Fronts stand 1..20 mm off the plane over a dark backing, so the 3 mm gaps read. */
+function kBox(m,axis,pl,dir,a0,a1,y0,y1,d0,d1,o){ const p0=pl+dir*d0, p1=pl+dir*d1;
+  if(axis==='x') box(m,L1,Math.min(p0,p1),Math.max(p0,p1),y0,y1,a0,a1,o); else box(m,L1,a0,a1,y0,y1,Math.min(p0,p1),Math.max(p0,p1),o); }
+const KG=0.0015;
+function kSlab(m,axis,pl,dir,a0,a1,y0,y1,g=KG){ kBox(m,axis,pl,dir,a0+g,a1-g,y0+g,y1-g,0.001,0.02); }
+/* frame-and-panel front (the whitened-oak sample): 3.5 cm stiles and rails, panel set back 6 mm */
+function kFramed(m,axis,pl,dir,a0,a1,y0,y1,panel){ a0+=KG; a1-=KG; y0+=KG; y1-=KG; const fw=Math.min(0.035,(a1-a0)/4,(y1-y0)/4);
+  kBox(panel||m,axis,pl,dir,a0+fw,a1-fw,y0+fw,y1-fw,0.001,0.014);
+  kBox(m,axis,pl,dir,a0,a0+fw,y0,y1,0.001,0.02); kBox(m,axis,pl,dir,a1-fw,a1,y0,y1,0.001,0.02);
+  kBox(m,axis,pl,dir,a0+fw,a1-fw,y0,y0+fw,0.001,0.02); kBox(m,axis,pl,dir,a0+fw,a1-fw,y1-fw,y1,0.001,0.02); }
+/* slim 12 mm bar pull on two posts */
+function kPull(axis,pl,dir,a,y,len,vert,m='brass'){ const d=0.02;
+  if(vert){ kBox(m,axis,pl,dir,a-0.006,a+0.006,y-len/2,y+len/2,d+0.024,d+0.036,{r:0.005}); for(const yy of [y-len/2+0.02,y+len/2-0.02]) kBox(m,axis,pl,dir,a-0.004,a+0.004,yy-0.004,yy+0.004,d,d+0.025); }
+  else { kBox(m,axis,pl,dir,a-len/2,a+len/2,y-0.006,y+0.006,d+0.024,d+0.036,{r:0.005}); for(const aa of [a-len/2+0.02,a+len/2-0.02]) kBox(m,axis,pl,dir,aa-0.004,aa+0.004,y-0.004,y+0.004,d,d+0.025); } }
+/* tall oak wall (elevations A and H): natural oak veneer, fixed 2 cm vertical divisions, a 2 cm rail at 2.10,
+   horizontal grooves at 0.90 / 1.03 running through every front, all ending at the 3.00 gypsum line */
+function kTall(axis,pl,dir,a0,a1,y0,y1){ const c=[y0,...[0.90,1.03].filter(y=>y>y0+0.05&&y<y1-0.05),y1]; for(let i=0;i<c.length-1;i++) kSlab('oak',axis,pl,dir,a0,a1,c[i],c[i+1],0.003); }   /* 6 mm joints so the grid reads from across the room */
+function kDiv(axis,pl,dir,a0,a1,y0,y1){ kBox('oak',axis,pl,dir,a0,a1,y0,y1,0.001,0.012); }
+function tallWall(axis,pl,dir,cols,openings){ const T=3.00;
+  for(const [a0,a1] of cols.back) kBox('gapDark',axis,pl,dir,a0,a1,0,T,0,0.001);
+  for(const [a0,a1] of openings) kBox('gapDark',axis,pl,dir,a0,a1,2.10,T,0,0.001);
+  for(const c of cols.list){ const [a0,a1,kind]=c;
+    if(kind==='div'){ kDiv(axis,pl,dir,a0,a1,0.02,T); continue; }
+    if(kind==='rail'){ kDiv(axis,pl,dir,a0,a1,2.10,2.12); continue; }
+    const lo=c[3]??0.02, n=c[4]??1, w=(a1-a0)/n;
+    for(let i=0;i<n;i++){ if(kind!=='top') kTall(axis,pl,dir,a0+i*w,a0+(i+1)*w,lo,2.10); kTall(axis,pl,dir,a0+i*w,a0+(i+1)*w,2.12,T); } }
+}
+/* kitchen face (z = 6.10): fixed 20 + 36 | 90 cupboard | 2 x 73 integrated fridges | fixed | pantry door 90 (fixed above) | filler + tall unit over the run */
+tallWall('z',6.10,1,{ back:[[9.48,12.48],[13.38,14.12]], list:[
+  [9.48,9.62,'f'],[9.62,9.98,'f'],[9.98,10.00,'div'],[10.00,10.90,'f',0.02,2],[10.90,10.92,'div'],[10.92,12.38,'f',0.02,2],[12.38,12.40,'div'],[12.40,12.46,'f'],[12.46,12.48,'div'],
+  [12.48,13.38,'top'],[13.38,13.40,'div'],[13.40,13.50,'f'],[13.50,14.12,'f',0.92],[9.48,12.48,'rail'],[13.38,14.12,'rail'] ]},[[12.48,13.38]]);
+for(const x of [11.625,11.675]) kPull('z',6.10,1,x,1.30,0.90,true,'oak');   /* fridge pulls in the joinery finish */
+/* hall face (x = 9.34): fixed 18 | flush door 90 (fixed above) | 7 | coat closet 2 x 50 | fixed 20 */
+tallWall('x',9.34,-1,{ back:[[3.65,3.86],[4.70,5.96]], list:[
+  [3.65,3.84,'f'],[3.84,3.86,'div'],[3.86,4.70,'top'],[4.70,4.77,'f'],[4.77,5.77,'f',0.02,2],[5.77,5.96,'f'],[3.65,3.86,'rail'],[4.70,5.96,'rail'] ]},[[3.86,4.70]]);
+for(const z of [5.245,5.295]) kPull('x',9.34,-1,z,1.30,0.50,true,'oak');
+/* gypsum bulkheads above the tall joinery (ceiling line +3.00 in the layouts) */
+box(P,L1,9.48,14.12,3.00,GC,6.10,6.122); box(P,L1,9.318,9.34,3.00,GC,3.65,5.96); cyl(P,L1,9.48,5.96,3.00,GC,0.162,{seg:24});
 
 // ---- staircase: oak blocks (flight 1) + winders + white folded plates (flight 2)
 const RS=U0/21;
@@ -1393,71 +1438,119 @@ box('lacquer',L1,12.46,13.47,1.55,2.60,3.44,3.80);
 box('white',L1,13.47,14.12,0,1.90,3.44,4.05,{solid:true}); box('chrome',L1,13.55,13.57,0.9,1.6,4.05,4.07);
 box('lacquer',L1,13.51,14.12,0,2.40,5.42,5.98,{solid:true});
 
-// ---------- kitchen (east run along the window, island with waterfall marble, oak dining extension) ----------
+// ---------- kitchen per the carpentry layouts (פריסות מטבח, 06.08.2026) ----------
 mat('lemon',{color:0xe8c34a, roughness:.55}); mat('brushedSteel',{color:0xbfc1c3, roughness:.32, metalness:1}); mat('hobGlass',{color:0x101112, roughness:.08, metalness:.2});
 mat('oil',{color:0x9a8a2a, roughness:.05, transparent:true, opacity:.75}); mat('bread',{color:0xc08a4e, roughness:.85});
-// base run: carcass, recessed plinth, handleless fronts with 3 mm shadow gaps and a grip channel
-box('lacquer',L1,13.56,14.12,0.10,0.86,6.40,11.30,{solid:true});
-box('lacquer',L1,13.60,14.12,0,0.10,6.40,11.30);
-{ const cols=[[6.40,7.00],[7.00,7.65],[7.65,8.25],[8.25,9.05],[9.05,9.70],[9.70,10.15],[10.15,10.90],[10.90,11.30]];
-  for(const [z0,z1] of cols){ const wide=z1-z0>0.62;
-    if(z0>=10.15&&z1<=10.90){ for(const [y0,y1] of [[0.11,0.36],[0.375,0.60],[0.615,0.80]]) rb('lacquer',L1,13.50,13.53,y0,y1,z0+0.0015,z1-0.0015,0.003); }
-    else rb('lacquer',L1,13.50,13.53,0.11,0.80,z0+0.0015,z1-0.0015,0.003);
-    if(wide) box('black',L1,13.505,13.51,0.12,0.79,(z0+z1)/2-0.0015,(z0+z1)/2+0.0015); }
-  box('lacquer',L1,13.52,13.56,0.80,0.855,6.40,11.30); }
-// worktop: 4 cm calacatta with 2 cm overhang, full-height marble splash around the window
-/* worktop with two undermount sink cut-outs */
-rb('marble',L1,13.48,14.12,0.86,0.90,6.40,7.68,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,8.22,8.48,0.004); rb('marble',L1,13.48,14.12,0.86,0.90,9.02,11.30,0.004);
-for(const [z0,z1] of [[7.68,8.22],[8.48,9.02]]){ box('marble',L1,13.48,13.62,0.86,0.90,z0,z1); box('marble',L1,13.98,14.12,0.86,0.90,z0,z1); }
-box('marble',L1,14.09,14.12,0.90,1.05,6.40,11.30);
-box('marble',L1,14.10,14.12,1.05,2.40,6.40,6.90); box('marble',L1,14.10,14.12,1.05,2.40,10.0,11.30);
-// twin undermount sinks with brushed-steel gooseneck taps
-for(const z of [7.95,8.75]){ box('porcelain',L1,13.61,13.99,0.68,0.70,z-0.28,z+0.28); for(const [x0,x1,z0,z1] of [[13.61,13.62,z-0.28,z+0.28],[13.98,13.99,z-0.28,z+0.28]]) box('porcelain',L1,x0,x1,0.70,0.86,z0,z1); box('porcelain',L1,13.61,13.99,0.70,0.86,z-0.28,z-0.27); box('porcelain',L1,13.61,13.99,0.70,0.86,z+0.27,z+0.28); cyl('brushedSteel',L1,13.8,z,0.70,0.704,0.025,{seg:16});
-  place(14.03,0.90,z,'W',()=>{ cyl('brushedSteel',L1,0,0,0,0.04,0.028,{seg:20}); cyl('brushedSteel',L1,0,0,0.04,0.36,0.012,{seg:14});
-    const g=new THREE.TorusGeometry(0.11,0.012,10,24,Math.PI); g.rotateY(-Math.PI/2); g.translate(0,0.36,0.11); addGeo(g,'brushedSteel',L1); cyl('brushedSteel',L1,0,0.22,0.27,0.36,0.012,{seg:14});
-    box('brushedSteel',L1,0.05,0.09,0.12,0.135,-0.006,0.006); }); }
-// induction hob (black glass, bevelled) with zone rings
-rb('hobGlass',L1,13.58,14.04,0.90,0.906,10.22,10.84,0.003);
-for(const [x,z,r] of [[13.70,10.38,0.09],[13.70,10.68,0.07],[13.92,10.38,0.07],[13.92,10.68,0.09]]){ const g=new THREE.TorusGeometry(r,0.0025,6,40); g.rotateX(Math.PI/2); g.translate(x,0.9065,z); addGeo(g,'frame',L1); }
-box('frame',L1,13.62,13.66,0.9065,0.907,10.48,10.58);
-// open oak shelf with ceramics
-box('oak',L1,13.85,14.10,1.45,1.48,10.15,10.95); box('oak',L1,13.85,14.10,2.02,2.05,10.15,10.95); box('oak',L1,13.85,14.10,1.45,2.05,10.12,10.15); box('oak',L1,13.85,14.10,1.45,2.05,10.95,10.98); box('oak',L1,13.85,14.10,1.74,1.76,10.15,10.95);
-lathe('ceramic',L1,13.97,1.48,10.32,[[0,0],[0.06,0],[0.075,0.1],[0.05,0.2],[0,0.2]]); lathe('limewash',L1,13.97,1.48,10.55,[[0,0],[0.05,0],[0.05,0.12],[0,0.12]]);
-for(let k=0;k<4;k++) lathe('limewash',L1,13.98,1.76+k*0.012,10.78,[[0,0],[0.1,0],[0.11,0.01],[0,0.01]]);
-lathe('artDark',L1,13.96,1.76,10.4,[[0,0],[0.04,0],[0.045,0.16],[0.02,0.2],[0.022,0.23],[0,0.23]]);
-// counter styling: oak board with bread, kettle, fruit bowl with lemons, oil and vinegar, herb pot, utensil crock
-{ rb('oak',L1,13.62,13.98,0.90,0.925,9.15,9.55,0.006); rb('bread',L1,13.72,13.88,0.925,0.99,9.25,9.48,0.04);
-  lathe('white',L1,13.85,0.90,9.85,[[0,0],[0.085,0],[0.095,0.08],[0.08,0.2],[0.04,0.23],[0,0.23]]); box('black',L1,13.83,13.87,1.07,1.13,9.93,9.96);
-  lathe('ceramic',L1,13.8,0.90,7.10,[[0,0],[0.06,0],[0.14,0.05],[0.16,0.09],[0.15,0.095],[0.12,0.05],[0,0.03]]);
-  { const rr=rng(31); for(let k=0;k<6;k++){ const a=k/6*6.28; sph('lemon',L1,13.8+Math.cos(a)*0.07,0.97+(k%2)*0.03,7.10+Math.sin(a)*0.07,0.038,1,0.85,1.2); } }
-  for(const [dz,h,m] of [[0,0.28,'oil'],[0.08,0.24,'glassTint']]){ cyl(m,L1,13.98,10.0+dz,0.90,0.90+h,0.03,{seg:16}); cyl('black',L1,13.98,10.0+dz,0.90+h,0.92+h,0.012,{seg:10}); }
-  lathe('limewash',L1,13.96,0.90,6.65,[[0,0],[0.07,0],[0.075,0.14],[0,0.14]]); for(let k=0;k<5;k++) branch(13.96,1.0,6.65,13.96+(k-2)*0.025,1.22+k*0.01,6.65+(k%2)*0.03,0.006,0.004,'oak');
-  lathe('ceramic',L1,13.92,0.90,11.05,[[0,0],[0.08,0],[0.085,0.12],[0,0.12]]); { const rr=rng(37); for(let k=0;k<40;k++){ const a=rr()*6.28, d=rr()*0.08; FOL.push([13.92+Math.cos(a)*d,1.04+rr()*0.12,11.05+Math.sin(a)*d,0.02,[0.27,0.4,0.3+rr()*0.1],rr()*3,rr()*3,1.4]); } } }
-// island: lacquer body, fluted oak back, waterfall marble with eased edges
-box('lacquer',L1,11.32,12.30,0.10,0.86,7.22,9.10,{solid:true}); box('lacquer',L1,11.38,12.24,0,0.10,7.28,9.04);
-for(let z=7.25; z<9.1; z+=0.47) for(const [y0,y1] of [[0.11,0.47],[0.485,0.80]]) rb('lacquer',L1,12.30,12.33,y0,y1,z+0.0015,z+0.4685,0.003);
-for(let z=7.26; z<9.08; z+=0.06) cyl('oak',L1,11.30,z+0.03,0.10,0.86,0.026,{seg:10});
-rb('marble',L1,11.24,12.36,0.86,0.92,7.16,9.10,0.006); rb('marble',L1,11.24,12.36,0,0.86,7.16,7.22,0.006);
-// oak dining extension on a slab leg
-rb('oak',L1,11.35,12.25,0.71,0.75,9.10,10.70,0.008,0,0,{solid:true}); box('oak',L1,11.66,11.94,0,0.71,10.18,10.62);
-for(const z of [7.45,7.9,8.35,8.8]) place(11.03,0,z,'E',()=>F.counter(L1,'fabCream','oak'));
-for(const z of [9.55,10.3]){ place(11.19,0,z,'E',()=>F.chair2(L1,'fabCream','oak')); place(12.41,0,z,'W',()=>F.chair2(L1,'fabCream','oak')); }
-// island styling: oak tray, stoneware jug with olive branches
-rb('oak',L1,11.55,11.95,0.92,0.94,8.30,8.75,0.008); lathe('limewash',L1,11.75,0.94,8.5,[[0,0],[0.06,0],[0.08,0.1],[0.05,0.2],[0.035,0.26],[0.04,0.28],[0,0.28]]);
-{ const rr=rng(41); for(let k=0;k<6;k++){ const a=rr()*6.28, h=0.3+rr()*0.25, tx=11.75+Math.cos(a)*0.2, tz=8.5+Math.sin(a)*0.2; branch(11.75,1.2,8.5,tx,1.2+h,tz,0.005,0.003,'trunk');
-  for(let q=0;q<6;q++) LEAF.push([11.75+(tx-11.75)*(0.35+q*0.13),1.2+h*(0.35+q*0.13),8.5+(tz-8.5)*(0.35+q*0.13),0.13+rr()*0.06,[0.2,0.14,0.42],rr()*6.28,rr()*6.28,1]); } }
-// slim black linear pendant over the island and a globe over the table
-rod('black',L1,11.8,7.6,1.85,GC,0.003); rod('black',L1,11.8,9.0,1.85,GC,0.003);
-rb('black',L1,11.77,11.83,1.82,1.86,7.45,9.15,0.01); box('lamp',L1,11.775,11.825,1.815,1.82,7.5,9.1);
-rod('black',L1,11.8,9.9,2.05,GC,0.003); sph('lamp',L1,11.8,1.9,9.9,0.15,1,1,1,{seg:20});
-// tall white cabinets + window seat
-box('lacquer',L1,9.56,10.16,0,2.62,7.60,8.62,{solid:true}); box('lacquer',L1,9.56,10.16,0,2.62,10.60,11.62,{solid:true});
-box('frame',L1,10.16,10.165,0.05,2.55,8.11,8.115); box('frame',L1,10.16,10.165,0.05,2.55,11.1,11.105);
-box('oak',L1,9.56,10.10,0,0.45,8.62,10.60,{solid:true}); box('fabCream',L1,9.6,10.08,0.45,0.52,8.67,10.55,{r:.03});
-box('oak',L1,9.56,10.10,2.60,2.64,8.62,10.60);
-/* oak lining all around the seat window: jambs, head and sill from the glass to the seat front */
-box('oak',L1,9.27,10.10,0.45,2.64,8.62,8.66); box('oak',L1,9.27,10.10,0.45,2.64,10.56,10.60);
-box('oak',L1,9.27,10.10,2.56,2.64,8.62,10.60); box('oak',L1,9.27,9.56,0.45,0.49,8.62,10.60);
+// ---- east run (elevation B): whitened-oak framed fronts with bar pulls, 2 cm marble top, 30 cm marble splash up to the window sill
+{ const pl=13.54, ax='x', dr=-1, RZ0=6.12, RZ1=11.65, RW=[0.80,0.50,0.60,0.60,0.60,0.60,0.45,0.95,0.35], RK=(RZ1-RZ0)/RW.reduce((a,b)=>a+b), Z=[RZ0];
+  for(const w of RW) Z.push(Z[Z.length-1]+w*RK);
+  box('lacquer',L1,pl,14.12,0.05,0.88,RZ0,RZ1,{solid:true}); box('gapDark',L1,pl+0.05,14.12,0,0.05,RZ0,RZ1);   /* carcass + recessed 5 cm plinth */
+  kBox('gapDark',ax,pl,dr,RZ0,RZ1,0.05,0.88,0,0.001);
+  const TOP=0.875, rows3=[[0.05,0.38],[0.38,0.715],[0.715,TOP]];
+  /* 1 drawers | 2 drawers | 3 dishwasher | 4 sink door (bin) | 5 sink door | 6 dishwasher | 7 bottle pull-out | 8 drawers under the induction | 9 drawers */
+  const kinds=['d3','d3','one','one','one','one','one','d3','d3'];
+  for(let i=0;i<9;i++){ const a0=Z[i], a1=Z[i+1], ac=(a0+a1)/2, len=Math.min(0.32,(a1-a0)*0.5);
+    if(kinds[i]==='d3') for(const [y0,y1] of rows3){ kFramed('oakWhite',ax,pl,dr,a0,a1,y0,y1); kPull(ax,pl,dr,ac,y1-Math.min(0.06,(y1-y0)/2),len,false); }
+    else { kFramed('oakWhite',ax,pl,dr,a0,a1,0.05,TOP); kPull(ax,pl,dr,ac,TOP-0.06,len,false); } }
+  // worktop with two undermount sink cut-outs (sinks centred on doors 4 and 5, under the middle of the window)
+  const S=[(Z[3]+Z[4])/2,(Z[4]+Z[5])/2], H=0.25;
+  rb('marble',L1,13.49,14.12,0.88,0.90,RZ0,S[0]-H,0.003); rb('marble',L1,13.49,14.12,0.88,0.90,S[0]+H,S[1]-H,0.003); rb('marble',L1,13.49,14.12,0.88,0.90,S[1]+H,RZ1,0.003);
+  for(const z of S){ box('marble',L1,13.49,13.62,0.88,0.90,z-H,z+H); box('marble',L1,13.98,14.12,0.88,0.90,z-H,z+H); }
+  box('marble',L1,14.10,14.12,0.90,1.20,RZ0,RZ1);
+  // twin undermount sinks with brushed-steel gooseneck taps
+  for(const z of S){ box('porcelain',L1,13.62,13.98,0.70,0.72,z-H,z+H); for(const [x0,x1] of [[13.62,13.63],[13.97,13.98]]) box('porcelain',L1,x0,x1,0.72,0.88,z-H,z+H); box('porcelain',L1,13.62,13.98,0.72,0.88,z-H,z-H+0.01); box('porcelain',L1,13.62,13.98,0.72,0.88,z+H-0.01,z+H); cyl('brushedSteel',L1,13.8,z,0.72,0.724,0.025,{seg:16});
+    place(14.04,0.90,z,'W',()=>{ cyl('brushedSteel',L1,0,0,0,0.04,0.028,{seg:20}); cyl('brushedSteel',L1,0,0,0.04,0.36,0.012,{seg:14});
+      const g=new THREE.TorusGeometry(0.11,0.012,10,24,Math.PI); g.rotateY(-Math.PI/2); g.translate(0,0.36,0.11); addGeo(g,'brushedSteel',L1); cyl('brushedSteel',L1,0,0.22,0.27,0.36,0.012,{seg:14});
+      box('brushedSteel',L1,0.05,0.09,0.12,0.135,-0.006,0.006); }); }
+  // 90 cm induction hob over the wide drawers, five zones
+  { const zc=(Z[7]+Z[8])/2; rb('hobGlass',L1,13.57,14.07,0.90,0.906,zc-0.45,zc+0.45,0.003);
+    for(const [x,dz,r] of [[13.71,-0.28,0.09],[13.93,-0.28,0.075],[13.82,0,0.13],[13.71,0.28,0.075],[13.93,0.28,0.09]]){ const g=new THREE.TorusGeometry(r,0.0025,6,40); g.rotateX(Math.PI/2); g.translate(x,0.9065,zc+dz); addGeo(g,'frame',L1); }
+    box('frame',L1,13.60,13.63,0.9065,0.907,zc-0.12,zc+0.12); }
+  // counter styling: lemons, olive branches, herbs, bread board, oil and vinegar, kettle
+  lathe('ceramic',L1,13.8,0.90,6.62,[[0,0],[0.06,0],[0.14,0.05],[0.16,0.09],[0.15,0.095],[0.12,0.05],[0,0.03]]);
+  for(let k=0;k<6;k++){ const a=k/6*6.28; sph('lemon',L1,13.8+Math.cos(a)*0.07,0.97+(k%2)*0.03,6.62+Math.sin(a)*0.07,0.038,1,0.85,1.2); }
+  lathe('limewash',L1,13.96,0.90,6.30,[[0,0],[0.07,0],[0.075,0.14],[0,0.14]]); for(let k=0;k<5;k++) branch(13.96,1.0,6.30,13.96+(k-2)*0.025,1.22+k*0.01,6.30+(k%2)*0.03,0.006,0.004,'oak');
+  lathe('ceramic',L1,13.92,0.90,7.25,[[0,0],[0.08,0],[0.085,0.12],[0,0.12]]); { const rr=rng(37); for(let k=0;k<40;k++){ const a=rr()*6.28, d=rr()*0.08; FOL.push([13.92+Math.cos(a)*d,1.04+rr()*0.12,7.25+Math.sin(a)*d,0.02,[0.27,0.4,0.3+rr()*0.1],rr()*3,rr()*3,1.4]); } }
+  rb('oak',L1,13.62,13.98,0.90,0.925,9.50,9.90,0.006); rb('bread',L1,13.72,13.88,0.925,0.99,9.60,9.83,0.04);
+  for(const [dz,h,m] of [[0,0.28,'oil'],[0.08,0.24,'glassTint']]){ cyl(m,L1,13.98,10.08+dz,0.90,0.90+h,0.03,{seg:16}); cyl('black',L1,13.98,10.08+dz,0.90+h,0.92+h,0.012,{seg:10}); }
+  lathe('white',L1,13.85,0.90,11.47,[[0,0],[0.085,0],[0.095,0.08],[0.08,0.2],[0.04,0.23],[0,0.23]]); box('black',L1,13.83,13.87,1.07,1.13,11.55,11.58);
+}
+// ---- island (elevations D, E, F, G): 2 cm marble top with 2 cm marble waterfall legs, whitened-oak drawers on the cooking side,
+//      oak-veneer plank doors under the 30 cm seating overhang, oak dining table at 75 on twin slab legs
+{ const X0=11.27, X1=12.37, Z0=7.36, Z1=9.41, ZT=10.61, pE=12.335, pW=11.59;
+  rb('marble',L1,X0,X1,0.88,0.90,Z0,Z1,0.003);
+  box('marble',L1,X0,X1,0,0.88,Z0,Z0+0.02,{solid:true}); box('marble',L1,X0,X1,0,0.88,Z1-0.02,Z1,{solid:true});
+  box('lacquer',L1,pW,pE,0.05,0.88,Z0+0.02,Z1-0.02,{solid:true}); box('gapDark',L1,pW+0.02,pE-0.05,0,0.05,Z0+0.02,Z1-0.02);
+  // cooking side (east): vegetable drawers with cane panels | 3 drawers | bin drawer
+  kBox('gapDark','x',pE,1,Z0+0.02,Z1-0.02,0.05,0.875,0,0.001);
+  const ez=[Z0+0.02,Z0+0.418,Z0+1.532,Z1-0.02], er=[[0.05,0.28],[0.28,0.58],[0.58,0.875]];
+  for(const [y0,y1] of er){ kFramed('oakWhite','x',pE,1,ez[0],ez[1],y0,y1,y0>0.2?'cane':null); kPull('x',pE,1,(ez[0]+ez[1])/2,y1-0.05,0.16,false);
+    kFramed('oakWhite','x',pE,1,ez[1],ez[2],y0,y1); kPull('x',pE,1,(ez[1]+ez[2])/2,y1-0.05,0.32,false); }
+  kFramed('oakWhite','x',pE,1,ez[2],ez[3],0.05,0.875); kPull('x',pE,1,(ez[2]+ez[3])/2,0.815,0.24,false);
+  // seating side (west): four 50 cm doors clad in vertical oak planks
+  kBox('gapDark','x',pW,-1,Z0+0.02,Z1-0.02,0.02,0.875,0,0.001);
+  { const dw=(Z1-Z0-0.04)/4, pw=dw/4; for(let i=0;i<16;i++){ const b0=Z0+0.02+i*pw; kBox('oak','x',pW,-1,b0+0.0015,b0+pw-0.0015,0.0215,0.8735,0.001,0.02); } }
+  // dining table: 5 cm oak top at 75, twin 3 cm oak slab legs 3.5 cm apart, set back 20 cm from the end
+  rb('oak',L1,X0,X1,0.70,0.75,Z1,ZT,0.006,0,0,{solid:true});
+  { const xc=(X0+X1)/2; for(const [x0,x1] of [[xc-0.0475,xc-0.0175],[xc+0.0175,xc+0.0475]]) box('oak',L1,x0,x1,0,0.70,Z1,ZT-0.20); }
+  for(const z of [7.63,8.13,8.64,9.14]) place(11.12,0,z,'E',()=>F.counter(L1,'fabCream','oak'));
+  for(const z of [9.73,10.29]){ place(11.11,0,z,'E',()=>F.chair2(L1,'fabCream','oak')); place(12.53,0,z,'W',()=>F.chair2(L1,'fabCream','oak')); }
+  // island styling: oak tray, stoneware jug with olive branches
+  rb('oak',L1,11.85,12.25,0.90,0.92,8.75,9.20,0.008); lathe('limewash',L1,12.05,0.92,8.975,[[0,0],[0.06,0],[0.08,0.1],[0.05,0.2],[0.035,0.26],[0.04,0.28],[0,0.28]]);
+  { const rr=rng(41), jx=12.05, jz=8.975; for(let k=0;k<6;k++){ const a=rr()*6.28, h=0.25+rr()*0.2, tx=jx+Math.cos(a)*0.2, tz=jz+Math.sin(a)*0.2; branch(jx,1.18,jz,tx,1.18+h,tz,0.005,0.003,'trunk');
+    for(let q=0;q<6;q++) LEAF.push([jx+(tx-jx)*(0.35+q*0.13),1.18+h*(0.35+q*0.13),jz+(tz-jz)*(0.35+q*0.13),0.13+rr()*0.06,[0.2,0.14,0.42],rr()*6.28,rr()*6.28,1]); } }
+  // slim black linear pendant over the island and a globe over the table
+  const zc=(Z0+Z1)/2, xc=(X0+X1)/2;
+  rod('black',L1,xc,zc-0.7,1.85,GC,0.003); rod('black',L1,xc,zc+0.7,1.85,GC,0.003);
+  rb('black',L1,xc-0.03,xc+0.03,1.82,1.86,zc-0.85,zc+0.85,0.01); box('lamp',L1,xc-0.025,xc+0.025,1.815,1.82,zc-0.80,zc+0.80);
+  rod('black',L1,xc,(Z1+ZT)/2,2.05,GC,0.003); sph('lamp',L1,xc,1.9,(Z1+ZT)/2,0.15,1,1,1,{seg:20});
+}
+// ---- window-seat wall (elevation C, sections 1-1 / 2-2): baked-paint fronts in a 1 cm frame, oak-veneer 3 cm frame around the seat window
+//      north: twin ovens with microwaves behind lift-up flaps | window seat with two drawers | south: coffee niche with marble back
+{ const pl=10.16, ax='x', dr=1, T=3.00, Zo=[7.60,8.85], Zs=[8.85,10.74], Zc=[10.74,11.65];
+  const frame=(z0,z1,seps)=>{ kBox('paintC',ax,pl,dr,z0,z0+0.01,0.02,T,0,0.02); kBox('paintC',ax,pl,dr,z1-0.01,z1,0.02,T,0,0.02);
+    for(const y of seps) kBox('paintC',ax,pl,dr,z0+0.01,z1-0.01,y,y+0.02,0,0.02); kBox('paintC',ax,pl,dr,z0+0.01,z1-0.01,T-0.01,T,0,0.02); };
+  const pair=(z0,z1,zm,y0,y1,py)=>{ kSlab('paintC',ax,pl,dr,z0,zm,y0,y1); kSlab('paintC',ax,pl,dr,zm,z1,y0,y1); kPull(ax,pl,dr,zm-0.035,py,0.22,true); kPull(ax,pl,dr,zm+0.035,py,0.22,true); };
+  // ovens column (2 x 63)
+  { const [z0,z1]=Zo, a0=z0+0.01, a1=z1-0.01, zm=(z0+z1)/2;
+    box('paintC',L1,9.56,pl,0.05,T,z0,z1,{solid:true}); box('gapDark',L1,9.56,pl-0.05,0,0.05,z0,z1);
+    kBox('gapDark',ax,pl,dr,a0,a1,0.02,T-0.01,0,0.001); frame(z0,z1,[0.88,2.10]);
+    pair(a0,a1,zm,0.02,0.88,0.70); pair(a0,a1,zm,2.12,T-0.01,2.27);
+    for(const [b0,b1] of [[a0,zm],[zm,a1]]){ const c=(b0+b1)/2;
+      kBox('paintC',ax,pl,dr,b0,b1,0.90,1.50,0.001,0.004);
+      kBox('hobGlass',ax,pl,dr,c-0.297,c+0.297,0.903,1.497,0.004,0.022); kBox('black',ax,pl,dr,c-0.29,c+0.29,1.43,1.49,0.022,0.024);
+      kPull(ax,pl,dr,c,1.40,0.46,false,'brushedSteel');
+      kSlab('paintC',ax,pl,dr,b0,b1,1.50,2.10); kPull(ax,pl,dr,c,1.56,0.30,false); } }
+  // window seat: drawers below, 3 cm oak seat + 10 cm cushion, oak frame running into the window reveal
+  { const [z0,z1]=Zs, zm=(z0+z1)/2;
+    box('paintC',L1,9.56,pl,0.05,0.37,z0,z1,{solid:true}); box('gapDark',L1,9.56,pl-0.05,0,0.05,z0,z1);
+    kBox('gapDark',ax,pl,dr,z0,z1,0.03,0.37,0,0.001);
+    for(const [b0,b1] of [[z0,zm],[zm,z1]]){ kSlab('paintC',ax,pl,dr,b0,b1,0.03,0.37); kPull(ax,pl,dr,(b0+b1)/2,0.30,0.32,false); }
+    box('oak',L1,9.48,pl+0.02,0.37,0.40,z0+0.03,z1-0.03,{solid:true});
+    box('oak',L1,9.56,pl+0.02,0.37,T,z0,z0+0.03); box('oak',L1,9.56,pl+0.02,0.37,T,z1-0.03,z1); box('oak',L1,9.56,pl+0.02,T-0.03,T,z0+0.03,z1-0.03);
+    box('fabCream',L1,9.50,pl+0.01,0.40,0.50,z0+0.04,z1-0.04,{r:.03});
+    box('fabLinen',L1,9.50,9.64,0.50,0.94,9.10,9.55,{r:.06}); box('fabCream',L1,9.50,9.63,0.50,0.91,9.62,10.05,{r:.06});
+    { const g=new THREE.CylinderGeometry(0.075,0.075,0.46,18); g.rotateX(Math.PI/2); g.translate(9.80,0.575,10.38); addGeo(g,'fabLinen',L1); } }
+  // coffee column (47 + 44): doors below and above, open niche with marble counter + marble back, two shelves, LED strips
+  { const [z0,z1]=Zc, a0=z0+0.01, a1=z1-0.01, zm=a0+0.465;
+    box('paintC',L1,9.56,pl,0.05,0.88,z0,z1,{solid:true}); box('gapDark',L1,9.56,pl-0.05,0,0.05,z0,z1); box('paintC',L1,9.56,pl,2.12,T,z0,z1,{solid:true});
+    kBox('gapDark',ax,pl,dr,a0,a1,0.02,0.88,0,0.001); kBox('gapDark',ax,pl,dr,a0,a1,2.12,T-0.01,0,0.001);
+    box('paintC',L1,9.56,pl+0.02,0.02,T,z0,z0+0.02); box('paintC',L1,9.56,pl+0.02,0.02,T,z1-0.02,z1);
+    kBox('paintC',ax,pl,dr,a0,a1,T-0.01,T,0,0.02); kBox('paintC',ax,pl,dr,a0,a1,2.10,2.12,0,0.02);
+    box('marble',L1,9.56,pl+0.02,0.88,0.90,z0+0.02,z1-0.02); box('paintC',L1,9.56,pl,2.10,2.12,z0+0.02,z1-0.02);
+    box('marble',L1,9.56,9.58,0.90,1.44,z0+0.02,z1-0.02); box('paintC',L1,9.56,9.575,1.44,2.10,z0+0.02,z1-0.02);
+    for(const y of [1.44,1.76]){ box('paintC',L1,9.575,pl-0.02,y,y+0.02,z0+0.02,z1-0.02); box('lamp',L1,9.60,9.62,y-0.004,y,z0+0.04,z1-0.04); }
+    box('lamp',L1,9.60,9.62,2.096,2.10,z0+0.04,z1-0.04);
+    pair(a0,a1,zm,0.02,0.88,0.70); pair(a0,a1,zm,2.12,T-0.01,2.27);
+    // espresso machine, grinder, cups and jars
+    rb('brushedSteel',L1,9.62,9.98,0.90,1.27,11.02,11.40,0.012); box('black',L1,9.98,10.02,0.90,0.93,11.05,11.37); box('black',L1,9.98,9.99,1.12,1.22,11.06,11.36);
+    cyl('black',L1,10.02,11.21,1.02,1.06,0.035,{seg:16}); box('black',L1,10.02,10.13,1.035,1.05,11.2,11.22);
+    cyl('black',L1,9.80,10.88,0.90,1.18,0.06,{seg:18}); cyl('glassTint',L1,9.80,10.88,1.18,1.30,0.055,{seg:18});
+    for(let k=0;k<4;k++) lathe('ceramic',L1,9.80+(k%2)*0.12,1.46,10.95+(k>>1)*0.12+(k%2)*0.05,[[0,0],[0.035,0],[0.042,0.07],[0,0.07]]);
+    for(let k=0;k<3;k++) cyl('glassTint',L1,9.80,10.95+k*0.22,1.78,1.98,0.05,{seg:18});
+  }
+  box(P,L1,9.56,pl+0.022,T,GC,7.60,11.65);   /* gypsum bulkhead above the joinery */
+}
 
 /* ===================================================================
    FURNITURE — UPPER FLOOR
