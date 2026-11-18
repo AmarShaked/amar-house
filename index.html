@@ -981,19 +981,22 @@ wall('ext',L1,'z',9.27,9.32,7.60,11.65,0,GC,ckOps,{noFill:true,solid:false});
   blocks(5.3,9.24,(a,b)=>box(LS,L,a,b,-0.03,-0.004,11.2,11.62));
   /* the olive: three twisted stems wound around each other, root flare, gnarled limbs */
   const top=[]; for(let s3=0;s3<3;s3++){ let prev=null; const ph=s3*2.094;
-    for(let q=0;q<=6;q++){ const y=q*0.3, ang=ph+q*0.55, rad=0.12*(1-q/8)+0.03, p=[TX0+Math.cos(ang)*rad,y-0.02,TZ0+Math.sin(ang)*rad], rr0=0.165-q*0.015;
+    for(let q=0;q<=6;q++){ const y=q*0.24, ang=ph+q*0.55, rad=0.12*(1-q/8)+0.03, p=[TX0+Math.cos(ang)*rad,y-0.02,TZ0+Math.sin(ang)*rad], rr0=0.165-q*0.015;
       if(prev){ branch(prev[0],prev[1],prev[2],p[0],p[1],p[2],rr0+0.012,rr0); sph('trunk','s',p[0],p[1],p[2],rr0*1.08,1,1,1,{seg:10}); } prev=p; } top.push(prev); }
   for(let q=0;q<5;q++){ const a=q*1.26+r()*0.5; sph('trunk','s',TX0+Math.cos(a)*0.2,0.04,TZ0+Math.sin(a)*0.2,0.14,1.4,0.4,0.9,{seg:10}); }
   sph('trunk','s',TX0,0.06,TZ0,0.36,1.15,0.35,1.1,{seg:14}); sph('trunk','s',TX0,0.55,TZ0,0.2,1.05,1.4,1.0,{seg:14});
   const tips=[];
-  for(let b=0;b<7;b++){ const a=b/7*Math.PI*2+r()*0.45, st=top[b%3], len=1.0+r()*0.6;
-    const mx=st[0]+Math.cos(a)*len*0.5, my=st[1]+0.45+r()*0.35, mz=st[2]+Math.sin(a)*len*0.5;
-    const ex=st[0]+Math.cos(a)*len, ey=my+0.5+r()*0.45, ez=st[2]+Math.sin(a)*len;
+  for(let b=0;b<7;b++){ const a=b/7*Math.PI*2+r()*0.45, st=top[b%3], len=0.8+r()*0.45;
+    const mx=st[0]+Math.cos(a)*len*0.5, my=st[1]+0.3+r()*0.22, mz=st[2]+Math.sin(a)*len*0.5;
+    const ex=st[0]+Math.cos(a)*len, ey=my+0.32+r()*0.25, ez=st[2]+Math.sin(a)*len;
     branch(st[0],st[1],st[2],mx,my,mz,0.08,0.055); sph('trunk','s',mx,my,mz,0.058,1,1,1,{seg:8}); branch(mx,my,mz,ex,ey,ez,0.055,0.025);
-    for(let t=0;t<3;t++){ const ta=a+(r()-0.5)*1.5, tx=ex+Math.cos(ta)*0.5, tz=ez+Math.sin(ta)*0.5, ty=ey+0.1+r()*0.4; branch(ex,ey,ez,tx,ty,tz,0.024,0.01); tips.push([tx,ty,tz]); }
+    for(let t=0;t<3;t++){ const ta=a+(r()-0.5)*1.5, tx=ex+Math.cos(ta)*0.4, tz=ez+Math.sin(ta)*0.4, ty=ey+0.05+r()*0.25; branch(ex,ey,ez,tx,ty,tz,0.024,0.01); tips.push([tx,ty,tz]); }
     tips.push([ex,ey+0.15,ez]); }
-  for(const [x,y,z] of tips) for(let q=0;q<170;q++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.45)*0.7, sx=Math.sqrt(1-u*u);
-    LEAF.push([x+Math.cos(th)*sx*rad*1.2, y+u*rad*0.55, z+Math.sin(th)*sx*rad*1.2, 0.26+r()*0.2, [0.19+r()*0.05, 0.13+r()*0.12, 0.36+r()*0.14+(u>0?0.05:-0.04)], r()*6.28, r()*6.28, 1]); }
+  /* the canopy stays inside the courtyard: no leaves through the walls, the glass or the upper-floor beams */
+  const inCourt=(x,y,z)=>x>5.50&&x<9.05&&z>7.85&&z<11.40&&y<GC-0.15;
+  for(const [x,y,z] of tips) for(let q=0;q<170;q++){ const u=r()*2-1, th=r()*6.28, rad=Math.pow(r(),0.45)*0.7, sx=Math.sqrt(1-u*u), lx=x+Math.cos(th)*sx*rad*1.2, ly=y+u*rad*0.55, lz=z+Math.sin(th)*sx*rad*1.2;
+    if(!inCourt(lx,ly,lz)){ r(); r(); r(); r(); r(); r(); continue; }
+    LEAF.push([lx, ly, lz, 0.26+r()*0.2, [0.19+r()*0.05, 0.13+r()*0.12, 0.36+r()*0.14+(u>0?0.05:-0.04)], r()*6.28, r()*6.28, 1]); }
   /* in the bed: clipped boxwood balls and white bacopa spilling over the coping */
   for(const [x,z,rb0] of [[6.55,9.3,0.3],[8.0,9.25,0.25],[7.95,10.55,0.33],[6.6,10.6,0.26],[7.3,10.7,0.2]]) sph('hedge',L,x,BH-0.1+rb0*0.85,z,rb0,1,0.9,1,{seg:22});
   const bacopa=(x,z,y)=>{ for(let q=0;q<16;q++){ const a=r()*6.28, d=r()*0.12; FOL.push([x+Math.cos(a)*d,y+r()*0.06,z+Math.sin(a)*d,0.018,[0.3,0.4,0.22+r()*0.08],r()*3,r()*3,0.8]); }
@@ -1490,9 +1493,9 @@ mat('oil',{color:0x9a8a2a, roughness:.05, transparent:true, opacity:.75}); mat('
   // seating side (west): four 50 cm doors clad in vertical oak planks
   kBox('gapDark','x',pW,-1,Z0+0.02,Z1-0.02,0.02,0.875,0,0.001);
   { const dw=(Z1-Z0-0.04)/4, pw=dw/4; for(let i=0;i<16;i++){ const b0=Z0+0.02+i*pw; kBox('oak','x',pW,-1,b0+0.0015,b0+pw-0.0015,0.0215,0.8735,0.001,0.02); } }
-  // dining table: 5 cm oak top at 75, twin 3 cm oak slab legs 3.5 cm apart, set back 20 cm from the end
+  // dining table: 5 cm oak top at 75 that folds down the far end as a full-width 5 cm oak waterfall leg
   rb('oak',L1,X0,X1,0.70,0.75,Z1,ZT,0.006,0,0,{solid:true});
-  { const xc=(X0+X1)/2; for(const [x0,x1] of [[xc-0.0475,xc-0.0175],[xc+0.0175,xc+0.0475]]) box('oak',L1,x0,x1,0,0.70,Z1,ZT-0.20); }
+  box('oak',L1,X0+0.002,X1-0.002,0,0.70,ZT-0.05,ZT-0.001,{solid:true});
   for(const z of [7.63,8.13,8.64,9.14]) place(11.12,0,z,'E',()=>F.counter(L1,'fabCream','oak'));
   for(const z of [9.73,10.29]){ place(11.11,0,z,'E',()=>F.chair2(L1,'fabCream','oak')); place(12.53,0,z,'W',()=>F.chair2(L1,'fabCream','oak')); }
   // island styling: oak tray, stoneware jug with olive branches
